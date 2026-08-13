@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Car, LayoutDashboard, CalendarDays, Wrench, CreditCard, LogOut } from "lucide-react";
+import { Car, LayoutDashboard, CalendarDays, Wrench, CreditCard, LogOut, Heart, Wallet, MessageSquare, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function DashboardLayout({
@@ -42,6 +42,26 @@ export default function DashboardLayout({
           <Link href="/dashboard/payments">
             <Button variant="ghost" className="w-full justify-start hover:bg-primary/10 hover:text-primary">
               <CreditCard className="mr-2 h-4 w-4" /> Payments
+            </Button>
+          </Link>
+          <Link href="/dashboard/wishlist">
+            <Button variant="ghost" className="w-full justify-start hover:bg-primary/10 hover:text-primary">
+              <Heart className="mr-2 h-4 w-4" /> Wishlist
+            </Button>
+          </Link>
+          <Link href="/dashboard/wallet">
+            <Button variant="ghost" className="w-full justify-start hover:bg-primary/10 hover:text-primary">
+              <Wallet className="mr-2 h-4 w-4" /> Wallet
+            </Button>
+          </Link>
+          <Link href="/dashboard/messages">
+            <Button variant="ghost" className="w-full justify-start hover:bg-primary/10 hover:text-primary">
+              <MessageSquare className="mr-2 h-4 w-4" /> Messages
+            </Button>
+          </Link>
+          <Link href="/dashboard/notifications">
+            <Button variant="ghost" className="w-full justify-start hover:bg-primary/10 hover:text-primary">
+              <Bell className="mr-2 h-4 w-4" /> Notifications
             </Button>
           </Link>
         </nav>

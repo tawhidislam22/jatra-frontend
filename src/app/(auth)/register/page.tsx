@@ -27,10 +27,10 @@ export default function RegisterPage() {
       const response = await authService.register({ fullName, email, phone, password });
       if (response?.data?.accessToken) {
         localStorage.setItem("token", response.data.accessToken);
-        // Force an event for any auth listeners (like a navbar)
         window.dispatchEvent(new Event("storage"));
       }
-      router.push("/dashboard");
+      // Redirect to OTP verification page instead of dashboard
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err: any) {
       console.error("Registration failed:", err);
       setError(err.response?.data?.message || "Failed to register. Please try again.");
