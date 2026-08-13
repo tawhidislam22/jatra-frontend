@@ -5,6 +5,8 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Settings, Users, Fuel, Gauge, CheckCircle2, Calendar, Clock, AlertTriangle, CarFront, Navigation, Bluetooth, Thermometer, Camera, Sun, Armchair } from "lucide-react";
 import { motion } from "framer-motion";
+import { bookingsService } from "@/services/bookings.service";
+import { vehiclesService } from "@/services/vehicles.service";
 
 const getFeatureIcon = (feature: string) => {
   switch (feature.toLowerCase()) {
@@ -23,48 +25,76 @@ export default function VehicleDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [booked, setBooked] = useState(false);
+  
+  const [pickupDate, setPickupDate] = useState("");
+  const [pickupTime, setPickupTime] = useState("");
+  const [returnDate, setReturnDate] = useState("");
+  const [error, setError] = useState("");
 
-  // Mocking the data fetch based on the theme vehicle models
-  const vehicle = {
-    id: params.id as string,
-    brand: "Mercedes",
-    model: "C-Class",
-    year: 2023,
-    pricePerDay: 85,
-    type: "Luxury",
-    transmission: "Automatic",
-    seats: 5,
-    fuel: "Petrol",
-    image: "https://demo.xpeedstudio.com/carrental/onepage-v4/wp-content/uploads/sites/9/2020/07/image2.png",
-    features: [
-      "GPS Navigation",
-      "Bluetooth & USB",
-      "Heated Seats",
-      "Backup Camera",
-      "Sunroof",
-      "Leather Interior"
-    ]
-  };
+  const [vehicle, setVehicle] = useState<any>(null);
 
   useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 800);
-  }, []);
+    const fetchVehicle = async () => {
+      try {
+        const response = await vehiclesService.getVehicleById(params.id as string);
+        if (response && response.data) {
+          setVehicle(response.data);
+        } else {
+          setVehicle(response);
+        }
+      } catch (err) {
+        console.error("Failed to fetch vehicle:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchVehicle();
+  }, [params.id]);
 
-  const handleBooking = (e: React.FormEvent) => {
+
+
+  const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     setBookingLoading(true);
-    setTimeout(() => {
-      setBookingLoading(false);
+    
+    try {
+      const pDate = new Date(`${pickupDate}T${pickupTime || "00:00"}:00`);
+      const rDate = new Date(`${returnDate}T00:00:00`);
+      
+      const diffTime = Math.abs(rDate.getTime() - pDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+      const totalAmount = diffDays * vehicle.pricePerDay;
+
+      await bookingsService.createBooking({
+        vehicleId: vehicle.id,
+        pickupDate: pDate.toISOString(),
+        returnDate: rDate.toISOString(),
+        totalAmount
+      });
+      
       setBooked(true);
-    }, 1500);
+    } catch (err: any) {
+      console.error("Booking error:", err);
+      setError(err.response?.data?.message || "Failed to create booking");
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   if (loading) {
     return (
       <div className="bg-[#f4f4f4] min-h-screen pt-24 pb-32 flex justify-center items-center">
         <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!vehicle) {
+    return (
+      <div className="bg-[#f4f4f4] min-h-screen pt-24 pb-32 flex justify-center items-center">
+        <div className="text-xl font-bold">Vehicle not found</div>
       </div>
     );
   }
@@ -83,7 +113,7 @@ export default function VehicleDetailsPage() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1 }}
         >
-          {vehicle.brand}
+          {vehicle.make}
         </motion.div>
         
         <div className="container mx-auto px-4 relative z-10">
@@ -104,7 +134,7 @@ export default function VehicleDetailsPage() {
                 </span>
               </div>
               <h1 className="text-4xl md:text-6xl font-extrabold text-white uppercase tracking-tight">
-                {vehicle.brand} <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500">{vehicle.model}</span>
+                {vehicle.make} <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500">{vehicle.model}</span>
               </h1>
               
               <div className="flex flex-wrap gap-6 mt-4">
@@ -133,8 +163,8 @@ export default function VehicleDetailsPage() {
               transition={{ duration: 0.6 }}
             >
               <img 
-                src={vehicle.image} 
-                alt={`${vehicle.brand} ${vehicle.model}`} 
+                src={vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : ""} 
+                alt={`${vehicle.make} ${vehicle.model}`} 
                 className="w-full max-w-2xl h-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500" 
               />
             </motion.div>
@@ -146,9 +176,9 @@ export default function VehicleDetailsPage() {
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               {[
-                { icon: Users, label: "Seats", value: vehicle.seats },
-                { icon: Settings, label: "Transmission", value: vehicle.transmission },
-                { icon: Fuel, label: "Fuel Type", value: vehicle.fuel },
+                { icon: Users, label: "Seats", value: vehicle.features?.find((f: string) => f.includes('Seat')) || '5' },
+                { icon: Settings, label: "Transmission", value: vehicle.features?.includes('Automatic') ? 'Auto' : 'Manual' },
+                { icon: Fuel, label: "Fuel Type", value: vehicle.features?.includes('Petrol') ? 'Petrol' : vehicle.features?.includes('Diesel') ? 'Diesel' : 'Petrol' },
                 { icon: Gauge, label: "Mileage", value: "Unlimited" },
               ].map((spec, i) => (
                 <div key={i} className="bg-white p-6 border border-gray-200 rounded-sm shadow-sm flex flex-col items-center text-center gap-3">
@@ -170,7 +200,7 @@ export default function VehicleDetailsPage() {
                 <CarFront className="w-6 h-6 text-primary" /> Features Included
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {vehicle.features.map((feature, i) => (
+                {(vehicle.features || []).map((feature: string, i: number) => (
                   <div key={i} className="bg-white p-4 border border-gray-200 rounded-sm shadow-sm flex items-center gap-3">
                     <div className="w-8 h-8 bg-primary/10 rounded-sm flex items-center justify-center shrink-0">
                       {getFeatureIcon(feature)}
@@ -230,6 +260,8 @@ export default function VehicleDetailsPage() {
                         type="date" 
                         className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm"
                         required
+                        value={pickupDate}
+                        onChange={(e) => setPickupDate(e.target.value)}
                       />
                     </div>
                     <div>
@@ -240,6 +272,8 @@ export default function VehicleDetailsPage() {
                         type="time" 
                         className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm"
                         required
+                        value={pickupTime}
+                        onChange={(e) => setPickupTime(e.target.value)}
                       />
                     </div>
                   </div>
@@ -253,11 +287,14 @@ export default function VehicleDetailsPage() {
                         type="date" 
                         className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm"
                         required
+                        value={returnDate}
+                        onChange={(e) => setReturnDate(e.target.value)}
                       />
                     </div>
                   </div>
 
                   <div className="pt-6">
+                    {error && <div className="text-red-500 text-sm mb-4 font-bold">{error}</div>}
                     <Button 
                       type="submit" 
                       className="w-full h-14 bg-primary hover:bg-[#1a1a1a] text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] transition-colors duration-300 shadow-lg"

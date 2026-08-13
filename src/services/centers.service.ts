@@ -13,5 +13,9 @@ export const centersService = {
   addMechanic: async (centerId: string, data: any) => {
     const response = await api.post(`/automotive-centers/${centerId}/mechanics`, data);
     return response.data;
+  },
+  getCenterById: async (id: string) => {
+    const response = await api.get(`/automotive-centers/${id}`);
+    return response.data;
   }
 };

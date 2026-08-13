@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { MapPin, Phone, Star, Wrench, CheckCircle2, Calendar, Clock, AlertTriangle, Droplet, Disc, ClipboardCheck, Paintbrush } from "lucide-react";
+import { serviceRequestsService } from "@/services/services.service";
+import { centersService } from "@/services/centers.service";
 
 const getServiceIcon = (service: string) => {
   switch (service.toLowerCase()) {
@@ -22,32 +24,58 @@ export default function CenterDetailsPage() {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [booked, setBooked] = useState(false);
 
-  // Mocking the data fetch
-  const center = { 
-    id: params.id as string, 
-    name: "Jatra Premier Service", 
-    address: "Road 11, Block E, Gulshan 1, Dhaka", 
-    latitude: 23.7808, 
-    longitude: 90.4196, 
-    phone: "01744444444", 
-    rating: 4.8, 
-    isApproved: true, 
-    servicesOffered: ["Engine Repair", "Oil Change", "Wheel Alignment", "Full Inspection", "Dent Paint"] 
-  };
+  const [selectedService, setSelectedService] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [issueDescription, setIssueDescription] = useState("");
+  const [error, setError] = useState("");
+
+  const [center, setCenter] = useState<any>(null);
 
   useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 800);
-  }, []);
+    const fetchCenter = async () => {
+      try {
+        const response = await centersService.getCenterById(params.id as string);
+        if (response && response.data) {
+          setCenter(response.data);
+        } else {
+          setCenter(response);
+        }
+      } catch (err) {
+        console.error("Failed to fetch center:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchCenter();
+  }, [params.id]);
 
-  const handleBooking = (e: React.FormEvent) => {
+  const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     setBookingLoading(true);
-    setTimeout(() => {
-      setBookingLoading(false);
+    
+    try {
+      const scheduledDate = new Date(`${date}T${time || "00:00"}:00`);
+      
+      const fullDescription = `[${selectedService || 'General Inspection'}] ${issueDescription}`;
+
+      await serviceRequestsService.createRequest({
+        serviceType: "WORKSHOP", // Required by backend enum
+        scheduledDate: scheduledDate.toISOString(),
+        issueDescription: fullDescription,
+        vehicleId: "dummy-vehicle-id", // Hardcoded placeholder until vehicle selection is added
+        centerId: center.id
+      });
+      
       setBooked(true);
-    }, 1500);
+    } catch (err: any) {
+      console.error("Booking error:", err);
+      setError(err.response?.data?.message || "Failed to book appointment");
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   if (loading) {
@@ -58,10 +86,26 @@ export default function CenterDetailsPage() {
     );
   }
 
+  if (!center) {
+    return (
+      <div className="bg-[#f4f4f4] min-h-screen pt-24 pb-32 flex justify-center items-center">
+        <div className="text-xl font-bold">Center not found</div>
+      </div>
+    );
+  }
+
+  const headerImage = (center && center.images && center.images.length > 0) 
+    ? center.images[0] 
+    : "https://images.unsplash.com/photo-1613214149922-f1809c99b414?auto=format&fit=crop&q=80";
+
   return (
     <div className="bg-[#f4f4f4] min-h-screen pb-32">
       {/* Zauto Style Header */}
-      <div className="bg-[#1a1a1a] py-24 mb-16 relative overflow-hidden">
+      <div 
+        className="bg-[#1a1a1a] py-24 mb-16 relative overflow-hidden bg-fixed bg-center bg-cover"
+        style={{ backgroundImage: `url('${headerImage}')` }}
+      >
+        <div className="absolute inset-0 bg-black/70 z-0" />
         <div className="absolute top-1/2 left-0 -translate-y-1/2 text-[150px] font-black text-white/5 select-none z-0 tracking-tighter uppercase whitespace-nowrap">
           SERVICE
         </div>
@@ -108,7 +152,7 @@ export default function CenterDetailsPage() {
                 <Wrench className="w-6 h-6 text-primary" /> Available Services
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {center.servicesOffered.map((service, i) => (
+                {(center.servicesOffered || []).map((service: string, i: number) => (
                   <div key={i} className="bg-white p-4 border border-gray-200 rounded-sm shadow-sm flex items-center gap-3">
                     <div className="w-8 h-8 bg-primary/10 rounded-sm flex items-center justify-center shrink-0">
                       {getServiceIcon(service)}
@@ -154,10 +198,14 @@ export default function CenterDetailsPage() {
                     <label className="block text-[10px] font-bold uppercase tracking-[2px] text-gray-500 mb-2 flex items-center gap-2">
                       <Wrench className="w-3 h-3 text-primary" /> Service Type
                     </label>
-                    <select className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm appearance-none focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm cursor-pointer">
-                      <option>Select a Service</option>
-                      {center.servicesOffered.map((s, i) => <option key={i}>{s}</option>)}
-                      <option>General Inspection</option>
+                    <select 
+                      className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm appearance-none focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm cursor-pointer"
+                      value={selectedService}
+                      onChange={(e) => setSelectedService(e.target.value)}
+                    >
+                      <option value="">Select a Service</option>
+                      {(center.servicesOffered || []).map((s: string, i: number) => <option key={i} value={s}>{s}</option>)}
+                      <option value="General Inspection">General Inspection</option>
                     </select>
                   </div>
                   
@@ -170,6 +218,8 @@ export default function CenterDetailsPage() {
                         type="date" 
                         className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm"
                         required
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
                       />
                     </div>
                     <div>
@@ -180,6 +230,8 @@ export default function CenterDetailsPage() {
                         type="time" 
                         className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm"
                         required
+                        value={time}
+                        onChange={(e) => setTime(e.target.value)}
                       />
                     </div>
                   </div>
@@ -192,8 +244,12 @@ export default function CenterDetailsPage() {
                       className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm min-h-[100px] resize-none focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm" 
                       placeholder="Briefly describe the issue..." 
                       required
+                      value={issueDescription}
+                      onChange={(e) => setIssueDescription(e.target.value)}
                     />
                   </div>
+
+                  {error && <div className="text-red-500 text-sm font-bold">{error}</div>}
 
                   <Button 
                     type="submit" 

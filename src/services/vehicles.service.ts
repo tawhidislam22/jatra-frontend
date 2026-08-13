@@ -13,5 +13,9 @@ export const vehiclesService = {
   getMyVehicles: async () => {
     const response = await api.get('/vehicles/my-vehicles');
     return response.data;
+  },
+  getVehicleById: async (id: string) => {
+    const response = await api.get(`/vehicles/${id}`);
+    return response.data;
   }
 };

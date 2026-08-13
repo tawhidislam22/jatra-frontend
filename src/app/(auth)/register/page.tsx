@@ -6,17 +6,36 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
+import { authService } from "@/services/auth.service";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+    setError("");
+    
+    try {
+      const response = await authService.register({ fullName, email, phone, password });
+      if (response?.data?.accessToken) {
+        localStorage.setItem("token", response.data.accessToken);
+        // Force an event for any auth listeners (like a navbar)
+        window.dispatchEvent(new Event("storage"));
+      }
+      router.push("/dashboard");
+    } catch (err: any) {
+      console.error("Registration failed:", err);
+      setError(err.response?.data?.message || "Failed to register. Please try again.");
       setLoading(false);
-      window.location.href = "/login";
-    }, 1000);
+    }
   };
 
   return (
@@ -26,6 +45,12 @@ export default function RegisterPage() {
         <p className="text-gray-500 font-medium text-sm">Join Jatra to rent vehicles or book services</p>
       </div>
       
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 text-red-600 text-sm font-bold uppercase tracking-wider rounded-sm border border-red-100">
+          {error}
+        </div>
+      )}
+      
       <form onSubmit={handleSubmit} className="space-y-5" autoComplete="off">
         <div className="space-y-3">
           <Label htmlFor="name" className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400">Full Name</Label>
@@ -34,6 +59,8 @@ export default function RegisterPage() {
             placeholder="JOHN DOE" 
             required 
             autoComplete="off"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
             className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
           />
         </div>
@@ -45,6 +72,8 @@ export default function RegisterPage() {
             placeholder="JOHN@EXAMPLE.COM" 
             required 
             autoComplete="off"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
           />
         </div>
@@ -56,6 +85,8 @@ export default function RegisterPage() {
             placeholder="+1234567890" 
             required 
             autoComplete="off"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
             className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
           />
         </div>
@@ -66,6 +97,8 @@ export default function RegisterPage() {
             type="password" 
             required 
             autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
           />
         </div>

@@ -6,17 +6,34 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
+import { authService } from "@/services/auth.service";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+    setError("");
+    
+    try {
+      const response = await authService.login({ email, password });
+      if (response?.data?.accessToken) {
+        localStorage.setItem("token", response.data.accessToken);
+        // Force an event for any auth listeners
+        window.dispatchEvent(new Event("storage"));
+      }
+      router.push("/dashboard");
+    } catch (err: any) {
+      console.error("Login failed:", err);
+      setError(err.response?.data?.message || "Failed to login. Please check your credentials.");
       setLoading(false);
-      window.location.href = "/dashboard";
-    }, 1000);
+    }
   };
 
   return (
@@ -25,6 +42,12 @@ export default function LoginPage() {
         <h1 className="text-3xl font-extrabold text-[#1a1a1a] uppercase tracking-tight">Welcome Back</h1>
         <p className="text-gray-500 font-medium text-sm">Enter your credentials to access your account</p>
       </div>
+      
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 text-red-600 text-sm font-bold uppercase tracking-wider rounded-sm border border-red-100">
+          {error}
+        </div>
+      )}
       
       <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
         <div className="space-y-3">
@@ -35,6 +58,8 @@ export default function LoginPage() {
             placeholder="JOHN@EXAMPLE.COM" 
             required 
             autoComplete="off"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
           />
         </div>
@@ -50,6 +75,8 @@ export default function LoginPage() {
             type="password" 
             required 
             autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
           />
         </div>

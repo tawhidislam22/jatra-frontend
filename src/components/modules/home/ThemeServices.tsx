@@ -7,46 +7,29 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { centersService } from "@/services/centers.service";
 
 export function ThemeServices() {
   const router = useRouter();
   
-  // Mock data for top workshops
-  const topCenters: AutomotiveCenter[] = [
-    { 
-      id: "1", 
-      name: "Jatra Premier Service", 
-      address: "Road 11, Block E, Gulshan 1, Dhaka", 
-      latitude: 23.7808, 
-      longitude: 90.4196, 
-      phone: "01744444444", 
-      rating: 4.8, 
-      isApproved: true, 
-      servicesOffered: ["Engine Repair", "Oil Change", "Wheel Alignment"] 
-    },
-    { 
-      id: "2", 
-      name: "AutoCare Banani", 
-      address: "Kemal Ataturk Ave, Banani, Dhaka", 
-      latitude: 23.7940, 
-      longitude: 90.4043, 
-      phone: "01988888888", 
-      rating: 4.6, 
-      isApproved: true, 
-      servicesOffered: ["Wash", "Battery Replacement"] 
-    },
-    { 
-      id: "3", 
-      name: "Dhanmondi Motors", 
-      address: "Satmasjid Road, Dhanmondi, Dhaka", 
-      latitude: 23.7461, 
-      longitude: 90.3742, 
-      phone: "01511111111", 
-      rating: 4.9, 
-      isApproved: false, 
-      servicesOffered: ["Full Inspection", "Dent Paint", "Tire Rotation"] 
-    },
-  ];
+  const [topCenters, setTopCenters] = useState<AutomotiveCenter[]>([]);
+
+  useEffect(() => {
+    const fetchCenters = async () => {
+      try {
+        const response = await centersService.getAllCenters();
+        if (response && response.data) {
+          setTopCenters(response.data.slice(0, 3));
+        } else if (Array.isArray(response)) {
+          setTopCenters(response.slice(0, 3));
+        }
+      } catch (error) {
+        console.error("Failed to fetch centers:", error);
+      }
+    };
+    fetchCenters();
+  }, []);
 
   return (
     <section className="py-24 bg-[#f4f4f4] relative overflow-hidden">

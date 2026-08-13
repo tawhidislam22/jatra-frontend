@@ -4,22 +4,29 @@ import { useEffect, useState } from "react";
 import { VehicleCard } from "@/components/modules/vehicles/VehicleCard";
 import { Vehicle } from "@/types/jatra";
 import { motion } from "framer-motion";
+import { vehiclesService } from "@/services/vehicles.service";
 
 export default function VehiclesPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mocking initial data fetch for UI demonstration
-    setTimeout(() => {
-      setVehicles([
-        { id: "1", make: "Toyota", model: "Corolla Cross", year: 2023, licensePlate: "DHA-KHA-12-3456", type: "RENTAL_FLEET", pricePerDay: 50, isAvailable: true, features: ["AC", "Automatic", "Hybrid"], images: ["https://demo.xpeedstudio.com/carrental/onepage-v4/wp-content/uploads/sites/9/2020/07/image7.png"] },
-        { id: "2", make: "BMW", model: "320i", year: 2022, licensePlate: "DHA-GA-11-2233", type: "RENTAL_FLEET", pricePerDay: 75, isAvailable: true, features: ["Automatic", "Petrol"], images: ["https://demo.xpeedstudio.com/carrental/onepage-v4/wp-content/uploads/sites/9/2020/07/image4.png"] },
-        { id: "3", make: "Mercedes", model: "C-Class", year: 2023, licensePlate: "DHA-KA-33-4455", type: "RENTAL_FLEET", pricePerDay: 85, isAvailable: true, features: ["Automatic", "Petrol"], images: ["https://demo.xpeedstudio.com/carrental/onepage-v4/wp-content/uploads/sites/9/2020/07/image2.png"] },
-        { id: "4", make: "Audi", model: "A1 S", year: 2021, licensePlate: "DHA-PA-99-8877", type: "RENTAL_FLEET", pricePerDay: 60, isAvailable: false, features: ["Manual", "Petrol"], images: ["https://demo.xpeedstudio.com/carrental/onepage-v4/wp-content/uploads/sites/9/2020/07/image6.png"] },
-      ]);
-      setLoading(false);
-    }, 1000);
+    const fetchVehicles = async () => {
+      try {
+        const response = await vehiclesService.getAllVehicles();
+        if (response && response.data) {
+          setVehicles(response.data);
+        } else {
+          setVehicles(response); // Fallback if the response isn't wrapped in {data: ...}
+        }
+      } catch (error) {
+        console.error("Failed to fetch vehicles:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchVehicles();
   }, []);
 
   return (

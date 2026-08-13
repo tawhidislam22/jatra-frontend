@@ -4,60 +4,29 @@ import { Button } from "@/components/ui/button";
 import { Settings, Users, Fuel, Gauge, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { vehiclesService } from "@/services/vehicles.service";
 
 export function ThemeVehicleModels() {
   const router = useRouter();
   
-  const dummyVehicles = [
-    {
-      id: "1",
-      brand: "Toyota",
-      model: "Camry",
-      year: 2023,
-      pricePerDay: 45,
-      type: "Sedan",
-      transmission: "Auto",
-      seats: 5,
-      fuel: "Petrol",
-      image: "https://demo.xpeedstudio.com/carrental/onepage-v4/wp-content/uploads/sites/9/2020/07/image7.png"
-    },
-    {
-      id: "2",
-      brand: "BMW",
-      model: "320i",
-      year: 2022,
-      pricePerDay: 75,
-      type: "Luxury",
-      transmission: "Auto",
-      seats: 5,
-      fuel: "Diesel",
-      image: "https://demo.xpeedstudio.com/carrental/onepage-v4/wp-content/uploads/sites/9/2020/07/image4.png"
-    },
-    {
-      id: "3",
-      brand: "Mercedes",
-      model: "C-Class",
-      year: 2023,
-      pricePerDay: 85,
-      type: "Luxury",
-      transmission: "Auto",
-      seats: 5,
-      fuel: "Petrol",
-      image: "https://demo.xpeedstudio.com/carrental/onepage-v4/wp-content/uploads/sites/9/2020/07/image2.png"
-    },
-    {
-      id: "4",
-      brand: "Audi",
-      model: "A1 S",
-      year: 2021,
-      pricePerDay: 60,
-      type: "Compact",
-      transmission: "Manual",
-      seats: 4,
-      fuel: "Petrol",
-      image: "https://demo.xpeedstudio.com/carrental/onepage-v4/wp-content/uploads/sites/9/2020/07/image6.png"
-    }
-  ];
+  const [vehicles, setVehicles] = useState<any[]>([]);
+  
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        const response = await vehiclesService.getAllVehicles();
+        if (response && response.data) {
+          setVehicles(response.data.slice(0, 4));
+        } else if (Array.isArray(response)) {
+          setVehicles(response.slice(0, 4));
+        }
+      } catch (error) {
+        console.error("Failed to fetch vehicles:", error);
+      }
+    };
+    fetchVehicles();
+  }, []);
 
   return (
     <section id="vehicle_models" className="pt-48 pb-24 bg-white">
@@ -88,7 +57,7 @@ export function ThemeVehicleModels() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
-          {dummyVehicles.map((car, index) => (
+          {vehicles.map((car: any, index: number) => (
             <motion.div 
               key={car.id} 
               className="group bg-white border border-gray-100 rounded-sm overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 relative"
@@ -104,8 +73,8 @@ export function ThemeVehicleModels() {
               
               <div className="bg-[#f9f9f9] p-8 aspect-video flex items-center justify-center relative overflow-hidden group-hover:bg-[#1a1a1a] transition-colors duration-500">
                 <img 
-                  src={car.image} 
-                  alt={`${car.brand} ${car.model}`}
+                  src={car.images && car.images.length > 0 ? car.images[0] : ""} 
+                  alt={`${car.make} ${car.model}`}
                   className="w-full h-auto object-contain group-hover:scale-110 group-hover:drop-shadow-[0_10px_20px_rgba(255,255,255,0.2)] transition-all duration-500"
                 />
               </div>
@@ -117,19 +86,19 @@ export function ThemeVehicleModels() {
                 </div>
 
                 <div className="mb-6 pt-2">
-                  <h4 className="font-extrabold text-2xl text-[#1a1a1a] mb-1 group-hover:text-primary transition-colors">{car.brand} {car.model}</h4>
+                  <h4 className="font-extrabold text-2xl text-[#1a1a1a] mb-1 group-hover:text-primary transition-colors">{car.make} {car.model}</h4>
                   <span className="text-xs text-gray-500 font-bold tracking-widest uppercase">{car.year} Model</span>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-y-4 gap-x-2 py-4 border-t border-gray-100 mb-6">
                   <div className="flex items-center gap-2 text-[13px] text-gray-500 font-medium">
-                    <Users className="w-4 h-4 text-primary" /> {car.seats} Seats
+                    <Users className="w-4 h-4 text-primary" /> {car.features?.find((f: string) => f.includes('Seat')) || '5'} Seats
                   </div>
                   <div className="flex items-center gap-2 text-[13px] text-gray-500 font-medium">
-                    <Settings className="w-4 h-4 text-primary" /> {car.transmission}
+                    <Settings className="w-4 h-4 text-primary" /> {car.features?.includes('Automatic') ? 'Auto' : 'Manual'}
                   </div>
                   <div className="flex items-center gap-2 text-[13px] text-gray-500 font-medium">
-                    <Fuel className="w-4 h-4 text-primary" /> {car.fuel}
+                    <Fuel className="w-4 h-4 text-primary" /> {car.features?.includes('Petrol') ? 'Petrol' : car.features?.includes('Diesel') ? 'Diesel' : 'Petrol'}
                   </div>
                   <div className="flex items-center gap-2 text-[13px] text-gray-500 font-medium">
                     <Gauge className="w-4 h-4 text-primary" /> 20K MPG

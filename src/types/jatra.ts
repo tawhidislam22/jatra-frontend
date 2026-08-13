@@ -16,6 +16,7 @@ export interface AutomotiveCenter {
   rating?: number;
   isApproved?: boolean;
   servicesOffered?: string[];
+  images?: string[];
 }
 
 export interface Vehicle {

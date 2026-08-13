@@ -9,8 +9,8 @@ interface CenterCardProps {
 }
 
 export function CenterCard({ center, onBook }: CenterCardProps) {
-  const defaultImage = "https://images.unsplash.com/photo-1613214149922-f1809c99b414?auto=format&fit=crop&q=80";
-  
+  // Use image from database, with fallback
+  const defaultImage = (center.images && center.images.length > 0) ? center.images[0] : "https://images.unsplash.com/photo-1613214149922-f1809c99b414?auto=format&fit=crop&q=80";
   return (
     <div className="group bg-white border border-gray-100 rounded-sm overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 relative flex flex-col h-full">
       {/* Verified Badge */}
