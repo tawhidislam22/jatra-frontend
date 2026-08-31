@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useState, Suspense, useEffect } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { authService } from "@/services/auth.service";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -20,6 +20,7 @@ function ResetPasswordForm() {
   const [newPassword, setNewPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (emailParam) {
@@ -95,16 +96,25 @@ function ResetPasswordForm() {
 
         <div className="space-y-3">
           <Label htmlFor="newPassword" className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400">New Password</Label>
-          <Input 
-            id="newPassword" 
-            type="password" 
-            placeholder="Enter new password" 
-            required 
-            autoComplete="new-password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
-          />
+          <div className="relative">
+            <Input 
+              id="newPassword" 
+              type={showPassword ? "text" : "password"} 
+              placeholder="Enter new password" 
+              required 
+              autoComplete="new-password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-6 pr-12 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
         
         <Button 

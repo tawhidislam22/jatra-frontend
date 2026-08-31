@@ -67,19 +67,31 @@ export default function VehicleDetailsPage() {
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
       const totalAmount = diffDays * vehicle.pricePerDay;
 
-      await bookingsService.createBooking({
+      // 1. Create the rental booking
+      const bookingResponse = await bookingsService.createBooking({
         vehicleId: vehicle.id,
         pickupDate: pDate.toISOString(),
         returnDate: rDate.toISOString(),
         totalAmount
       });
       
-      setBooked(true);
+      // 2. Create the Stripe checkout session
+      const { paymentService } = await import("@/services/payment.service");
+      const checkoutResponse = await paymentService.createCheckoutSession({
+        amount: totalAmount,
+        rentalBookingId: bookingResponse.data.id
+      });
+      
+      // 3. Redirect to Stripe
+      if (checkoutResponse.success && checkoutResponse.data?.url) {
+        window.location.href = checkoutResponse.data.url;
+      } else {
+        setBooked(true); // Fallback to old behavior if no URL is returned
+      }
     } catch (err: any) {
       console.error("Booking error:", err);
-      setError(err.response?.data?.message || "Failed to create booking");
-    } finally {
-      setBookingLoading(false);
+      setError(err.response?.data?.message || "Failed to create booking & payment");
+      setBookingLoading(false); // Only stop loading if there's an error so the user isn't stuck if the redirect takes a moment
     }
   };
 

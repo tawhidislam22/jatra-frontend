@@ -24,6 +24,8 @@ export default function CenterDetailsPage() {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [booked, setBooked] = useState(false);
 
+  const [myVehicles, setMyVehicles] = useState<any[]>([]);
+  const [selectedVehicle, setSelectedVehicle] = useState("");
   const [selectedService, setSelectedService] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -33,22 +35,39 @@ export default function CenterDetailsPage() {
   const [center, setCenter] = useState<any>(null);
 
   useEffect(() => {
-    const fetchCenter = async () => {
+    const fetchData = async () => {
       try {
-        const response = await centersService.getCenterById(params.id as string);
-        if (response && response.data) {
-          setCenter(response.data);
+        const [centerRes, vehiclesRes] = await Promise.all([
+          centersService.getCenterById(params.id as string),
+          import("@/services/vehicles.service")
+            .then(m => m.vehiclesService.getMyVehicles())
+            .catch(err => {
+              // If user is not logged in, this will 401. Catch it so center data still loads.
+              return { data: [] };
+            })
+        ]);
+        
+        if (centerRes && centerRes.data) {
+          setCenter(centerRes.data);
         } else {
-          setCenter(response);
+          setCenter(centerRes);
+        }
+
+        if (vehiclesRes && vehiclesRes.data) {
+          setMyVehicles(vehiclesRes.data);
+          if (vehiclesRes.data.length > 0) setSelectedVehicle(vehiclesRes.data[0].id);
+        } else if (Array.isArray(vehiclesRes)) {
+          setMyVehicles(vehiclesRes);
+          if (vehiclesRes.length > 0) setSelectedVehicle(vehiclesRes[0].id);
         }
       } catch (err) {
-        console.error("Failed to fetch center:", err);
+        console.error("Failed to fetch data:", err);
       } finally {
         setLoading(false);
       }
     };
     
-    fetchCenter();
+    fetchData();
   }, [params.id]);
 
   const handleBooking = async (e: React.FormEvent) => {
@@ -56,23 +75,39 @@ export default function CenterDetailsPage() {
     setError("");
     setBookingLoading(true);
     
+    if (!selectedVehicle) {
+      setError("Please add a vehicle to your account first.");
+      setBookingLoading(false);
+      return;
+    }
+    
     try {
       const scheduledDate = new Date(`${date}T${time || "00:00"}:00`);
       
       const fullDescription = `[${selectedService || 'General Inspection'}] ${issueDescription}`;
 
-      await serviceRequestsService.createRequest({
+      const requestData = await serviceRequestsService.createRequest({
         serviceType: "WORKSHOP", // Required by backend enum
         scheduledDate: scheduledDate.toISOString(),
         issueDescription: fullDescription,
-        vehicleId: "dummy-vehicle-id", // Hardcoded placeholder until vehicle selection is added
+        vehicleId: selectedVehicle,
         centerId: center.id
       });
       
-      setBooked(true);
+      const { paymentService } = await import("@/services/payment.service");
+      const session = await paymentService.createCheckoutSession({
+        amount: 50, // $50 flat booking deposit for service centers
+        serviceRequestId: requestData.data?.id || requestData.id
+      });
+
+      if (session && session.data && session.data.url) {
+        window.location.href = session.data.url;
+      } else {
+        setBooked(true); // Fallback if no payment url
+      }
     } catch (err: any) {
       console.error("Booking error:", err);
-      setError(err.response?.data?.message || "Failed to book appointment");
+      setError(err.response?.data?.message || err.message || "Failed to book appointment");
     } finally {
       setBookingLoading(false);
     }
@@ -196,6 +231,21 @@ export default function CenterDetailsPage() {
                 <form onSubmit={handleBooking} className="space-y-6">
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-[2px] text-gray-500 mb-2 flex items-center gap-2">
+                      <CheckCircle2 className="w-3 h-3 text-primary" /> Your Vehicle
+                    </label>
+                    <select 
+                      className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm appearance-none focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm cursor-pointer mb-6"
+                      value={selectedVehicle}
+                      onChange={(e) => setSelectedVehicle(e.target.value)}
+                      required
+                    >
+                      <option value="">Select a Vehicle</option>
+                      {myVehicles.map((v: any) => <option key={v.id} value={v.id}>{v.make} {v.model} ({v.year})</option>)}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-[2px] text-gray-500 mb-2 flex items-center gap-2">
                       <Wrench className="w-3 h-3 text-primary" /> Service Type
                     </label>
                     <select 
@@ -206,6 +256,7 @@ export default function CenterDetailsPage() {
                       <option value="">Select a Service</option>
                       {(center.servicesOffered || []).map((s: string, i: number) => <option key={i} value={s}>{s}</option>)}
                       <option value="General Inspection">General Inspection</option>
+                      <option value="Other">Other</option>
                     </select>
                   </div>
                   

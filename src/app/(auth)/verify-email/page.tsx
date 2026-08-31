@@ -13,6 +13,7 @@ function VerifyEmailForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailParam = searchParams.get("email");
+  const redirectParam = searchParams.get("redirect");
 
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
@@ -44,9 +45,9 @@ function VerifyEmailForm() {
     
     try {
       await authService.verifyEmail({ email, otp });
-      setSuccess("Email verified successfully! Redirecting to dashboard...");
+      setSuccess(`Email verified successfully! Redirecting...`);
       setTimeout(() => {
-        router.push("/dashboard");
+        router.push(redirectParam ? `/${redirectParam}` : "/dashboard");
       }, 2000);
     } catch (err: any) {
       console.error("Verification failed:", err);

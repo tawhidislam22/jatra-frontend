@@ -2,8 +2,12 @@ export interface User {
   id: string;
   email: string;
   fullName: string;
+  name?: string;
   phone: string;
-  role: 'CUSTOMER' | 'ADMIN' | 'MECHANIC';
+  role: 'CUSTOMER' | 'OWNER' | 'ADMIN' | 'MECHANIC';
+  status?: string;
+  image?: string;
+  managedCenter?: AutomotiveCenter;
 }
 
 export interface AutomotiveCenter {
@@ -17,6 +21,9 @@ export interface AutomotiveCenter {
   isApproved?: boolean;
   servicesOffered?: string[];
   images?: string[];
+  adminId?: string;
+  mechanics?: User[];
+  rentalFleet?: Vehicle[];
 }
 
 export interface Vehicle {
@@ -30,26 +37,37 @@ export interface Vehicle {
   isAvailable?: boolean;
   features?: string[];
   images?: string[];
+  centerId?: string;
+  ownerId?: string;
 }
 
 export interface RentalBooking {
   id: string;
   vehicleId: string;
+  customerId?: string;
   pickupDate: string;
   returnDate: string;
   totalAmount: number;
-  status: 'PENDING' | 'ACCEPTED' | 'COMPLETED' | 'CANCELLED';
+  status: 'PENDING' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  vehicle?: Vehicle;
+  customer?: User;
+  payment?: Payment;
 }
 
 export interface ServiceRequest {
   id: string;
-  serviceType: 'WORKSHOP' | 'MOBILE';
+  serviceType: 'WORKSHOP' | 'DOORSTEP';
   scheduledDate: string;
   issueDescription: string;
   vehicleId: string;
   centerId: string;
   mechanicId?: string;
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  customerId?: string;
+  status: 'PENDING' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  vehicle?: Vehicle;
+  customer?: User;
+  mechanic?: User;
+  payment?: Payment;
 }
 
 export interface Emergency {
@@ -58,5 +76,31 @@ export interface Emergency {
   longitude: number;
   issueDescription: string;
   centerId: string;
-  status: 'PENDING' | 'RESOLVED';
+  customerId?: string;
+  mechanicId?: string;
+  status: 'PENDING' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  customer?: User;
+  mechanic?: User;
 }
+
+export interface Payment {
+  id: string;
+  amount: number;
+  status: 'PENDING' | 'SUCCESS' | 'FAILED';
+  transactionId?: string;
+  paidAt?: string;
+  userId?: string;
+  rentalBookingId?: string;
+  serviceRequestId?: string;
+  emergencyId?: string;
+}
+
+export interface Review {
+  id: string;
+  rating: number;
+  comment: string;
+  createdAt?: string;
+  customer?: User;
+  centerId?: string;
+}
+

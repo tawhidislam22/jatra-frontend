@@ -12,5 +12,9 @@ export const serviceRequestsService = {
   assignMechanic: async (id: string, mechanicId: string) => {
     const response = await api.patch(`/service-requests/${id}/assign`, { mechanicId });
     return response.data;
+  },
+  updateStatus: async (id: string, data: any) => {
+    const response = await api.patch(`/service-requests/${id}/status`, data);
+    return response.data;
   }
 };

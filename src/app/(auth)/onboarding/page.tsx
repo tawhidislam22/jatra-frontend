@@ -171,6 +171,12 @@ export default function OnboardingPage() {
         allServices.push(customService.trim());
       }
       
+      if (allServices.length === 0) {
+        setError("Please select or enter at least one service.");
+        setIsLoading(false);
+        return;
+      }
+      
       await centersService.updateCenter(centerId, { servicesOffered: allServices });
       setCurrentStep(3);
     } catch (err: any) {

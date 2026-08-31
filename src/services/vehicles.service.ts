@@ -6,8 +6,9 @@ export const vehiclesService = {
     const response = await api.post('/vehicles', data);
     return response.data;
   },
-  getAllVehicles: async () => {
-    const response = await api.get('/vehicles');
+  getAllVehicles: async (params?: any) => {
+    const queryString = params ? '?' + new URLSearchParams(params).toString() : '';
+    const response = await api.get(`/vehicles${queryString}`);
     return response.data;
   },
   getMyVehicles: async () => {
@@ -16,6 +17,10 @@ export const vehiclesService = {
   },
   getVehicleById: async (id: string) => {
     const response = await api.get(`/vehicles/${id}`);
+    return response.data;
+  },
+  updateVehicle: async (id: string, data: any) => {
+    const response = await api.patch(`/vehicles/${id}`, data);
     return response.data;
   }
 };
