@@ -37,6 +37,7 @@ export default function OnboardingPage() {
     latitude: "",
     longitude: "",
   });
+  const [centerImage, setCenterImage] = useState<File | null>(null);
 
   // Step 2 State
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
@@ -50,6 +51,7 @@ export default function OnboardingPage() {
     licensePlate: "",
     pricePerDay: "",
   });
+  const [vehicleImage, setVehicleImage] = useState<File | null>(null);
   const [vehicleAdded, setVehicleAdded] = useState(false);
 
   useEffect(() => {
@@ -111,13 +113,21 @@ export default function OnboardingPage() {
     setError("");
 
     try {
-      const response = await centersService.registerCenter({
+      const payloadData = {
         name: centerInfo.name,
         address: centerInfo.address,
         phone: centerInfo.phone,
         latitude: parseFloat(centerInfo.latitude),
         longitude: parseFloat(centerInfo.longitude),
-      });
+      };
+      
+      const formData = new FormData();
+      formData.append('data', JSON.stringify(payloadData));
+      if (centerImage) {
+        formData.append('image', centerImage);
+      }
+
+      const response = await centersService.registerCenter(formData);
       // Try multiple possible paths for the center ID depending on API response format
       const id = response?.id || response?.data?.id || response?.center?.id;
       if (id) {
@@ -176,14 +186,22 @@ export default function OnboardingPage() {
     setError("");
 
     try {
-      await vehiclesService.registerVehicle({
+      const payloadData = {
         make: vehicleInfo.make,
         model: vehicleInfo.model,
         year: parseInt(vehicleInfo.year),
         licensePlate: vehicleInfo.licensePlate,
         pricePerDay: parseFloat(vehicleInfo.pricePerDay),
         type: "RENTAL_FLEET",
-      });
+      };
+
+      const formData = new FormData();
+      formData.append('data', JSON.stringify(payloadData));
+      if (vehicleImage) {
+        formData.append('image', vehicleImage);
+      }
+
+      await vehiclesService.registerVehicle(formData);
       setVehicleAdded(true);
       setCurrentStep(4);
     } catch (err: any) {
@@ -290,6 +308,20 @@ export default function OnboardingPage() {
                     className="w-full bg-gray-50 border border-gray-300 shadow-sm hover:border-gray-400 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400" htmlFor="image">Business Image (Optional)</Label>
+                <Input
+                  id="image"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      setCenterImage(e.target.files[0]);
+                    }
+                  }}
+                  className="w-full bg-gray-50 border border-gray-300 shadow-sm hover:border-gray-400 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:text-sm file:font-bold file:bg-primary file:text-white hover:file:bg-[#1a1a1a] file:transition-colors"
+                />
               </div>
               <Button
                 type="submit"
@@ -423,6 +455,20 @@ export default function OnboardingPage() {
                   value={vehicleInfo.pricePerDay}
                   onChange={(e) => setVehicleInfo({ ...vehicleInfo, pricePerDay: e.target.value })}
                   className="w-full bg-gray-50 border border-gray-300 shadow-sm hover:border-gray-400 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400" htmlFor="vehicleImage">Vehicle Image (Optional)</Label>
+                <Input
+                  id="vehicleImage"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      setVehicleImage(e.target.files[0]);
+                    }
+                  }}
+                  className="w-full bg-gray-50 border border-gray-300 shadow-sm hover:border-gray-400 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:text-sm file:font-bold file:bg-primary file:text-white hover:file:bg-[#1a1a1a] file:transition-colors"
                 />
               </div>
               <div className="flex gap-4">
