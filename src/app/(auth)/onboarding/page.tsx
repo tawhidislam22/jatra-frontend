@@ -61,7 +61,7 @@ export default function OnboardingPage() {
         if (res?.data) {
           const user = res.data;
           
-          let centerIdToUse = user.managedCenter?.id;
+          let centerIdToUse = user.data?.managedCenter?.id;
 
           // If managedCenter is not in getMe response, try fetching it directly
           if (!centerIdToUse) {

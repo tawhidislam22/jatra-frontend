@@ -26,7 +26,7 @@ export default function EmergenciesPage() {
       setEmergencies(emergenciesRes.data || []);
       
       if (meRes.data?.managedCenter) {
-        const centerRes = await centersService.getCenterById(meRes.data.managedCenter);
+        const centerRes = await centersService.getCenterById(meRes.data.managedCenter?.id);
         setMechanics(centerRes.data?.mechanics || []);
       }
     } catch (error) {

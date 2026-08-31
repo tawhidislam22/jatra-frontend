@@ -25,8 +25,8 @@ export default function MechanicsPage() {
     try {
       const meRes = await authService.getMe();
       if (meRes.data?.managedCenter) {
-        setCenterId(meRes.data.managedCenter);
-        const centerRes = await centersService.getCenterById(meRes.data.managedCenter);
+        setCenterId(meRes.data.managedCenter?.id);
+        const centerRes = await centersService.getCenterById(meRes.data.managedCenter?.id);
         setMechanics(centerRes.data?.mechanics || []);
       }
     } catch (error) {

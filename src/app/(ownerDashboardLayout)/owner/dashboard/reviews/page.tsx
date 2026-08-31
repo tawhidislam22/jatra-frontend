@@ -15,8 +15,8 @@ export default function OwnerReviewsPage() {
       try {
         const userRes = await authService.getMe();
         const user = userRes?.data;
-        if (user?.managedCenter?.id) {
-          const res = await api.get(`/reviews/center/${user.managedCenter.id}`);
+        if (user?.data?.managedCenter?.id) {
+          const res = await api.get(`/reviews/center/${user.data.managedCenter.id}`);
           if (res?.data?.data) {
             setReviews(res.data.data);
           } else if (Array.isArray(res?.data)) {

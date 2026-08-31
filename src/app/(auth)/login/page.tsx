@@ -42,7 +42,7 @@ function LoginForm() {
           // Check if they actually completed onboarding by seeing if they have a center with services
           let hasCompletedOnboarding = false;
           
-          if (user?.managedCenter?.servicesOffered?.length > 0) {
+          if (user?.data?.managedCenter?.servicesOffered?.length > 0) {
             hasCompletedOnboarding = true;
           } else {
             // Import centersService if not already imported, but to avoid import errors we can fetch manually

@@ -24,7 +24,7 @@ export default function OwnerDashboardPage() {
           setUser(userRes.data);
           
           if (userRes.data.managedCenter) {
-            const centerRes = await centersService.getCenterById(userRes.data.managedCenter);
+            const centerRes = await centersService.getCenterById(userRes.data.managedCenter?.id);
             if (centerRes?.data) {
               setCenter(centerRes.data);
             }

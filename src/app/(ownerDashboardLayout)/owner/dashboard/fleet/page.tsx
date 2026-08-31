@@ -27,9 +27,9 @@ export default function FleetPage() {
     try {
       setLoading(true);
       const user = await authService.getMe();
-      if (user?.managedCenter?.id) {
-        const center = await centersService.getCenterById(user.managedCenter.id);
-        setVehicles(center.rentalFleet || []);
+      if (user?.data?.managedCenter?.id) {
+        const center = await centersService.getCenterById(user.data.managedCenter.id);
+        setVehicles(center.data?.rentalFleet || []);
       }
     } catch (error) {
       console.error("Error fetching fleet:", error);

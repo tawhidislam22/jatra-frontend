@@ -22,14 +22,14 @@ export default function CenterProfilePage() {
     try {
       setLoading(true);
       const user = await authService.getMe();
-      if (user?.managedCenter?.id) {
-        const centerData = await centersService.getCenterById(user.managedCenter.id);
-        setCenter(centerData);
+      if (user?.data?.managedCenter?.id) {
+        const centerData = await centersService.getCenterById(user.data.managedCenter.id);
+        setCenter(centerData.data);
         setFormData({
-          name: centerData.name || "",
-          address: centerData.address || "",
-          phone: centerData.phone || "",
-          services: centerData.services || [],
+          name: centerData.data?.name || "",
+          address: centerData.data?.address || "",
+          phone: centerData.data?.phone || "",
+          services: centerData.data?.servicesOffered || [],
         });
       }
     } catch (error) {
