@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { Car, LayoutDashboard, Building2, CalendarDays, Wrench, Users, AlertTriangle, CreditCard, Star, Settings, LogOut, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { authService } from "@/services/auth.service";
-import { User } from "@/types/jatra";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useState } from "react";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 const dummyNotifications = [
   { id: 1, title: "New Booking Request #1029", time: "5m ago", read: false },
@@ -27,14 +27,14 @@ function NotificationsPopover() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className="relative text-gray-500 hover:text-primary transition-colors focus:outline-none">
+        <button className="relative text-muted-foreground hover:text-primary transition-colors focus:outline-none">
           <Bell className="h-5 w-5" />
           <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
         </button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0 shadow-lg border-2 border-muted/20">
         <div className="p-4 border-b bg-card">
-          <h3 className="font-bold text-sm text-[#1a1a1a]">Notifications</h3>
+          <h3 className="font-bold text-sm text-foreground">Notifications</h3>
           <div className="flex gap-2 mt-3">
             <button onClick={() => setFilter('all')} className={`text-[10px] uppercase tracking-wider px-3 py-1 rounded-full font-bold transition-all ${filter === 'all' ? 'bg-primary text-white shadow-sm' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>All</button>
             <button onClick={() => setFilter('unread')} className={`text-[10px] uppercase tracking-wider px-3 py-1 rounded-full font-bold transition-all ${filter === 'unread' ? 'bg-primary text-white shadow-sm' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>Unread</button>
@@ -46,7 +46,7 @@ function NotificationsPopover() {
             filtered.map((n) => (
               <div key={n.id} className={`p-4 border-b last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer ${!n.read ? 'bg-primary/5' : ''}`}>
                 <div className="flex justify-between items-start gap-4">
-                  <p className={`text-xs leading-tight ${!n.read ? 'font-bold text-[#1a1a1a]' : 'font-medium text-muted-foreground'}`}>{n.title}</p>
+                  <p className={`text-xs leading-tight ${!n.read ? 'font-bold text-foreground' : 'font-medium text-muted-foreground'}`}>{n.title}</p>
                   {!n.read && <span className="w-2 h-2 rounded-full bg-primary mt-1 shrink-0" />}
                 </div>
                 <p className="text-[10px] text-muted-foreground mt-2 font-medium">{n.time}</p>
@@ -66,65 +66,8 @@ export default function OwnerDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await authService.getMe();
-        if (response && response.data) {
-          const fetchedUser = response.data;
-          if (fetchedUser.role !== 'OWNER') {
-            router.push('/dashboard');
-          } else {
-            // They are OWNER, but did they finish onboarding?
-            try {
-              const token = localStorage.getItem("token");
-              const centersRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/automotive-centers?adminId=${fetchedUser.id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-              }).then(r => r.json());
-              
-              if (centersRes?.data?.length > 0) {
-                const center = centersRes.data[0];
-                if (center.servicesOffered && center.servicesOffered.length > 0) {
-                  setUser(fetchedUser);
-                  return; // All good!
-                }
-              }
-              // Not finished
-              router.push('/onboarding');
-            } catch (e) {
-              console.error(e);
-              setUser(fetchedUser); // Fallback to allowing access
-            }
-          }
-        } else {
-          router.push('/login');
-        }
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
-        router.push('/login');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchUser();
-  }, [router]);
-
-  const handleLogout = async () => {
-    try {
-      await authService.logout();
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-      }
-      router.push('/login');
-    } catch (error) {
-      console.error("Failed to logout:", error);
-    }
-  };
+  const { user, logout } = useAuth();
 
   const isActive = (path: string) => {
     if (path === '/owner/dashboard' && pathname !== '/owner/dashboard') return false;
@@ -135,10 +78,6 @@ export default function OwnerDashboardLayout({
     const active = isActive(path);
     return `w-full justify-start transition-all ${active ? 'bg-primary/10 text-primary font-bold' : 'hover:bg-primary/10 hover:text-primary font-medium text-muted-foreground'}`;
   };
-
-  if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground font-medium">Loading...</p></div>;
-  }
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-background">
@@ -206,18 +145,22 @@ export default function OwnerDashboardLayout({
         
         {/* Sidebar Bottom: User Profile & Logout */}
         <div className="p-4 border-t flex items-center justify-between bg-card">
-          <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold shrink-0">
-              {user?.fullName?.charAt(0)?.toUpperCase() || "U"}
+          <div className="flex items-center gap-3 overflow-hidden" suppressHydrationWarning>
+            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold shrink-0" suppressHydrationWarning>
+              {(user?.fullName || user?.name || user?.email || "O").charAt(0).toUpperCase()}
             </div>
-            <div className="flex flex-col overflow-hidden">
-              <span className="font-bold text-sm leading-tight text-[#1a1a1a] truncate">{user?.fullName || "Loading..."}</span>
-              <span className="text-[10px] text-muted-foreground font-medium truncate">{user?.role || "Welcome"}</span>
+            <div className="flex flex-col overflow-hidden" suppressHydrationWarning>
+              <span className="font-bold text-sm leading-tight text-foreground truncate" suppressHydrationWarning>
+                {user?.fullName || user?.name || user?.email?.split('@')[0] || "Owner"}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider truncate" suppressHydrationWarning>
+                {user?.role || "OWNER"}
+              </span>
             </div>
           </div>
           
           <Button 
-            onClick={handleLogout} 
+            onClick={() => logout()} 
             variant="ghost" 
             size="icon" 
             className="shrink-0 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-xl h-10 w-10 transition-colors"
@@ -230,7 +173,8 @@ export default function OwnerDashboardLayout({
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Top Navbar */}
-        <header className="h-16 border-b bg-card flex items-center justify-end px-8 shrink-0">
+        <header className="h-16 border-b bg-card flex items-center justify-end px-8 gap-4 shrink-0">
+          <ThemeToggle />
           <NotificationsPopover />
         </header>
 

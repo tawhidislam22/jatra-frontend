@@ -36,10 +36,10 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="bg-white rounded-sm shadow-2xl p-8 md:p-12 border-t-4 border-primary">
+    <div className="bg-card rounded-sm shadow-2xl p-8 md:p-12 border-t-4 border-primary">
       <div className="space-y-2 text-center mb-8">
-        <h1 className="text-3xl font-extrabold text-[#1a1a1a] uppercase tracking-tight">Forgot Password</h1>
-        <p className="text-gray-500 font-medium text-sm">Enter your email address to receive a reset OTP</p>
+        <h1 className="text-3xl font-extrabold text-foreground uppercase tracking-tight">Forgot Password</h1>
+        <p className="text-muted-foreground font-medium text-sm">Enter your email address to receive a reset OTP</p>
       </div>
       
       {error && (
@@ -56,7 +56,7 @@ export default function ForgotPasswordPage() {
       
       <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
         <div className="space-y-3">
-          <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400">Email Address</Label>
+          <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground">Email Address</Label>
           <Input 
             id="email" 
             type="email" 
@@ -65,22 +65,22 @@ export default function ForgotPasswordPage() {
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+            className="w-full bg-muted/40 border border-border text-foreground p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
           />
         </div>
         
         <Button 
           type="submit" 
-          className="w-full h-14 bg-primary hover:bg-[#1a1a1a] text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] transition-all duration-300 flex items-center justify-center gap-2 mt-4" 
+          className="w-full h-14 bg-primary hover:bg-zinc-800 text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] transition-all duration-300 flex items-center justify-center gap-2 mt-4" 
           disabled={loading || !!success}
         >
           {loading ? "Processing..." : "Send Reset OTP"} <ArrowRight className="w-4 h-4" />
         </Button>
       </form>
       
-      <div className="text-center text-sm font-medium text-gray-500 mt-8 pt-6 border-t border-gray-100">
+      <div className="text-center text-sm font-medium text-muted-foreground mt-8 pt-6 border-t border-border">
         Remember your password?{" "}
-        <Link href="/login" className="font-extrabold text-primary hover:text-[#1a1a1a] uppercase tracking-wider transition-colors ml-1">
+        <Link href="/login" className="font-extrabold text-primary hover:text-foreground uppercase tracking-wider transition-colors ml-1">
           Sign In
         </Link>
       </div>

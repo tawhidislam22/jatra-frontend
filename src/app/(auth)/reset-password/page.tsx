@@ -67,7 +67,7 @@ function ResetPasswordForm() {
       
       <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
         <div className="space-y-3">
-          <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400">Email Address</Label>
+          <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground">Email Address</Label>
           <Input 
             id="email" 
             type="email" 
@@ -76,12 +76,12 @@ function ResetPasswordForm() {
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+            className="w-full bg-muted/40 border border-border text-foreground p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
           />
         </div>
 
         <div className="space-y-3">
-          <Label htmlFor="otp" className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400">OTP</Label>
+          <Label htmlFor="otp" className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground">OTP</Label>
           <Input 
             id="otp" 
             type="text" 
@@ -90,12 +90,12 @@ function ResetPasswordForm() {
             autoComplete="off"
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
-            className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+            className="w-full bg-muted/40 border border-border text-foreground p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
           />
         </div>
 
         <div className="space-y-3">
-          <Label htmlFor="newPassword" className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400">New Password</Label>
+          <Label htmlFor="newPassword" className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground">New Password</Label>
           <div className="relative">
             <Input 
               id="newPassword" 
@@ -105,12 +105,12 @@ function ResetPasswordForm() {
               autoComplete="new-password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-6 pr-12 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+              className="w-full bg-muted/40 border border-border text-foreground p-6 pr-12 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground focus:outline-none"
             >
               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
@@ -119,7 +119,7 @@ function ResetPasswordForm() {
         
         <Button 
           type="submit" 
-          className="w-full h-14 bg-primary hover:bg-[#1a1a1a] text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] transition-all duration-300 flex items-center justify-center gap-2 mt-4" 
+          className="w-full h-14 bg-primary hover:bg-zinc-800 text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] transition-all duration-300 flex items-center justify-center gap-2 mt-4" 
           disabled={loading || !!success}
         >
           {loading ? "Processing..." : "Reset Password"} <ArrowRight className="w-4 h-4" />
@@ -131,19 +131,19 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="bg-white rounded-sm shadow-2xl p-8 md:p-12 border-t-4 border-primary">
+    <div className="bg-card rounded-sm shadow-2xl p-8 md:p-12 border-t-4 border-primary">
       <div className="space-y-2 text-center mb-8">
-        <h1 className="text-3xl font-extrabold text-[#1a1a1a] uppercase tracking-tight">Reset Password</h1>
-        <p className="text-gray-500 font-medium text-sm">Enter the OTP sent to your email and your new password</p>
+        <h1 className="text-3xl font-extrabold text-foreground uppercase tracking-tight">Reset Password</h1>
+        <p className="text-muted-foreground font-medium text-sm">Enter the OTP sent to your email and your new password</p>
       </div>
       
       <Suspense fallback={<div className="text-center p-4">Loading...</div>}>
         <ResetPasswordForm />
       </Suspense>
       
-      <div className="text-center text-sm font-medium text-gray-500 mt-8 pt-6 border-t border-gray-100">
+      <div className="text-center text-sm font-medium text-muted-foreground mt-8 pt-6 border-t border-border">
         Remember your password?{" "}
-        <Link href="/login" className="font-extrabold text-primary hover:text-[#1a1a1a] uppercase tracking-wider transition-colors ml-1">
+        <Link href="/login" className="font-extrabold text-primary hover:text-foreground uppercase tracking-wider transition-colors ml-1">
           Sign In
         </Link>
       </div>

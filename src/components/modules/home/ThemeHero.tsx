@@ -35,12 +35,12 @@ export function ThemeHero() {
                   Ride
                 </span> With Us
               </h1>
-              <p className="text-lg text-gray-400 max-w-lg leading-relaxed font-medium">
+              <p className="text-lg text-muted-foreground max-w-lg leading-relaxed font-medium">
                 Find the perfect car for your next adventure. We offer a wide range of premium vehicles at affordable prices with 24/7 support.
               </p>
               <div className="flex flex-wrap gap-6 pt-4">
                 <Link href="/vehicles">
-                  <Button className="h-14 px-8 bg-primary hover:bg-white text-white hover:text-black rounded-sm font-bold uppercase tracking-[2px] transition-all duration-300 flex items-center gap-3">
+                  <Button className="h-14 px-8 bg-primary hover:bg-card text-white hover:text-black rounded-sm font-bold uppercase tracking-[2px] transition-all duration-300 flex items-center gap-3">
                     Book A Car <ArrowRight className="w-5 h-5" />
                   </Button>
                 </Link>
@@ -81,7 +81,7 @@ export function ThemeHero() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 items-end">
               {/* Pick Up Location */}
               <div className="flex flex-col">
-                <label className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400 mb-3 flex items-center gap-2">
+                <label className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground mb-3 flex items-center gap-2">
                   <MapPin className="w-3 h-3 text-primary" /> Pick-Up Location
                 </label>
                 <select className="w-full bg-[#111] border border-[#333] text-white p-4 font-semibold outline-none text-sm appearance-none cursor-pointer focus:border-primary transition-colors rounded-sm">
@@ -94,7 +94,7 @@ export function ThemeHero() {
               
               {/* Drop Off Location */}
               <div className="flex flex-col">
-                <label className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400 mb-3 flex items-center gap-2">
+                <label className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground mb-3 flex items-center gap-2">
                   <MapPin className="w-3 h-3 text-primary" /> Drop-Off Location
                 </label>
                 <select className="w-full bg-[#111] border border-[#333] text-white p-4 font-semibold outline-none text-sm appearance-none cursor-pointer focus:border-primary transition-colors rounded-sm">
@@ -107,7 +107,7 @@ export function ThemeHero() {
               
               {/* Pick Up Date */}
               <div className="flex flex-col">
-                <label className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400 mb-3 flex items-center gap-2">
+                <label className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground mb-3 flex items-center gap-2">
                   <Calendar className="w-3 h-3 text-primary" /> Pick-Up Date
                 </label>
                 <Input type="date" className="bg-[#111] border border-[#333] p-4 h-[54px] rounded-sm text-white font-semibold shadow-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary transition-colors" />
@@ -115,7 +115,7 @@ export function ThemeHero() {
               
               {/* Drop Off Date */}
               <div className="flex flex-col">
-                <label className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400 mb-3 flex items-center gap-2">
+                <label className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground mb-3 flex items-center gap-2">
                   <Calendar className="w-3 h-3 text-primary" /> Drop-Off Date
                 </label>
                 <Input type="date" className="bg-[#111] border border-[#333] p-4 h-[54px] rounded-sm text-white font-semibold shadow-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary transition-colors" />
@@ -124,7 +124,7 @@ export function ThemeHero() {
               {/* Search Button */}
               <div>
                 <Link href="/vehicles">
-                  <Button className="w-full h-[54px] bg-primary text-white hover:bg-white hover:text-black rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] transition-colors duration-300">
+                  <Button className="w-full h-[54px] bg-primary text-white hover:bg-card hover:text-black rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] transition-colors duration-300">
                     Find Car
                   </Button>
                 </Link>

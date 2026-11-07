@@ -19,7 +19,7 @@ export default function EmergencyPage() {
   };
 
   return (
-    <div className="bg-[#f4f4f4] min-h-screen pb-32">
+    <div className="bg-muted/40 min-h-screen pb-32">
       {/* Zauto Style Header */}
       <div 
         className="py-24 mb-16 relative overflow-hidden bg-fixed bg-center bg-cover"
@@ -46,7 +46,7 @@ export default function EmergencyPage() {
             viewport={{ once: true }}
           >
             <h3 className="text-white font-bold uppercase tracking-[3px] text-xs flex items-center gap-2">
-              <span className="w-8 h-[2px] bg-white"></span>
+              <span className="w-8 h-[2px] bg-card"></span>
               24/7 Support
             </h3>
             <h1 className="text-5xl md:text-7xl font-extrabold text-white uppercase tracking-tight flex items-center gap-4">
@@ -59,7 +59,7 @@ export default function EmergencyPage() {
 
       <div className="container mx-auto px-4 max-w-4xl">
         <motion.div 
-          className="bg-white border-t-4 border-[#E60000] rounded-sm p-8 md:p-12 text-center shadow-xl relative overflow-hidden"
+          className="bg-card border-t-4 border-[#E60000] rounded-sm p-8 md:p-12 text-center shadow-xl relative overflow-hidden"
           initial={{ opacity: 0, scale: 0.95, y: 50 }}
           whileInView={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -69,17 +69,17 @@ export default function EmergencyPage() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-[#E60000]/5 rounded-bl-[100px] z-0" />
 
           <div className="relative z-10">
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4 text-[#1a1a1a] uppercase">
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4 text-foreground uppercase">
               Immediate Response Required?
             </h2>
-            <p className="text-lg text-gray-500 mb-8 max-w-2xl mx-auto font-medium">
+            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto font-medium">
               If you are in a life-threatening situation, please call your local authorities immediately.
               For roadside assistance, breakdowns, or accidents, request our emergency response team below.
             </p>
 
             {requested ? (
               <motion.div 
-                className="bg-[#f9f9f9] rounded-sm p-10 border border-gray-200 shadow-sm max-w-lg mx-auto"
+                className="bg-muted/40 rounded-sm p-10 border border-border shadow-sm max-w-lg mx-auto"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4 }}
@@ -87,8 +87,8 @@ export default function EmergencyPage() {
                 <div className="w-20 h-20 bg-[#E60000]/10 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-[#E60000]/30">
                    <PhoneCall className="w-8 h-8 text-[#E60000] animate-bounce" />
                 </div>
-                <h3 className="text-3xl font-extrabold text-[#1a1a1a] mb-2 uppercase tracking-tight">Team Dispatched!</h3>
-                <p className="text-gray-500 mb-8 font-medium text-[15px]">
+                <h3 className="text-3xl font-extrabold text-foreground mb-2 uppercase tracking-tight">Team Dispatched!</h3>
+                <p className="text-muted-foreground mb-8 font-medium text-[15px]">
                   Our nearest emergency response unit is on the way to your location.
                 </p>
                 <div className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-[#E60000] bg-[#E60000]/10 py-4 rounded-sm border border-[#E60000]/20">
@@ -96,37 +96,37 @@ export default function EmergencyPage() {
                   <span>Stay safe. We will call you shortly.</span>
                 </div>
                 <Button 
-                  className="mt-8 bg-transparent border-2 border-gray-300 text-gray-500 hover:bg-[#1a1a1a] hover:text-white hover:border-[#1a1a1a] rounded-sm font-bold uppercase tracking-widest text-[11px] h-12 px-8 transition-colors"
+                  className="mt-8 bg-transparent border-2 border-gray-300 text-muted-foreground hover:bg-zinc-800 hover:text-white hover:border-[#1a1a1a] rounded-sm font-bold uppercase tracking-widest text-[11px] h-12 px-8 transition-colors"
                   onClick={() => setRequested(false)}
                 >
                   Cancel Request
                 </Button>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubmit} className="bg-[#f9f9f9] rounded-sm p-8 border border-gray-200 text-left max-w-2xl mx-auto space-y-6">
+              <form onSubmit={handleSubmit} className="bg-muted/40 rounded-sm p-8 border border-border text-left max-w-2xl mx-auto space-y-6">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-[2px] text-gray-500 mb-3 flex items-center gap-2">
+                  <label className="block text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground mb-3 flex items-center gap-2">
                     <MapPin className="w-3 h-3 text-[#E60000]" /> Your Current Location
                   </label>
                   <input 
-                    className="w-full bg-white border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm focus:border-[#E60000] transition-colors rounded-sm shadow-sm" 
+                    className="w-full bg-card border border-border text-foreground p-4 font-semibold outline-none text-sm focus:border-[#E60000] transition-colors rounded-sm shadow-sm" 
                     placeholder="e.g. Highway 61, near exit 4" 
                     required 
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-[2px] text-gray-500 mb-3 flex items-center gap-2">
+                  <label className="block text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground mb-3 flex items-center gap-2">
                     <AlertTriangle className="w-3 h-3 text-[#E60000]" /> Describe the Issue
                   </label>
                   <textarea 
-                    className="w-full bg-white border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm min-h-[140px] resize-none focus:border-[#E60000] transition-colors rounded-sm shadow-sm" 
+                    className="w-full bg-card border border-border text-foreground p-4 font-semibold outline-none text-sm min-h-[140px] resize-none focus:border-[#E60000] transition-colors rounded-sm shadow-sm" 
                     placeholder="Engine failure, flat tire, accident..." 
                     required
                   />
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full h-14 bg-[#E60000] hover:bg-[#1a1a1a] text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] transition-colors duration-300 shadow-md"
+                  className="w-full h-14 bg-[#E60000] hover:bg-zinc-800 text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] transition-colors duration-300 shadow-md"
                   disabled={loading}
                 >
                   {loading ? "Transmitting..." : "Send SOS Signal"}

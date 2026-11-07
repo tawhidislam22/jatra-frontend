@@ -1,6 +1,8 @@
 import { Toaster } from "@/components/ui/sonner";
 import QueryProviders from "@/providers/QueryProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
+import { AuthProvider } from "@/context/AuthContext";
+import { getServerCurrentUser } from "@/lib/server-auth";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -20,11 +22,13 @@ export const metadata: Metadata = {
   description: "Your premium platform for vehicle rentals, professional maintenance, and on-demand emergency assistance.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialUser = await getServerCurrentUser();
+
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body
@@ -37,8 +41,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProviders>
-            {children}
-            <Toaster position="top-right" richColors />
+            <AuthProvider initialUser={initialUser}>
+              {children}
+              <Toaster position="top-right" richColors />
+            </AuthProvider>
           </QueryProviders>
         </ThemeProvider>
       </body>

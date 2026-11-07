@@ -67,10 +67,10 @@ export default function RegisterOwnerPage() {
   };
 
   return (
-    <div className="bg-white rounded-sm shadow-2xl p-8 md:p-12 border-t-4 border-primary">
+    <div className="bg-card rounded-sm shadow-2xl p-8 md:p-12 border-t-4 border-primary">
       <div className="mb-8">
-        <h1 className="text-3xl uppercase tracking-tight font-extrabold text-[#1a1a1a] mb-2">Register Your Business</h1>
-        <p className="text-gray-500 font-medium">Create an owner account to manage your automotive center</p>
+        <h1 className="text-3xl uppercase tracking-tight font-extrabold text-foreground mb-2">Register Your Business</h1>
+        <p className="text-muted-foreground font-medium">Create an owner account to manage your automotive center</p>
       </div>
 
       {error && (
@@ -81,7 +81,7 @@ export default function RegisterOwnerPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <Label className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400" htmlFor="fullName">Full Name</Label>
+          <Label className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground" htmlFor="fullName">Full Name</Label>
           <Input
             id="fullName"
             name="fullName"
@@ -89,12 +89,12 @@ export default function RegisterOwnerPage() {
             required
             value={formData.fullName}
             onChange={handleChange}
-            className="w-full bg-gray-50 border border-gray-300 shadow-sm hover:border-gray-400 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+            className="w-full bg-muted/40 border border-gray-300 shadow-sm hover:border-gray-400 text-foreground p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
           />
         </div>
 
         <div className="space-y-2">
-          <Label className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400" htmlFor="email">Email</Label>
+          <Label className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground" htmlFor="email">Email</Label>
           <Input
             id="email"
             name="email"
@@ -102,12 +102,12 @@ export default function RegisterOwnerPage() {
             required
             value={formData.email}
             onChange={handleChange}
-            className="w-full bg-gray-50 border border-gray-300 shadow-sm hover:border-gray-400 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+            className="w-full bg-muted/40 border border-gray-300 shadow-sm hover:border-gray-400 text-foreground p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
           />
         </div>
 
         <div className="space-y-2">
-          <Label className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400" htmlFor="phone">Phone Number</Label>
+          <Label className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground" htmlFor="phone">Phone Number</Label>
           <Input
             id="phone"
             name="phone"
@@ -115,12 +115,12 @@ export default function RegisterOwnerPage() {
             required
             value={formData.phone}
             onChange={handleChange}
-            className="w-full bg-gray-50 border border-gray-300 shadow-sm hover:border-gray-400 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+            className="w-full bg-muted/40 border border-gray-300 shadow-sm hover:border-gray-400 text-foreground p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
           />
         </div>
 
         <div className="space-y-2 relative">
-          <Label className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400" htmlFor="password">Password</Label>
+          <Label className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground" htmlFor="password">Password</Label>
           <div className="relative">
             <Input
               id="password"
@@ -129,12 +129,12 @@ export default function RegisterOwnerPage() {
               required
               value={formData.password}
               onChange={handleChange}
-              className="w-full bg-gray-50 border border-gray-300 shadow-sm hover:border-gray-400 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm pr-12"
+              className="w-full bg-muted/40 border border-gray-300 shadow-sm hover:border-gray-400 text-foreground p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm pr-12"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#1a1a1a]"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
@@ -144,7 +144,7 @@ export default function RegisterOwnerPage() {
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-primary hover:bg-[#1a1a1a] text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] h-14"
+          className="w-full bg-primary hover:bg-zinc-800 text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] h-14"
         >
           {isLoading ? "Creating account..." : "Register"}
         </Button>
@@ -154,7 +154,7 @@ export default function RegisterOwnerPage() {
         <Button
           type="button"
           variant="outline"
-          className="w-full bg-white border border-gray-200 hover:bg-gray-50 text-[#1a1a1a] rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] h-14 flex items-center justify-center gap-3"
+          className="w-full bg-card border border-border hover:bg-muted/60 text-foreground rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] h-14 flex items-center justify-center gap-3"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -166,11 +166,11 @@ export default function RegisterOwnerPage() {
         </Button>
       </div>
 
-      <div className="mt-8 pt-8 border-t border-gray-100 flex flex-col space-y-3">
-        <Link href="/login" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors text-center uppercase tracking-wider">
+      <div className="mt-8 pt-8 border-t border-border flex flex-col space-y-3">
+        <Link href="/login" className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors text-center uppercase tracking-wider">
           Already have an account? &rarr; Sign In
         </Link>
-        <Link href="/register" className="text-sm font-bold text-gray-500 hover:text-primary transition-colors text-center uppercase tracking-wider">
+        <Link href="/register" className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors text-center uppercase tracking-wider">
           Looking for car rental? &rarr; Register as Customer
         </Link>
       </div>

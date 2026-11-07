@@ -32,10 +32,10 @@ export function ThemeServices() {
   }, []);
 
   return (
-    <section className="py-24 bg-[#f4f4f4] relative overflow-hidden">
+    <section className="py-24 bg-muted/40 relative overflow-hidden">
       {/* Decorative text background */}
       <motion.div 
-        className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-20 text-[180px] font-black text-[#1a1a1a] opacity-[0.03] select-none z-0 tracking-tighter uppercase whitespace-nowrap pointer-events-none"
+        className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-20 text-[180px] font-black text-foreground opacity-[0.03] select-none z-0 tracking-tighter uppercase whitespace-nowrap pointer-events-none"
         initial={{ opacity: 0, x: 100 }}
         whileInView={{ opacity: 0.03, x: 0 }}
         transition={{ duration: 1 }}
@@ -57,12 +57,12 @@ export function ThemeServices() {
               <span className="w-8 h-[2px] bg-primary"></span>
               Certified Workshops
             </h3>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-[#1a1a1a] uppercase tracking-tight">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-foreground uppercase tracking-tight">
               Top Service <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500">Centers</span>
             </h2>
           </div>
           <Link href="/centers">
-            <Button variant="outline" className="h-12 px-6 border-2 border-[#1a1a1a] text-[#1a1a1a] font-bold uppercase tracking-[2px] text-xs hover:bg-[#1a1a1a] hover:text-white transition-all duration-300 rounded-sm flex items-center gap-2">
+            <Button variant="outline" className="h-12 px-6 border-2 border-[#1a1a1a] text-foreground font-bold uppercase tracking-[2px] text-xs hover:bg-zinc-800 hover:text-white transition-all duration-300 rounded-sm flex items-center gap-2">
               View All Workshops <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>

@@ -1,13 +1,22 @@
 import api from './api';
 import { User } from '../types/jatra';
+import { setClientAuthToken, clearClientAuthToken } from '../lib/auth-cookies';
 
 export const authService = {
   register: async (data: any) => {
     const response = await api.post('/auth/register', data);
+    const token = response.data?.data?.accessToken || response.data?.accessToken || response.data?.token;
+    if (token) {
+      setClientAuthToken(token);
+    }
     return response.data;
   },
   login: async (data: any) => {
     const response = await api.post('/auth/login', data);
+    const token = response.data?.data?.accessToken || response.data?.accessToken || response.data?.token;
+    if (token) {
+      setClientAuthToken(token);
+    }
     return response.data;
   },
   getMe: async () => {
@@ -23,8 +32,12 @@ export const authService = {
     return response.data;
   },
   logout: async () => {
-    const response = await api.post('/auth/logout');
-    return response.data;
+    try {
+      const response = await api.post('/auth/logout');
+      return response.data;
+    } finally {
+      clearClientAuthToken();
+    }
   },
   forgetPassword: async (data: { email: string }) => {
     const response = await api.post('/auth/forget-password', data);
@@ -32,6 +45,10 @@ export const authService = {
   },
   resetPassword: async (data: { email: string, otp: string, newPassword: string }) => {
     const response = await api.post('/auth/reset-password', data);
+    const token = response.data?.data?.accessToken || response.data?.accessToken || response.data?.token;
+    if (token) {
+      setClientAuthToken(token);
+    }
     return response.data;
   },
   changePassword: async (data: { oldPassword: string, newPassword: string }) => {
@@ -40,6 +57,18 @@ export const authService = {
   },
   refreshToken: async () => {
     const response = await api.post('/auth/refresh-token');
+    const token = response.data?.data?.accessToken || response.data?.accessToken || response.data?.token;
+    if (token) {
+      setClientAuthToken(token);
+    }
+    return response.data;
+  },
+  setupPassword: async (data: { email: string, temporaryPassword?: string, newPassword: string }) => {
+    const response = await api.post('/auth/setup-password', data);
+    const token = response.data?.data?.accessToken || response.data?.accessToken || response.data?.token;
+    if (token) {
+      setClientAuthToken(token);
+    }
     return response.data;
   }
 };

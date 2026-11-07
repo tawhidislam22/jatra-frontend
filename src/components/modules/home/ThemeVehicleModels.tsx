@@ -29,7 +29,7 @@ export function ThemeVehicleModels() {
   }, []);
 
   return (
-    <section id="vehicle_models" className="pt-48 pb-24 bg-white">
+    <section id="vehicle_models" className="pt-48 pb-24 bg-card">
       <div className="container mx-auto px-4">
         <motion.div 
           className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6"
@@ -43,13 +43,13 @@ export function ThemeVehicleModels() {
               <span className="w-8 h-[2px] bg-primary"></span>
               Checkout our Fleet
             </h3>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-[#1a1a1a] uppercase tracking-tight">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-foreground uppercase tracking-tight">
               Vehicle <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1a1a1a] to-gray-400">Models</span>
             </h2>
           </div>
           <Button 
             variant="outline" 
-            className="h-12 px-8 border-2 border-[#1a1a1a] text-[#1a1a1a] hover:bg-primary hover:border-primary hover:text-white rounded-sm font-bold uppercase tracking-widest transition-all duration-300"
+            className="h-12 px-8 border-2 border-[#1a1a1a] text-foreground hover:bg-primary hover:border-primary hover:text-white rounded-sm font-bold uppercase tracking-widest transition-all duration-300"
             onClick={() => router.push('/vehicles')}
           >
             View All Cars
@@ -60,7 +60,7 @@ export function ThemeVehicleModels() {
           {vehicles.map((car: any, index: number) => (
             <motion.div 
               key={car.id} 
-              className="group bg-white border border-gray-100 rounded-sm overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 relative"
+              className="group bg-card border border-border rounded-sm overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 relative"
               initial={{ opacity: 0, scale: 0.95, y: 30 }}
               whileInView={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -71,7 +71,7 @@ export function ThemeVehicleModels() {
                 {car.type}
               </div>
               
-              <div className="bg-[#f9f9f9] p-8 aspect-video flex items-center justify-center relative overflow-hidden group-hover:bg-[#1a1a1a] transition-colors duration-500">
+              <div className="bg-muted/40 p-8 aspect-video flex items-center justify-center relative overflow-hidden group-hover:bg-zinc-800 transition-colors duration-500">
                 <img 
                   src={car.images && car.images.length > 0 ? car.images[0] : ""} 
                   alt={`${car.make} ${car.model}`}
@@ -86,27 +86,27 @@ export function ThemeVehicleModels() {
                 </div>
 
                 <div className="mb-6 pt-2">
-                  <h4 className="font-extrabold text-2xl text-[#1a1a1a] mb-1 group-hover:text-primary transition-colors">{car.make} {car.model}</h4>
-                  <span className="text-xs text-gray-500 font-bold tracking-widest uppercase">{car.year} Model</span>
+                  <h4 className="font-extrabold text-2xl text-foreground mb-1 group-hover:text-primary transition-colors">{car.make} {car.model}</h4>
+                  <span className="text-xs text-muted-foreground font-bold tracking-widest uppercase">{car.year} Model</span>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-y-4 gap-x-2 py-4 border-t border-gray-100 mb-6">
-                  <div className="flex items-center gap-2 text-[13px] text-gray-500 font-medium">
+                <div className="grid grid-cols-2 gap-y-4 gap-x-2 py-4 border-t border-border mb-6">
+                  <div className="flex items-center gap-2 text-[13px] text-muted-foreground font-medium">
                     <Users className="w-4 h-4 text-primary" /> {car.features?.find((f: string) => f.includes('Seat')) || '5'} Seats
                   </div>
-                  <div className="flex items-center gap-2 text-[13px] text-gray-500 font-medium">
+                  <div className="flex items-center gap-2 text-[13px] text-muted-foreground font-medium">
                     <Settings className="w-4 h-4 text-primary" /> {car.features?.includes('Automatic') ? 'Auto' : 'Manual'}
                   </div>
-                  <div className="flex items-center gap-2 text-[13px] text-gray-500 font-medium">
+                  <div className="flex items-center gap-2 text-[13px] text-muted-foreground font-medium">
                     <Fuel className="w-4 h-4 text-primary" /> {car.features?.includes('Petrol') ? 'Petrol' : car.features?.includes('Diesel') ? 'Diesel' : 'Petrol'}
                   </div>
-                  <div className="flex items-center gap-2 text-[13px] text-gray-500 font-medium">
+                  <div className="flex items-center gap-2 text-[13px] text-muted-foreground font-medium">
                     <Gauge className="w-4 h-4 text-primary" /> 20K MPG
                   </div>
                 </div>
                 
                 <Button 
-                  className="w-full h-12 bg-transparent border-2 border-gray-200 text-[#1a1a1a] group-hover:border-primary group-hover:bg-primary group-hover:text-white rounded-sm font-bold uppercase tracking-widest text-[11px] transition-all duration-300 flex items-center justify-between px-6"
+                  className="w-full h-12 bg-transparent border-2 border-border text-foreground group-hover:border-primary group-hover:bg-primary group-hover:text-white rounded-sm font-bold uppercase tracking-widest text-[11px] transition-all duration-300 flex items-center justify-between px-6"
                   onClick={() => router.push(`/vehicles/${car.id}`)}
                 >
                   Rent This Car <ArrowRight className="w-4 h-4" />

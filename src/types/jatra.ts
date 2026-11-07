@@ -8,6 +8,9 @@ export interface User {
   status?: string;
   image?: string;
   managedCenter?: AutomotiveCenter;
+  managedCenters?: AutomotiveCenter[];
+  employedAtCenterId?: string;
+  employedAtCenter?: AutomotiveCenter;
 }
 
 export interface AutomotiveCenter {
@@ -17,11 +20,13 @@ export interface AutomotiveCenter {
   latitude: number;
   longitude: number;
   phone?: string;
+  description?: string;
   rating?: number;
   isApproved?: boolean;
   servicesOffered?: string[];
   images?: string[];
   adminId?: string;
+  admin?: User;
   mechanics?: User[];
   rentalFleet?: Vehicle[];
 }

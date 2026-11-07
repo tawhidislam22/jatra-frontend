@@ -27,7 +27,7 @@ export default function ServiceRequestsPage() {
   }, []);
 
   if (loading) {
-    return <div className="p-8 text-center text-gray-500 font-bold uppercase tracking-widest text-sm animate-pulse">Loading Service Requests...</div>;
+    return <div className="p-8 text-center text-muted-foreground font-bold uppercase tracking-widest text-sm animate-pulse">Loading Service Requests...</div>;
   }
 
   return (
@@ -35,7 +35,7 @@ export default function ServiceRequestsPage() {
       <h1 className="text-3xl font-bold mb-6">Service Requests</h1>
       <div className="bg-card border rounded-xl overflow-hidden">
         {requests.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">No service requests found.</div>
+          <div className="p-8 text-center text-muted-foreground">No service requests found.</div>
         ) : (
           <table className="w-full text-left text-sm">
             <thead className="bg-muted/50">

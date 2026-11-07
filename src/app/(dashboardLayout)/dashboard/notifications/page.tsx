@@ -43,10 +43,10 @@ export default function NotificationsPage() {
               </div>
               <div className="flex-1">
                 <div className="flex justify-between items-start mb-1">
-                  <h4 className={`text-sm ${n.read ? 'font-semibold' : 'font-bold text-[#1a1a1a]'}`}>{n.title}</h4>
+                  <h4 className={`text-sm ${n.read ? 'font-semibold' : 'font-bold text-foreground'}`}>{n.title}</h4>
                   <span className="text-[11px] text-muted-foreground whitespace-nowrap ml-4">{n.time}</span>
                 </div>
-                <p className={`text-sm ${n.read ? 'text-muted-foreground' : 'text-[#1a1a1a]'}`}>{n.message}</p>
+                <p className={`text-sm ${n.read ? 'text-muted-foreground' : 'text-foreground'}`}>{n.message}</p>
               </div>
               {!n.read && (
                 <div className="flex items-center ml-4 shrink-0">

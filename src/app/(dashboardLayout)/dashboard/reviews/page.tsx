@@ -64,7 +64,7 @@ export default function MyReviewsPage() {
     <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-[#1a1a1a]">My Reviews</h1>
+          <h1 className="text-3xl font-black tracking-tight text-foreground">My Reviews</h1>
           <p className="text-muted-foreground mt-1 font-medium">Manage and view the feedback you've shared.</p>
         </div>
       </div>
@@ -81,7 +81,7 @@ export default function MyReviewsPage() {
             <div key={review.id} className="bg-card p-6 rounded-2xl border shadow-sm hover:shadow-md transition-shadow">
               <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-4">
                 <div>
-                  <h3 className="font-bold text-lg text-[#1a1a1a]">
+                  <h3 className="font-bold text-lg text-foreground">
                     {review.center?.name 
                       ? review.center.name 
                       : review.rentalBooking?.vehicle 
@@ -107,7 +107,7 @@ export default function MyReviewsPage() {
               {review.comment && (
                 <div className="flex gap-3 bg-muted/30 p-4 rounded-xl border border-muted/50 mt-4">
                   <MessageSquare className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                  <p className="text-sm font-medium text-[#1a1a1a] leading-relaxed italic">
+                  <p className="text-sm font-medium text-foreground leading-relaxed italic">
                     "{review.comment}"
                   </p>
                 </div>
@@ -120,7 +120,7 @@ export default function MyReviewsPage() {
           <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mb-4">
             <Star className="h-8 w-8 text-muted-foreground" />
           </div>
-          <h3 className="text-xl font-bold text-[#1a1a1a] mb-2">No reviews yet</h3>
+          <h3 className="text-xl font-bold text-foreground mb-2">No reviews yet</h3>
           <p className="text-muted-foreground font-medium max-w-md">
             You haven't left any reviews for vehicles or automotive centers. Once you share your feedback, it will appear here.
           </p>

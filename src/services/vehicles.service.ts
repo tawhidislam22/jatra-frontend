@@ -3,7 +3,10 @@ import { Vehicle } from '../types/jatra';
 
 export const vehiclesService = {
   registerVehicle: async (data: any) => {
-    const response = await api.post('/vehicles', data);
+    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
+    const response = await api.post('/vehicles', data, {
+      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined,
+    });
     return response.data;
   },
   getAllVehicles: async (params?: any) => {

@@ -27,7 +27,7 @@ export default function PaymentsPage() {
   }, []);
 
   if (loading) {
-    return <div className="p-8 text-center text-gray-500 font-bold uppercase tracking-widest text-sm animate-pulse">Loading Payments...</div>;
+    return <div className="p-8 text-center text-muted-foreground font-bold uppercase tracking-widest text-sm animate-pulse">Loading Payments...</div>;
   }
 
   return (
@@ -35,7 +35,7 @@ export default function PaymentsPage() {
       <h1 className="text-3xl font-bold mb-6">Payment History</h1>
       <div className="bg-card border rounded-xl overflow-hidden">
         {payments.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">No payment history found.</div>
+          <div className="p-8 text-center text-muted-foreground">No payment history found.</div>
         ) : (
           <table className="w-full text-left text-sm">
             <thead className="bg-muted/50">

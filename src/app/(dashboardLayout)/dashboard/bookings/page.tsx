@@ -27,7 +27,7 @@ export default function BookingsPage() {
   }, []);
 
   if (loading) {
-    return <div className="p-8 text-center text-gray-500 font-bold uppercase tracking-widest text-sm animate-pulse">Loading Bookings...</div>;
+    return <div className="p-8 text-center text-muted-foreground font-bold uppercase tracking-widest text-sm animate-pulse">Loading Bookings...</div>;
   }
 
   return (
@@ -35,7 +35,7 @@ export default function BookingsPage() {
       <h1 className="text-3xl font-bold mb-6">Rental Bookings</h1>
       <div className="bg-card border rounded-xl overflow-hidden">
         {bookings.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">No bookings found.</div>
+          <div className="p-8 text-center text-muted-foreground">No bookings found.</div>
         ) : (
           <table className="w-full text-left text-sm">
             <thead className="bg-muted/50">

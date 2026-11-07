@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 
 export function ThemeAbout() {
   return (
-    <section id="about" className="py-24 bg-[#f4f4f4] relative overflow-hidden">
+    <section id="about" className="py-24 bg-muted/40 relative overflow-hidden">
       {/* Decorative text background */}
       <motion.div 
         className="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-20 text-[200px] font-black text-white opacity-40 select-none z-0 tracking-tighter uppercase whitespace-nowrap"
@@ -64,17 +64,17 @@ export function ThemeAbout() {
                 <span className="w-8 h-[2px] bg-primary"></span>
                 About Our Company
               </h3>
-              <h2 className="text-4xl md:text-6xl font-extrabold text-[#1a1a1a] leading-tight uppercase tracking-tight">
+              <h2 className="text-4xl md:text-6xl font-extrabold text-foreground leading-tight uppercase tracking-tight">
                 Start your engine <br/>
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500">and explore</span>
               </h2>
             </div>
             
-            <p className="text-gray-500 leading-loose font-medium text-[15px]">
+            <p className="text-muted-foreground leading-loose font-medium text-[15px]">
               Jatra is your premium platform for vehicle rentals, professional maintenance, and on-demand emergency assistance. We integrate all automotive needs into a single seamless experience designed for luxury and performance.
             </p>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 py-6 border-t border-b border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 py-6 border-t border-b border-border">
               {[
                 "24/7 Roadside Assistance",
                 "Wide Range of Vehicles",
@@ -94,7 +94,7 @@ export function ThemeAbout() {
                   <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                     <Check className="w-3 h-3 text-primary" strokeWidth={3} />
                   </div>
-                  <span className="font-bold text-[#1a1a1a] text-[13px] uppercase tracking-wide">{feature}</span>
+                  <span className="font-bold text-foreground text-[13px] uppercase tracking-wide">{feature}</span>
                 </motion.div>
               ))}
             </div>

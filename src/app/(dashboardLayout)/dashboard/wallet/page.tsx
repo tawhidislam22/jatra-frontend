@@ -52,7 +52,7 @@ export default function WalletPage() {
                     <p className="text-xs text-muted-foreground">{t.date} &middot; <span className="capitalize">{t.status}</span></p>
                   </div>
                 </div>
-                <div className={`font-bold ${t.type === 'deposit' ? 'text-emerald-600' : 'text-[#1a1a1a]'}`}>
+                <div className={`font-bold ${t.type === 'deposit' ? 'text-emerald-600' : 'text-foreground'}`}>
                   {t.type === 'deposit' ? '+' : ''}{t.amount.toFixed(2)}
                 </div>
               </div>

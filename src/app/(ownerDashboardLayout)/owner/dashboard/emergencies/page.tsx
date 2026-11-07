@@ -3,31 +3,36 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { emergencyService } from "@/services/emergency.service";
-import { authService } from "@/services/auth.service";
+import { useAuth } from "@/context/AuthContext";
 import { centersService } from "@/services/centers.service";
 
 export default function EmergenciesPage() {
+  const { user } = useAuth();
   const [emergencies, setEmergencies] = useState<any[]>([]);
   const [mechanics, setMechanics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMechanics, setSelectedMechanics] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   const loadData = async () => {
     setLoading(true);
     try {
-      const [emergenciesRes, meRes] = await Promise.all([
+      const centerId = user?.managedCenter?.id;
+      const [emergenciesRes, centerRes] = await Promise.all([
         emergencyService.getEmergencies(),
-        authService.getMe()
+        centerId ? centersService.getCenterById(centerId) : (user?.id ? centersService.getAllCenters({ adminId: user.id }) : Promise.resolve(null)),
       ]);
-      setEmergencies(emergenciesRes.data || []);
+
+      const rawEmergencies = emergenciesRes?.data || (Array.isArray(emergenciesRes) ? emergenciesRes : []);
+      setEmergencies(Array.isArray(rawEmergencies) ? rawEmergencies : []);
       
-      if (meRes.data?.managedCenter) {
-        const centerRes = await centersService.getCenterById(meRes.data.managedCenter?.id);
-        setMechanics(centerRes.data?.mechanics || []);
+      if (centerRes?.data) {
+        const centerData = Array.isArray(centerRes.data) ? centerRes.data[0] : centerRes.data;
+        if (centerData?.mechanics) {
+          setMechanics(centerData.mechanics);
+        } else if (centerData?.id) {
+          const detailRes = await centersService.getCenterById(centerData.id);
+          setMechanics(detailRes?.data?.mechanics || []);
+        }
       }
     } catch (error) {
       console.error("Failed to load emergencies", error);
@@ -35,6 +40,12 @@ export default function EmergenciesPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      loadData();
+    }
+  }, [user]);
 
   const handleMechanicSelect = (id: string, mechanicId: string) => {
     setSelectedMechanics(prev => ({ ...prev, [id]: mechanicId }));
@@ -74,34 +85,34 @@ export default function EmergenciesPage() {
       case "CANCELLED":
         return <span className={`${baseClasses} bg-red-100 text-red-700`}>CANCELLED</span>;
       default:
-        return <span className={`${baseClasses} bg-gray-100 text-gray-700`}>{status}</span>;
+        return <span className={`${baseClasses} bg-muted text-gray-700`}>{status}</span>;
     }
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-gray-500 font-bold uppercase tracking-widest text-sm animate-pulse">Loading emergencies...</div>;
+    return <div className="p-8 text-center text-muted-foreground font-bold uppercase tracking-widest text-sm animate-pulse">Loading emergencies...</div>;
   }
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6 text-[#1a1a1a] uppercase tracking-wider">Emergency Assistance</h1>
+      <h1 className="text-3xl font-bold mb-6 text-foreground uppercase tracking-wider">Emergency Assistance</h1>
 
       <div className="bg-card border rounded-xl overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead className="bg-muted/50">
             <tr>
-              <th className="p-4 font-semibold text-[#1a1a1a] uppercase tracking-wider text-xs">Customer</th>
-              <th className="p-4 font-semibold text-[#1a1a1a] uppercase tracking-wider text-xs">Location</th>
-              <th className="p-4 font-semibold text-[#1a1a1a] uppercase tracking-wider text-xs">Issue</th>
-              <th className="p-4 font-semibold text-[#1a1a1a] uppercase tracking-wider text-xs">Status</th>
-              <th className="p-4 font-semibold text-[#1a1a1a] uppercase tracking-wider text-xs">Mechanic</th>
-              <th className="p-4 font-semibold text-[#1a1a1a] uppercase tracking-wider text-xs">Actions</th>
+              <th className="p-4 font-semibold text-foreground uppercase tracking-wider text-xs">Customer</th>
+              <th className="p-4 font-semibold text-foreground uppercase tracking-wider text-xs">Location</th>
+              <th className="p-4 font-semibold text-foreground uppercase tracking-wider text-xs">Issue</th>
+              <th className="p-4 font-semibold text-foreground uppercase tracking-wider text-xs">Status</th>
+              <th className="p-4 font-semibold text-foreground uppercase tracking-wider text-xs">Mechanic</th>
+              <th className="p-4 font-semibold text-foreground uppercase tracking-wider text-xs">Actions</th>
             </tr>
           </thead>
           <tbody>
             {emergencies.length === 0 ? (
               <tr>
-                <td colSpan={6} className="p-8 text-center text-gray-500 font-bold uppercase tracking-widest text-sm">
+                <td colSpan={6} className="p-8 text-center text-muted-foreground font-bold uppercase tracking-widest text-sm">
                   No emergency requests found.
                 </td>
               </tr>
@@ -120,7 +131,7 @@ export default function EmergenciesPage() {
                     {em.mechanic?.fullName ? (
                       <span className="font-medium">{em.mechanic.fullName}</span>
                     ) : (
-                      <span className="text-gray-400">Unassigned</span>
+                      <span className="text-muted-foreground">Unassigned</span>
                     )}
                   </td>
                   <td className="p-4 flex gap-2 items-center">

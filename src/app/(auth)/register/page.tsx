@@ -40,10 +40,10 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="bg-white rounded-sm shadow-2xl p-8 md:p-12 border-t-4 border-primary">
+    <div className="bg-card rounded-sm shadow-2xl p-8 md:p-12 border-t-4 border-primary">
       <div className="space-y-2 text-center mb-8">
-        <h1 className="text-3xl font-extrabold text-[#1a1a1a] uppercase tracking-tight">Create an Account</h1>
-        <p className="text-gray-500 font-medium text-sm">Join Jatra to rent vehicles or book services</p>
+        <h1 className="text-3xl font-extrabold text-foreground uppercase tracking-tight">Create an Account</h1>
+        <p className="text-muted-foreground font-medium text-sm">Join Jatra to rent vehicles or book services</p>
       </div>
       
       {error && (
@@ -54,7 +54,7 @@ export default function RegisterPage() {
       
       <form onSubmit={handleSubmit} className="space-y-5" autoComplete="off">
         <div className="space-y-3">
-          <Label htmlFor="name" className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400">Full Name</Label>
+          <Label htmlFor="name" className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground">Full Name</Label>
           <Input 
             id="name" 
             placeholder="JOHN DOE" 
@@ -62,11 +62,11 @@ export default function RegisterPage() {
             autoComplete="off"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+            className="w-full bg-muted/40 border border-border text-foreground p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
           />
         </div>
         <div className="space-y-3">
-          <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400">Email Address</Label>
+          <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground">Email Address</Label>
           <Input 
             id="email" 
             type="email" 
@@ -75,11 +75,11 @@ export default function RegisterPage() {
             autoComplete="off"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+            className="w-full bg-muted/40 border border-border text-foreground p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
           />
         </div>
         <div className="space-y-3">
-          <Label htmlFor="phone" className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400">Phone Number</Label>
+          <Label htmlFor="phone" className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground">Phone Number</Label>
           <Input 
             id="phone" 
             type="tel" 
@@ -88,11 +88,11 @@ export default function RegisterPage() {
             autoComplete="off"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+            className="w-full bg-muted/40 border border-border text-foreground p-6 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
           />
         </div>
         <div className="space-y-3">
-          <Label htmlFor="password" className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400">Password</Label>
+          <Label htmlFor="password" className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground">Password</Label>
           <div className="relative">
             <Input 
               id="password" 
@@ -101,12 +101,12 @@ export default function RegisterPage() {
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-6 pr-12 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+              className="w-full bg-muted/40 border border-border text-foreground p-6 pr-12 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground focus:outline-none"
             >
               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
@@ -115,7 +115,7 @@ export default function RegisterPage() {
         
         <Button 
           type="submit" 
-          className="w-full h-14 bg-primary hover:bg-[#1a1a1a] text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] transition-all duration-300 flex items-center justify-center gap-2 mt-4" 
+          className="w-full h-14 bg-primary hover:bg-zinc-800 text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] transition-all duration-300 flex items-center justify-center gap-2 mt-4" 
           disabled={loading}
         >
           {loading ? "Creating account..." : "Register"} <ArrowRight className="w-4 h-4" />
@@ -123,17 +123,17 @@ export default function RegisterPage() {
 
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200"></div>
+            <div className="w-full border-t border-border"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-white px-2 text-gray-500 font-medium">Or continue with</span>
+            <span className="bg-card px-2 text-muted-foreground font-medium">Or continue with</span>
           </div>
         </div>
 
         <Button 
           type="button" 
           onClick={() => window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login/google`}
-          className="w-full h-14 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-sm font-extrabold uppercase tracking-[1px] text-[13px] transition-all duration-300 flex items-center justify-center gap-3"
+          className="w-full h-14 bg-card border border-border text-gray-700 hover:bg-muted/60 rounded-sm font-extrabold uppercase tracking-[1px] text-[13px] transition-all duration-300 flex items-center justify-center gap-3"
         >
           <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -145,15 +145,15 @@ export default function RegisterPage() {
         </Button>
       </form>
       
-      <div className="text-center text-sm font-medium text-gray-500 mt-8 pt-6 border-t border-gray-100">
+      <div className="text-center text-sm font-medium text-muted-foreground mt-8 pt-6 border-t border-border">
         Already have an account?{" "}
-        <Link href="/login" className="font-extrabold text-primary hover:text-[#1a1a1a] uppercase tracking-wider transition-colors ml-1">
+        <Link href="/login" className="font-extrabold text-primary hover:text-foreground uppercase tracking-wider transition-colors ml-1">
           Sign In
         </Link>
       </div>
-      <div className="text-center text-xs font-medium text-gray-400 mt-3">
+      <div className="text-center text-xs font-medium text-muted-foreground mt-3">
         Own an automotive business?{" "}
-        <Link href="/register-owner" className="font-bold text-[#1a1a1a] hover:text-primary uppercase tracking-wider transition-colors">
+        <Link href="/register-owner" className="font-bold text-foreground hover:text-primary uppercase tracking-wider transition-colors">
           Register as Owner
         </Link>
       </div>

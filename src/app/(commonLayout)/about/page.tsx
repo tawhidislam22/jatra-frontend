@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 export default function AboutPage() {
   return (
-    <div className="bg-[#f4f4f4] min-h-screen">
+    <div className="bg-muted/40 min-h-screen">
       {/* Zauto Style Header */}
       <div 
         className="py-32 mb-20 relative overflow-hidden bg-fixed bg-center bg-cover"
@@ -87,20 +87,20 @@ export default function AboutPage() {
                 <span className="w-8 h-[2px] bg-primary"></span>
                 Who We Are
               </h3>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-[#1a1a1a] leading-tight uppercase tracking-tight">
+              <h2 className="text-4xl md:text-5xl font-extrabold text-foreground leading-tight uppercase tracking-tight">
                 Redefining the <br/>
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500">Driving Experience</span>
               </h2>
             </div>
             
-            <p className="text-gray-500 leading-loose font-medium text-[15px]">
+            <p className="text-muted-foreground leading-loose font-medium text-[15px]">
               Jatra is the leading premium platform for vehicle rentals, professional maintenance, and on-demand emergency assistance. We integrate all your automotive needs into a single seamless experience designed for luxury, performance, and ultimate peace of mind.
             </p>
-            <p className="text-gray-500 leading-loose font-medium text-[15px]">
+            <p className="text-muted-foreground leading-loose font-medium text-[15px]">
               Whether you are looking to rent a luxury sedan for the weekend or need immediate roadside assistance, our extensive network of certified partners and state-of-the-art digital infrastructure guarantees a frictionless experience.
             </p>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 py-8 border-t border-b border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 py-8 border-t border-b border-border">
               {[
                 "24/7 Roadside Assistance",
                 "Wide Range of Vehicles",
@@ -120,7 +120,7 @@ export default function AboutPage() {
                   <div className="w-6 h-6 rounded-sm bg-primary flex items-center justify-center shrink-0 shadow-md">
                     <Check className="w-3.5 h-3.5 text-white" strokeWidth={4} />
                   </div>
-                  <span className="font-bold text-[#1a1a1a] text-[13px] uppercase tracking-wide">{feature}</span>
+                  <span className="font-bold text-foreground text-[13px] uppercase tracking-wide">{feature}</span>
                 </motion.div>
               ))}
             </div>
@@ -152,7 +152,7 @@ export default function AboutPage() {
               >
                 <stat.icon className="w-12 h-12 text-primary mx-auto mb-4" />
                 <div className="text-5xl font-black text-white mb-2 uppercase">{stat.value}</div>
-                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-[3px]">{stat.label}</div>
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[3px]">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -170,10 +170,10 @@ export default function AboutPage() {
               <span className="w-8 h-[2px] bg-primary"></span>
               The Minds Behind Jatra
             </h3>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-[#1a1a1a] uppercase tracking-tight mb-6">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-foreground uppercase tracking-tight mb-6">
               Our Leadership <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1a1a1a] to-gray-400">Team</span>
             </h2>
-            <p className="text-gray-500 max-w-2xl mx-auto font-medium text-sm leading-loose">
+            <p className="text-muted-foreground max-w-2xl mx-auto font-medium text-sm leading-loose">
               Meet the brilliant minds from the Department of CSE, CUET, who engineered this platform to bridge the gap between technology and modern automotive services.
             </p>
         </motion.div>
@@ -186,26 +186,26 @@ export default function AboutPage() {
           ].map((member, i) => (
             <motion.div 
               key={i} 
-              className="bg-white border border-gray-100 rounded-sm overflow-hidden group hover:shadow-2xl transition-all duration-500"
+              className="bg-card border border-border rounded-sm overflow-hidden group hover:shadow-2xl transition-all duration-500"
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: i * 0.15 }}
               viewport={{ once: true }}
             >
-              <div className="h-64 bg-[#f9f9f9] flex items-center justify-center relative overflow-hidden">
+              <div className="h-64 bg-muted/40 flex items-center justify-center relative overflow-hidden">
                 <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/90 transition-colors duration-500 z-10 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100">
                   <div className="flex gap-4">
-                    <span className="w-10 h-10 bg-white text-primary flex items-center justify-center rounded-sm font-bold cursor-pointer hover:bg-[#1a1a1a] hover:text-white transition-colors">IN</span>
-                    <span className="w-10 h-10 bg-white text-primary flex items-center justify-center rounded-sm font-bold cursor-pointer hover:bg-[#1a1a1a] hover:text-white transition-colors">FB</span>
+                    <span className="w-10 h-10 bg-card text-primary flex items-center justify-center rounded-sm font-bold cursor-pointer hover:bg-zinc-800 hover:text-white transition-colors">IN</span>
+                    <span className="w-10 h-10 bg-card text-primary flex items-center justify-center rounded-sm font-bold cursor-pointer hover:bg-zinc-800 hover:text-white transition-colors">FB</span>
                   </div>
                 </div>
                 {/* Placeholder avatar */}
                 <Users className="w-24 h-24 text-gray-200 group-hover:scale-110 transition-transform duration-500" />
               </div>
-              <div className="p-8 text-center border-t border-gray-100">
-                <h4 className="font-extrabold text-xl text-[#1a1a1a] uppercase tracking-wider mb-2">{member.name}</h4>
+              <div className="p-8 text-center border-t border-border">
+                <h4 className="font-extrabold text-xl text-foreground uppercase tracking-wider mb-2">{member.name}</h4>
                 <div className="text-primary font-bold text-[11px] uppercase tracking-[2px] mb-1">{member.role}</div>
-                <div className="text-gray-400 font-bold text-[10px] uppercase tracking-widest">ID: {member.id}</div>
+                <div className="text-muted-foreground font-bold text-[10px] uppercase tracking-widest">ID: {member.id}</div>
               </div>
             </motion.div>
           ))}

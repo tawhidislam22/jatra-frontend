@@ -122,7 +122,7 @@ export default function CentersPage() {
   };
 
   return (
-    <div className="bg-[#f4f4f4] min-h-screen pb-32">
+    <div className="bg-muted/40 min-h-screen pb-32">
       {/* Zauto Style Header */}
       <div 
         className="py-24 mb-16 relative overflow-hidden bg-fixed bg-center bg-cover"
@@ -153,7 +153,7 @@ export default function CentersPage() {
             <h1 className="text-5xl md:text-7xl font-extrabold text-white uppercase tracking-tight">
               Service <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500">Centers</span>
             </h1>
-            <p className="text-gray-400 max-w-xl font-medium text-lg leading-relaxed mt-4">
+            <p className="text-muted-foreground max-w-xl font-medium text-lg leading-relaxed mt-4">
               Find top-rated workshops and certified mechanics near you. We partner with the best to keep your vehicle running smoothly.
             </p>
           </motion.div>
@@ -162,18 +162,18 @@ export default function CentersPage() {
 
       <div className="container mx-auto px-4">
         {/* Filters and Controls */}
-        <div className="mb-12 bg-white p-6 rounded-md border border-gray-100 shadow-sm flex flex-col lg:flex-row gap-6 items-end justify-between">
+        <div className="mb-12 bg-card p-6 rounded-md border border-border shadow-sm flex flex-col lg:flex-row gap-6 items-end justify-between">
           
           <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Search Bar */}
             <div className="flex flex-col gap-2 lg:col-span-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Search Workshops</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Search Workshops</label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <input 
                   type="text" 
                   placeholder="Search by Name or Location..."
-                  className="w-full pl-10 pr-4 py-3 bg-[#f9f9f9] border border-gray-200 rounded-sm outline-none focus:border-primary transition-colors text-sm font-medium"
+                  className="w-full pl-10 pr-4 py-3 bg-muted/40 border border-border rounded-sm outline-none focus:border-primary transition-colors text-sm font-medium"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -182,10 +182,10 @@ export default function CentersPage() {
             
             {/* Sort & Limit */}
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Sort & Display</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Sort & Display</label>
               <div className="flex items-center gap-4">
                 <select 
-                  className="flex-1 px-4 py-3 bg-[#f9f9f9] border border-gray-200 rounded-sm outline-none focus:border-primary transition-colors text-sm font-bold uppercase tracking-widest text-[#1a1a1a]"
+                  className="flex-1 px-4 py-3 bg-muted/40 border border-border rounded-sm outline-none focus:border-primary transition-colors text-sm font-bold uppercase tracking-widest text-foreground"
                   onChange={handleSortChange}
                   value={sortBy === "rating" ? "highest_rated" : sortBy === "name" && sortOrder === "asc" ? "a_z" : "z_a"}
                 >
@@ -195,7 +195,7 @@ export default function CentersPage() {
                 </select>
                 
                 <select 
-                  className="w-24 px-4 py-3 bg-[#f9f9f9] border border-gray-200 rounded-sm outline-none focus:border-primary transition-colors text-sm font-bold text-[#1a1a1a]"
+                  className="w-24 px-4 py-3 bg-muted/40 border border-border rounded-sm outline-none focus:border-primary transition-colors text-sm font-bold text-foreground"
                   value={limit}
                   onChange={(e) => { setLimit(Number(e.target.value)); setPage(1); }}
                 >
@@ -209,8 +209,8 @@ export default function CentersPage() {
         </div>
 
         {/* Top Info Bar */}
-        <div className="flex justify-between items-center mb-8 border-b border-gray-200 pb-4">
-          <div className="text-gray-500 font-bold uppercase tracking-widest text-sm flex items-center gap-2">
+        <div className="flex justify-between items-center mb-8 border-b border-border pb-4">
+          <div className="text-muted-foreground font-bold uppercase tracking-widest text-sm flex items-center gap-2">
             <SlidersHorizontal className="w-4 h-4" />
             Showing {centers.length > 0 ? (page - 1) * limit + 1 : 0} - {Math.min(page * limit, total)} of {total} Workshops
           </div>
@@ -241,10 +241,10 @@ export default function CentersPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-24 bg-white rounded-md border border-gray-100">
+          <div className="text-center py-24 bg-card rounded-md border border-border">
             <Wrench className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-            <h3 className="text-2xl font-bold text-[#1a1a1a] mb-2">No Workshops Found</h3>
-            <p className="text-gray-500 font-medium">Try adjusting your search to find what you're looking for.</p>
+            <h3 className="text-2xl font-bold text-foreground mb-2">No Workshops Found</h3>
+            <p className="text-muted-foreground font-medium">Try adjusting your search to find what you're looking for.</p>
             <button 
               onClick={() => { setSearchTerm(""); setPage(1); }}
               className="mt-6 px-6 py-3 bg-primary text-white font-bold uppercase tracking-widest text-xs rounded-sm hover:bg-orange-600 transition-colors"
@@ -260,14 +260,14 @@ export default function CentersPage() {
             <button 
               onClick={() => handlePageChange(1)} 
               disabled={page === 1}
-              className="w-10 h-10 flex items-center justify-center rounded-sm border border-gray-200 bg-white text-gray-500 hover:bg-primary hover:text-white hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-10 h-10 flex items-center justify-center rounded-sm border border-border bg-card text-muted-foreground hover:bg-primary hover:text-white hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               <ChevronsLeft className="w-4 h-4" />
             </button>
             <button 
               onClick={() => handlePageChange(Math.max(1, page - 1))} 
               disabled={page === 1}
-              className="w-10 h-10 flex items-center justify-center rounded-sm border border-gray-200 bg-white text-gray-500 hover:bg-primary hover:text-white hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-10 h-10 flex items-center justify-center rounded-sm border border-border bg-card text-muted-foreground hover:bg-primary hover:text-white hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -281,8 +281,8 @@ export default function CentersPage() {
                   num === page 
                     ? "bg-primary text-white border-primary" 
                     : num === "..." 
-                      ? "border-transparent bg-transparent text-gray-400 cursor-default" 
-                      : "border-gray-200 bg-white text-gray-600 hover:bg-primary/10 hover:text-primary hover:border-primary/20"
+                      ? "border-transparent bg-transparent text-muted-foreground cursor-default" 
+                      : "border-border bg-card text-muted-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/20"
                 }`}
               >
                 {num}
@@ -292,14 +292,14 @@ export default function CentersPage() {
             <button 
               onClick={() => handlePageChange(Math.min(totalPages, page + 1))} 
               disabled={page === totalPages}
-              className="w-10 h-10 flex items-center justify-center rounded-sm border border-gray-200 bg-white text-gray-500 hover:bg-primary hover:text-white hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-10 h-10 flex items-center justify-center rounded-sm border border-border bg-card text-muted-foreground hover:bg-primary hover:text-white hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
             <button 
               onClick={() => handlePageChange(totalPages)} 
               disabled={page === totalPages}
-              className="w-10 h-10 flex items-center justify-center rounded-sm border border-gray-200 bg-white text-gray-500 hover:bg-primary hover:text-white hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-10 h-10 flex items-center justify-center rounded-sm border border-border bg-card text-muted-foreground hover:bg-primary hover:text-white hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               <ChevronsRight className="w-4 h-4" />
             </button>

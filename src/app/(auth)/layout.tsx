@@ -24,7 +24,7 @@ export default function AuthLayout({
       {/* Brand Header */}
       <div className="relative z-10 mb-8 mt-8 flex flex-col items-center">
         <Link href="/" className="flex gap-2 items-center mb-4 group">
-          <div className="bg-primary p-3 rounded-sm text-white group-hover:bg-white group-hover:text-primary transition-colors duration-300 shadow-[0_0_15px_rgba(230,0,0,0.5)]">
+          <div className="bg-primary p-3 rounded-sm text-white group-hover:bg-card group-hover:text-primary transition-colors duration-300 shadow-[0_0_15px_rgba(230,0,0,0.5)]">
             <Car className="h-8 w-8" />
           </div>
           <span className="font-black text-4xl tracking-tighter text-white uppercase">JATRA</span>

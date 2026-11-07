@@ -23,29 +23,31 @@ export default function EarningsPage() {
       ]);
 
       let rentalSum = 0;
-      const rentalTx = (bookingsRes.data || []).map((b: any) => {
-        if (b.status === 'COMPLETED') rentalSum += (b.totalPrice || 0);
+      const rawBookings = bookingsRes?.data || (Array.isArray(bookingsRes) ? bookingsRes : []);
+      const rentalTx = (Array.isArray(rawBookings) ? rawBookings : []).map((b: any) => {
+        if (b.status === 'COMPLETED') rentalSum += (b.totalAmount || b.totalPrice || 0);
         return {
-          id: b._id,
+          id: b.id || b._id,
           type: 'Rental',
-          customer: b.user?.fullName || 'Customer',
-          amount: b.totalPrice || 0,
+          customer: b.customer?.fullName || b.customer?.name || b.user?.fullName || 'Customer',
+          amount: b.totalAmount || b.totalPrice || 0,
           status: b.status,
-          date: new Date(b.createdAt)
+          date: new Date(b.createdAt || Date.now())
         };
       });
 
       let serviceSum = 0;
-      const serviceTx = (servicesRes.data || []).map((s: any) => {
+      const rawServices = servicesRes?.data || (Array.isArray(servicesRes) ? servicesRes : []);
+      const serviceTx = (Array.isArray(rawServices) ? rawServices : []).map((s: any) => {
         const cost = s.estimatedCost || 0;
         if (s.status === 'COMPLETED') serviceSum += cost;
         return {
-          id: s._id,
+          id: s.id || s._id,
           type: 'Service',
-          customer: s.customer?.fullName || 'Customer',
+          customer: s.customer?.fullName || s.customer?.name || 'Customer',
           amount: cost,
           status: s.status,
-          date: new Date(s.createdAt)
+          date: new Date(s.createdAt || Date.now())
         };
       });
 
@@ -72,51 +74,51 @@ export default function EarningsPage() {
       case "CANCELLED":
         return <span className={`${baseClasses} bg-red-100 text-red-700`}>CANCELLED</span>;
       default:
-        return <span className={`${baseClasses} bg-gray-100 text-gray-700`}>{status}</span>;
+        return <span className={`${baseClasses} bg-muted text-gray-700`}>{status}</span>;
     }
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-gray-500 font-bold uppercase tracking-widest text-sm animate-pulse">Loading earnings...</div>;
+    return <div className="p-8 text-center text-muted-foreground font-bold uppercase tracking-widest text-sm animate-pulse">Loading earnings...</div>;
   }
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6 text-[#1a1a1a] uppercase tracking-wider">Earnings</h1>
+      <h1 className="text-3xl font-bold mb-6 text-foreground uppercase tracking-wider">Earnings</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-sm border p-6 shadow-sm">
+        <div className="bg-card rounded-sm border p-6 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-green-100 rounded-full text-green-600">
               <DollarSign className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-500 uppercase tracking-widest">Total Revenue</p>
-              <p className="text-3xl font-black text-[#1a1a1a]">${summary.total.toFixed(2)}</p>
+              <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Total Revenue</p>
+              <p className="text-3xl font-black text-foreground">${summary.total.toFixed(2)}</p>
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-sm border p-6 shadow-sm">
+        <div className="bg-card rounded-sm border p-6 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-blue-100 rounded-full text-blue-600">
               <Truck className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-500 uppercase tracking-widest">Rental Income</p>
-              <p className="text-3xl font-black text-[#1a1a1a]">${summary.rental.toFixed(2)}</p>
+              <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Rental Income</p>
+              <p className="text-3xl font-black text-foreground">${summary.rental.toFixed(2)}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-sm border p-6 shadow-sm">
+        <div className="bg-card rounded-sm border p-6 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-purple-100 rounded-full text-purple-600">
               <Wrench className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-500 uppercase tracking-widest">Service Income</p>
-              <p className="text-3xl font-black text-[#1a1a1a]">${summary.service.toFixed(2)}</p>
+              <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Service Income</p>
+              <p className="text-3xl font-black text-foreground">${summary.service.toFixed(2)}</p>
             </div>
           </div>
         </div>
@@ -126,17 +128,17 @@ export default function EarningsPage() {
         <table className="w-full text-left border-collapse">
           <thead className="bg-muted/50">
             <tr>
-              <th className="p-4 font-semibold text-[#1a1a1a] uppercase tracking-wider text-xs">Type</th>
-              <th className="p-4 font-semibold text-[#1a1a1a] uppercase tracking-wider text-xs">Customer</th>
-              <th className="p-4 font-semibold text-[#1a1a1a] uppercase tracking-wider text-xs">Amount</th>
-              <th className="p-4 font-semibold text-[#1a1a1a] uppercase tracking-wider text-xs">Status</th>
-              <th className="p-4 font-semibold text-[#1a1a1a] uppercase tracking-wider text-xs">Date</th>
+              <th className="p-4 font-semibold text-foreground uppercase tracking-wider text-xs">Type</th>
+              <th className="p-4 font-semibold text-foreground uppercase tracking-wider text-xs">Customer</th>
+              <th className="p-4 font-semibold text-foreground uppercase tracking-wider text-xs">Amount</th>
+              <th className="p-4 font-semibold text-foreground uppercase tracking-wider text-xs">Status</th>
+              <th className="p-4 font-semibold text-foreground uppercase tracking-wider text-xs">Date</th>
             </tr>
           </thead>
           <tbody>
             {transactions.length === 0 ? (
               <tr>
-                <td colSpan={5} className="p-8 text-center text-gray-500 font-bold uppercase tracking-widest text-sm">
+                <td colSpan={5} className="p-8 text-center text-muted-foreground font-bold uppercase tracking-widest text-sm">
                   No transactions found.
                 </td>
               </tr>

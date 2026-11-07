@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 export default function ContactPage() {
   return (
-    <div className="bg-[#f4f4f4] min-h-screen pb-32">
+    <div className="bg-muted/40 min-h-screen pb-32">
       {/* Zauto Style Header */}
       <div 
         className="py-24 mb-16 relative overflow-hidden bg-fixed bg-center bg-cover"
@@ -52,39 +52,39 @@ export default function ContactPage() {
             viewport={{ once: true }}
           >
             <div>
-              <h2 className="text-3xl font-extrabold text-[#1a1a1a] uppercase tracking-tight mb-6">
+              <h2 className="text-3xl font-extrabold text-foreground uppercase tracking-tight mb-6">
                 Contact Info
               </h2>
-              <p className="text-gray-500 font-medium leading-loose text-sm mb-8">
+              <p className="text-muted-foreground font-medium leading-loose text-sm mb-8">
                 Have a question or need assistance? Our support team is ready to help you with your vehicle rental and service needs.
               </p>
               
               <ul className="space-y-8">
                 <li className="flex items-start gap-4 group">
-                  <div className="w-14 h-14 bg-white border border-gray-200 group-hover:border-primary group-hover:bg-primary transition-colors flex items-center justify-center shrink-0 rounded-sm shadow-sm">
+                  <div className="w-14 h-14 bg-card border border-border group-hover:border-primary group-hover:bg-primary transition-colors flex items-center justify-center shrink-0 rounded-sm shadow-sm">
                     <MapPin className="text-primary group-hover:text-white transition-colors h-6 w-6" />
                   </div>
                   <div className="pt-1">
-                    <h4 className="font-bold text-[#1a1a1a] uppercase tracking-wider text-sm mb-1">Our Location</h4>
-                    <span className="text-gray-500 font-medium text-sm leading-relaxed">Department of CSE, CUET<br/>Chattogram-4349, Bangladesh</span>
+                    <h4 className="font-bold text-foreground uppercase tracking-wider text-sm mb-1">Our Location</h4>
+                    <span className="text-muted-foreground font-medium text-sm leading-relaxed">Department of CSE, CUET<br/>Chattogram-4349, Bangladesh</span>
                   </div>
                 </li>
                 <li className="flex items-start gap-4 group">
-                  <div className="w-14 h-14 bg-white border border-gray-200 group-hover:border-primary group-hover:bg-primary transition-colors flex items-center justify-center shrink-0 rounded-sm shadow-sm">
+                  <div className="w-14 h-14 bg-card border border-border group-hover:border-primary group-hover:bg-primary transition-colors flex items-center justify-center shrink-0 rounded-sm shadow-sm">
                     <Phone className="text-primary group-hover:text-white transition-colors h-6 w-6" />
                   </div>
                   <div className="pt-1">
-                    <h4 className="font-bold text-[#1a1a1a] uppercase tracking-wider text-sm mb-1">Call Us</h4>
-                    <span className="text-gray-500 font-medium text-sm">+880 123 456 7890</span>
+                    <h4 className="font-bold text-foreground uppercase tracking-wider text-sm mb-1">Call Us</h4>
+                    <span className="text-muted-foreground font-medium text-sm">+880 123 456 7890</span>
                   </div>
                 </li>
                 <li className="flex items-start gap-4 group">
-                  <div className="w-14 h-14 bg-white border border-gray-200 group-hover:border-primary group-hover:bg-primary transition-colors flex items-center justify-center shrink-0 rounded-sm shadow-sm">
+                  <div className="w-14 h-14 bg-card border border-border group-hover:border-primary group-hover:bg-primary transition-colors flex items-center justify-center shrink-0 rounded-sm shadow-sm">
                     <Mail className="text-primary group-hover:text-white transition-colors h-6 w-6" />
                   </div>
                   <div className="pt-1">
-                    <h4 className="font-bold text-[#1a1a1a] uppercase tracking-wider text-sm mb-1">Email Us</h4>
-                    <span className="text-gray-500 font-medium text-sm">support@jatra.com</span>
+                    <h4 className="font-bold text-foreground uppercase tracking-wider text-sm mb-1">Email Us</h4>
+                    <span className="text-muted-foreground font-medium text-sm">support@jatra.com</span>
                   </div>
                 </li>
               </ul>
@@ -99,59 +99,59 @@ export default function ContactPage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            <div className="bg-white rounded-sm shadow-xl p-8 md:p-12 border-t-4 border-primary">
-              <h3 className="text-2xl font-extrabold text-[#1a1a1a] uppercase tracking-tight mb-8">
+            <div className="bg-card rounded-sm shadow-xl p-8 md:p-12 border-t-4 border-primary">
+              <h3 className="text-2xl font-extrabold text-foreground uppercase tracking-tight mb-8">
                 Send a Message
               </h3>
               <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-[2px] text-gray-400 mb-2">
+                    <label className="block text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground mb-2">
                       Your Name
                     </label>
                     <input 
                       type="text" 
-                      className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+                      className="w-full bg-muted/40 border border-border text-foreground p-4 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
                       placeholder="JOHN DOE"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-[2px] text-gray-400 mb-2">
+                    <label className="block text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground mb-2">
                       Email Address
                     </label>
                     <input 
                       type="email" 
-                      className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+                      className="w-full bg-muted/40 border border-border text-foreground p-4 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
                       placeholder="JOHN@EXAMPLE.COM"
                       required
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-[2px] text-gray-400 mb-2">
+                  <label className="block text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground mb-2">
                     Subject
                   </label>
                   <input 
                     type="text" 
-                    className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+                    className="w-full bg-muted/40 border border-border text-foreground p-4 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
                     placeholder="HOW CAN WE HELP?"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-[2px] text-gray-400 mb-2">
+                  <label className="block text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground mb-2">
                     Message
                   </label>
                   <textarea 
-                    className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm min-h-[150px] resize-none focus:border-primary transition-colors rounded-sm"
+                    className="w-full bg-muted/40 border border-border text-foreground p-4 font-semibold outline-none text-sm min-h-[150px] resize-none focus:border-primary transition-colors rounded-sm"
                     placeholder="WRITE YOUR MESSAGE HERE..."
                     required
                   />
                 </div>
                 <Button 
                   type="submit" 
-                  className="h-14 px-10 bg-primary hover:bg-[#1a1a1a] text-white rounded-sm font-bold uppercase tracking-[2px] transition-colors duration-300 flex items-center gap-3 text-[13px] mt-4"
+                  className="h-14 px-10 bg-primary hover:bg-zinc-800 text-white rounded-sm font-bold uppercase tracking-[2px] transition-colors duration-300 flex items-center gap-3 text-[13px] mt-4"
                 >
                   Send Message <ArrowRight className="w-4 h-4" />
                 </Button>

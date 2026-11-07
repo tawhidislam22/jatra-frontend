@@ -36,7 +36,7 @@ export default function MessagesPage() {
                   <h4 className="font-semibold text-sm">{c.name}</h4>
                   <span className="text-[10px] text-muted-foreground">{c.time}</span>
                 </div>
-                <p className={`text-xs truncate ${c.unread ? 'text-[#1a1a1a] font-medium' : 'text-muted-foreground'}`}>{c.lastMessage}</p>
+                <p className={`text-xs truncate ${c.unread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>{c.lastMessage}</p>
               </div>
             ))}
           </div>

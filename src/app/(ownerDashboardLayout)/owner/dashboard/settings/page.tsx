@@ -6,11 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User as UserIcon, Lock, Eye, EyeOff } from "lucide-react";
 import { authService } from "@/services/auth.service";
-import { User } from "@/types/jatra";
+import { useAuth } from "@/context/AuthContext";
 
 export default function OwnerSettingsPage() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, isLoading: loading, refetchUser } = useAuth();
 
   // Profile
   const [fullName, setFullName] = useState("");
@@ -28,22 +27,11 @@ export default function OwnerSettingsPage() {
   const [passwordSuccess, setPasswordSuccess] = useState("");
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await authService.getMe();
-        if (response?.data) {
-          setUser(response.data);
-          setFullName(response.data.fullName || response.data.name || "");
-          setPhone(response.data.phone || "");
-        }
-      } catch (err) {
-        console.error("Failed to fetch user:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, []);
+    if (user) {
+      setFullName(user.fullName || user.name || "");
+      setPhone(user.phone || "");
+    }
+  }, [user]);
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +52,7 @@ export default function OwnerSettingsPage() {
 
   if (loading) {
     return (
-      <div className="p-8 text-center text-gray-500 font-bold uppercase tracking-widest text-sm animate-pulse">
+      <div className="p-8 text-center text-muted-foreground font-bold uppercase tracking-widest text-sm animate-pulse">
         Loading Settings...
       </div>
     );
@@ -81,32 +69,32 @@ export default function OwnerSettingsPage() {
             <div className="w-10 h-10 bg-primary/10 rounded-sm flex items-center justify-center">
               <UserIcon className="w-5 h-5 text-primary" />
             </div>
-            <h2 className="text-xl font-extrabold text-[#1a1a1a] uppercase tracking-tight">Profile Information</h2>
+            <h2 className="text-xl font-extrabold text-foreground uppercase tracking-tight">Profile Information</h2>
           </div>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400">Full Name</Label>
+              <Label className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground">Full Name</Label>
               <Input
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+                className="w-full bg-muted/40 border border-border text-foreground p-4 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400">Email</Label>
+              <Label className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground">Email</Label>
               <Input
                 value={user?.email || ""}
                 disabled
-                className="w-full bg-gray-100 border border-gray-200 text-gray-500 p-4 font-semibold outline-none text-sm rounded-sm cursor-not-allowed"
+                className="w-full bg-muted border border-border text-muted-foreground p-4 font-semibold outline-none text-sm rounded-sm cursor-not-allowed"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400">Phone</Label>
+              <Label className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground">Phone</Label>
               <Input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+                className="w-full bg-muted/40 border border-border text-foreground p-4 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
               />
             </div>
             {profileSuccess && (
@@ -123,43 +111,43 @@ export default function OwnerSettingsPage() {
             <div className="w-10 h-10 bg-primary/10 rounded-sm flex items-center justify-center">
               <Lock className="w-5 h-5 text-primary" />
             </div>
-            <h2 className="text-xl font-extrabold text-[#1a1a1a] uppercase tracking-tight">Change Password</h2>
+            <h2 className="text-xl font-extrabold text-foreground uppercase tracking-tight">Change Password</h2>
           </div>
 
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400">Current Password</Label>
+              <Label className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground">Current Password</Label>
               <div className="relative">
                 <Input
                   type={showOldPassword ? "text" : "password"}
                   value={oldPassword}
                   onChange={(e) => setOldPassword(e.target.value)}
                   required
-                  className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-4 pr-12 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+                  className="w-full bg-muted/40 border border-border text-foreground p-4 pr-12 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowOldPassword(!showOldPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground focus:outline-none"
                 >
                   {showOldPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-[11px] font-bold uppercase tracking-[2px] text-gray-400">New Password</Label>
+              <Label className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground">New Password</Label>
               <div className="relative">
                 <Input
                   type={showNewPassword ? "text" : "password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
-                  className="w-full bg-[#f9f9f9] border border-gray-200 text-[#1a1a1a] p-4 pr-12 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
+                  className="w-full bg-muted/40 border border-border text-foreground p-4 pr-12 font-semibold outline-none text-sm focus:border-primary transition-colors rounded-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground focus:outline-none"
                 >
                   {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -180,7 +168,7 @@ export default function OwnerSettingsPage() {
             <Button
               type="submit"
               disabled={passwordLoading}
-              className="bg-primary hover:bg-[#1a1a1a] text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[11px] h-12 px-8 transition-colors"
+              className="bg-primary hover:bg-zinc-800 text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[11px] h-12 px-8 transition-colors"
             >
               {passwordLoading ? "Changing..." : "Change Password"}
             </Button>

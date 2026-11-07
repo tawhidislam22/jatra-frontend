@@ -115,7 +115,7 @@ export default function CenterDetailsPage() {
 
   if (loading) {
     return (
-      <div className="bg-[#f4f4f4] min-h-screen pt-24 pb-32 flex justify-center items-center">
+      <div className="bg-muted/40 min-h-screen pt-24 pb-32 flex justify-center items-center">
         <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
@@ -123,7 +123,7 @@ export default function CenterDetailsPage() {
 
   if (!center) {
     return (
-      <div className="bg-[#f4f4f4] min-h-screen pt-24 pb-32 flex justify-center items-center">
+      <div className="bg-muted/40 min-h-screen pt-24 pb-32 flex justify-center items-center">
         <div className="text-xl font-bold">Center not found</div>
       </div>
     );
@@ -134,7 +134,7 @@ export default function CenterDetailsPage() {
     : "https://images.unsplash.com/photo-1613214149922-f1809c99b414?auto=format&fit=crop&q=80";
 
   return (
-    <div className="bg-[#f4f4f4] min-h-screen pb-32">
+    <div className="bg-muted/40 min-h-screen pb-32">
       {/* Zauto Style Header */}
       <div 
         className="bg-[#1a1a1a] py-24 mb-16 relative overflow-hidden bg-fixed bg-center bg-cover"
@@ -162,13 +162,13 @@ export default function CenterDetailsPage() {
                 {center.name}
               </h1>
               <div className="flex flex-wrap gap-6 mt-4">
-                <span className="text-xs text-gray-400 font-bold tracking-widest uppercase flex items-center">
+                <span className="text-xs text-muted-foreground font-bold tracking-widest uppercase flex items-center">
                   <MapPin className="w-4 h-4 mr-2 text-primary" /> {center.address}
                 </span>
-                <span className="text-xs text-gray-400 font-bold tracking-widest uppercase flex items-center">
+                <span className="text-xs text-muted-foreground font-bold tracking-widest uppercase flex items-center">
                   <Phone className="w-4 h-4 mr-2 text-primary" /> {center.phone}
                 </span>
-                <span className="text-xs text-gray-400 font-bold tracking-widest uppercase flex items-center">
+                <span className="text-xs text-muted-foreground font-bold tracking-widest uppercase flex items-center">
                   <Star className="w-4 h-4 mr-2 text-primary fill-primary" /> {center.rating} / 5.0 Rating
                 </span>
               </div>
@@ -183,45 +183,45 @@ export default function CenterDetailsPage() {
           {/* Services & Info */}
           <div className="lg:col-span-2 space-y-12">
             <div>
-              <h4 className="text-2xl font-extrabold text-[#1a1a1a] uppercase tracking-tight mb-6 flex items-center gap-3">
+              <h4 className="text-2xl font-extrabold text-foreground uppercase tracking-tight mb-6 flex items-center gap-3">
                 <Wrench className="w-6 h-6 text-primary" /> Available Services
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {(center.servicesOffered || []).map((service: string, i: number) => (
-                  <div key={i} className="bg-white p-4 border border-gray-200 rounded-sm shadow-sm flex items-center gap-3">
+                  <div key={i} className="bg-card p-4 border border-border rounded-sm shadow-sm flex items-center gap-3">
                     <div className="w-8 h-8 bg-primary/10 rounded-sm flex items-center justify-center shrink-0">
                       {getServiceIcon(service)}
                     </div>
-                    <span className="font-bold text-[#1a1a1a] text-sm uppercase tracking-wide">{service}</span>
+                    <span className="font-bold text-foreground text-sm uppercase tracking-wide">{service}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="bg-white p-8 border border-gray-200 rounded-sm shadow-sm">
-              <h4 className="text-xl font-extrabold text-[#1a1a1a] uppercase tracking-tight mb-4">About this Center</h4>
-              <p className="text-gray-500 font-medium leading-loose text-sm">
-                This center is equipped with state-of-the-art diagnostic tools and certified mechanics to ensure your vehicle receives the highest standard of care. We use genuine parts and provide a warranty on all our services. Experience premium automotive care with quick turnaround times.
+            <div className="bg-card p-8 border border-border rounded-sm shadow-sm">
+              <h4 className="text-xl font-extrabold text-foreground uppercase tracking-tight mb-4">About this Center</h4>
+              <p className="text-muted-foreground font-medium leading-loose text-sm whitespace-pre-line">
+                {center.description || "This center is equipped with state-of-the-art diagnostic tools and certified mechanics to ensure your vehicle receives the highest standard of care. We use genuine parts and provide a warranty on all our services. Experience premium automotive care with quick turnaround times."}
               </p>
             </div>
           </div>
 
           {/* Booking Widget */}
           <div className="relative">
-            <div className="bg-white rounded-sm shadow-xl p-8 border-t-4 border-primary sticky top-32 border border-gray-100">
-              <h4 className="text-2xl font-extrabold text-[#1a1a1a] uppercase tracking-tight mb-6">Book an Appointment</h4>
+            <div className="bg-card rounded-sm shadow-xl p-8 border-t-4 border-primary sticky top-32 border border-border">
+              <h4 className="text-2xl font-extrabold text-foreground uppercase tracking-tight mb-6">Book an Appointment</h4>
               
               {booked ? (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/30">
                     <CheckCircle2 className="w-8 h-8 text-emerald-500" />
                   </div>
-                  <h3 className="text-xl font-black text-[#1a1a1a] mb-2 uppercase tracking-wide">Booking Confirmed!</h3>
-                  <p className="text-gray-600 mb-6 font-medium text-xs">
+                  <h3 className="text-xl font-black text-foreground mb-2 uppercase tracking-wide">Booking Confirmed!</h3>
+                  <p className="text-muted-foreground mb-6 font-medium text-xs">
                     Your appointment has been successfully scheduled. We will contact you shortly to confirm the details.
                   </p>
                   <Button 
-                    className="w-full bg-transparent border-2 border-gray-200 text-gray-700 hover:bg-[#1a1a1a] hover:text-white hover:border-[#1a1a1a] rounded-sm font-bold uppercase tracking-widest text-[11px] h-12 transition-colors"
+                    className="w-full bg-transparent border-2 border-border text-gray-700 hover:bg-zinc-800 hover:text-white hover:border-[#1a1a1a] rounded-sm font-bold uppercase tracking-widest text-[11px] h-12 transition-colors"
                     onClick={() => setBooked(false)}
                   >
                     Book Another Service
@@ -230,11 +230,11 @@ export default function CenterDetailsPage() {
               ) : (
                 <form onSubmit={handleBooking} className="space-y-6">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-[2px] text-gray-500 mb-2 flex items-center gap-2">
+                    <label className="block text-[10px] font-bold uppercase tracking-[2px] text-muted-foreground mb-2 flex items-center gap-2">
                       <CheckCircle2 className="w-3 h-3 text-primary" /> Your Vehicle
                     </label>
                     <select 
-                      className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm appearance-none focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm cursor-pointer mb-6"
+                      className="w-full bg-muted/40 border border-border text-foreground p-4 font-semibold outline-none text-sm appearance-none focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm cursor-pointer mb-6"
                       value={selectedVehicle}
                       onChange={(e) => setSelectedVehicle(e.target.value)}
                       required
@@ -245,11 +245,11 @@ export default function CenterDetailsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-[2px] text-gray-500 mb-2 flex items-center gap-2">
+                    <label className="block text-[10px] font-bold uppercase tracking-[2px] text-muted-foreground mb-2 flex items-center gap-2">
                       <Wrench className="w-3 h-3 text-primary" /> Service Type
                     </label>
                     <select 
-                      className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm appearance-none focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm cursor-pointer"
+                      className="w-full bg-muted/40 border border-border text-foreground p-4 font-semibold outline-none text-sm appearance-none focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm cursor-pointer"
                       value={selectedService}
                       onChange={(e) => setSelectedService(e.target.value)}
                     >
@@ -262,24 +262,24 @@ export default function CenterDetailsPage() {
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-[2px] text-gray-500 mb-2 flex items-center gap-2">
+                      <label className="block text-[10px] font-bold uppercase tracking-[2px] text-muted-foreground mb-2 flex items-center gap-2">
                         <Calendar className="w-3 h-3 text-primary" /> Date
                       </label>
                       <input 
                         type="date" 
-                        className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm"
+                        className="w-full bg-muted/40 border border-border text-foreground p-4 font-semibold outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm"
                         required
                         value={date}
                         onChange={(e) => setDate(e.target.value)}
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-[2px] text-gray-500 mb-2 flex items-center gap-2">
+                      <label className="block text-[10px] font-bold uppercase tracking-[2px] text-muted-foreground mb-2 flex items-center gap-2">
                         <Clock className="w-3 h-3 text-primary" /> Time
                       </label>
                       <input 
                         type="time" 
-                        className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm"
+                        className="w-full bg-muted/40 border border-border text-foreground p-4 font-semibold outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm"
                         required
                         value={time}
                         onChange={(e) => setTime(e.target.value)}
@@ -288,11 +288,11 @@ export default function CenterDetailsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-[2px] text-gray-500 mb-2 flex items-center gap-2">
+                    <label className="block text-[10px] font-bold uppercase tracking-[2px] text-muted-foreground mb-2 flex items-center gap-2">
                       <AlertTriangle className="w-3 h-3 text-primary" /> Issue Description
                     </label>
                     <textarea 
-                      className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm min-h-[100px] resize-none focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm" 
+                      className="w-full bg-muted/40 border border-border text-foreground p-4 font-semibold outline-none text-sm min-h-[100px] resize-none focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm" 
                       placeholder="Briefly describe the issue..." 
                       required
                       value={issueDescription}
@@ -304,7 +304,7 @@ export default function CenterDetailsPage() {
 
                   <Button 
                     type="submit" 
-                    className="w-full h-14 bg-primary hover:bg-[#1a1a1a] text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] transition-colors duration-300 mt-2 shadow-lg"
+                    className="w-full h-14 bg-primary hover:bg-zinc-800 text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] transition-colors duration-300 mt-2 shadow-lg"
                     disabled={bookingLoading}
                   >
                     {bookingLoading ? "Processing..." : "Confirm Booking"}

@@ -32,7 +32,7 @@ export default function DashboardOverview() {
               <p className="font-semibold">Service completed for Ford Mustang</p>
               <p className="text-sm text-muted-foreground">Sep 20</p>
             </div>
-            <span className="bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 px-2 py-1 rounded text-xs font-medium">Completed</span>
+            <span className="bg-muted text-gray-700 dark:bg-gray-800 dark:text-gray-300 px-2 py-1 rounded text-xs font-medium">Completed</span>
           </div>
         </div>
       </div>

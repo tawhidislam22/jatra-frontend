@@ -65,7 +65,14 @@ export default function VehicleDetailsPage() {
       
       const diffTime = Math.abs(rDate.getTime() - pDate.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
-      const totalAmount = diffDays * vehicle.pricePerDay;
+      
+      const price = Number(vehicle.pricePerDay);
+      if (isNaN(price) || price < 1) {
+        setError("This vehicle does not have a valid daily price set.");
+        setBookingLoading(false);
+        return;
+      }
+      const totalAmount = diffDays * price;
 
       // 1. Create the rental booking
       const bookingResponse = await bookingsService.createBooking({
@@ -97,7 +104,7 @@ export default function VehicleDetailsPage() {
 
   if (loading) {
     return (
-      <div className="bg-[#f4f4f4] min-h-screen pt-24 pb-32 flex justify-center items-center">
+      <div className="bg-muted/40 min-h-screen pt-24 pb-32 flex justify-center items-center">
         <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
@@ -105,14 +112,14 @@ export default function VehicleDetailsPage() {
 
   if (!vehicle) {
     return (
-      <div className="bg-[#f4f4f4] min-h-screen pt-24 pb-32 flex justify-center items-center">
+      <div className="bg-muted/40 min-h-screen pt-24 pb-32 flex justify-center items-center">
         <div className="text-xl font-bold">Vehicle not found</div>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#f4f4f4] min-h-screen pb-32">
+    <div className="bg-muted/40 min-h-screen pb-32">
       {/* Zauto Style Header */}
       <div 
         className="py-24 mb-16 relative overflow-hidden bg-fixed bg-center bg-cover"
@@ -150,10 +157,10 @@ export default function VehicleDetailsPage() {
               </h1>
               
               <div className="flex flex-wrap gap-6 mt-4">
-                <span className="text-xs text-gray-400 font-bold tracking-widest uppercase flex items-center bg-white/10 px-3 py-1.5 rounded-sm">
+                <span className="text-xs text-muted-foreground font-bold tracking-widest uppercase flex items-center bg-card/10 px-3 py-1.5 rounded-sm">
                   {vehicle.year} Model
                 </span>
-                <span className="text-xs text-gray-400 font-bold tracking-widest uppercase flex items-center bg-white/10 px-3 py-1.5 rounded-sm">
+                <span className="text-xs text-muted-foreground font-bold tracking-widest uppercase flex items-center bg-card/10 px-3 py-1.5 rounded-sm">
                   {vehicle.type}
                 </span>
               </div>
@@ -169,16 +176,18 @@ export default function VehicleDetailsPage() {
           <div className="lg:col-span-2 space-y-12">
             
             <motion.div 
-              className="bg-white rounded-sm shadow-xl p-12 border-t-4 border-primary flex items-center justify-center min-h-[400px]"
+              className="bg-card rounded-sm shadow-xl p-12 border-t-4 border-primary flex items-center justify-center min-h-[400px]"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6 }}
             >
-              <img 
-                src={vehicle.images && vehicle.images.length > 0 ? vehicle.images[0] : ""} 
-                alt={`${vehicle.make} ${vehicle.model}`} 
-                className="w-full max-w-2xl h-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500" 
-              />
+              {vehicle.images && vehicle.images.length > 0 && (
+                <img 
+                  src={vehicle.images[0]} 
+                  alt={`${vehicle.make} ${vehicle.model}`} 
+                  className="w-full max-w-2xl h-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500" 
+                />
+              )}
             </motion.div>
 
             <motion.div 
@@ -193,11 +202,11 @@ export default function VehicleDetailsPage() {
                 { icon: Fuel, label: "Fuel Type", value: vehicle.features?.includes('Petrol') ? 'Petrol' : vehicle.features?.includes('Diesel') ? 'Diesel' : 'Petrol' },
                 { icon: Gauge, label: "Mileage", value: "Unlimited" },
               ].map((spec, i) => (
-                <div key={i} className="bg-white p-6 border border-gray-200 rounded-sm shadow-sm flex flex-col items-center text-center gap-3">
+                <div key={i} className="bg-card p-6 border border-border rounded-sm shadow-sm flex flex-col items-center text-center gap-3">
                   <spec.icon className="w-8 h-8 text-primary" />
                   <div>
-                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{spec.label}</div>
-                    <div className="font-extrabold text-[#1a1a1a] text-sm uppercase">{spec.value}</div>
+                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{spec.label}</div>
+                    <div className="font-extrabold text-foreground text-sm uppercase">{spec.value}</div>
                   </div>
                 </div>
               ))}
@@ -208,16 +217,16 @@ export default function VehicleDetailsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <h4 className="text-2xl font-extrabold text-[#1a1a1a] uppercase tracking-tight mb-6 flex items-center gap-3">
+              <h4 className="text-2xl font-extrabold text-foreground uppercase tracking-tight mb-6 flex items-center gap-3">
                 <CarFront className="w-6 h-6 text-primary" /> Features Included
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {(vehicle.features || []).map((feature: string, i: number) => (
-                  <div key={i} className="bg-white p-4 border border-gray-200 rounded-sm shadow-sm flex items-center gap-3">
+                  <div key={i} className="bg-card p-4 border border-border rounded-sm shadow-sm flex items-center gap-3">
                     <div className="w-8 h-8 bg-primary/10 rounded-sm flex items-center justify-center shrink-0">
                       {getFeatureIcon(feature)}
                     </div>
-                    <span className="font-bold text-[#1a1a1a] text-sm uppercase tracking-wide">{feature}</span>
+                    <span className="font-bold text-foreground text-sm uppercase tracking-wide">{feature}</span>
                   </div>
                 ))}
               </div>
@@ -231,16 +240,16 @@ export default function VehicleDetailsPage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <div className="bg-white rounded-sm shadow-xl p-8 border-t-4 border-primary sticky top-32 border border-gray-100">
+            <div className="bg-card rounded-sm shadow-xl p-8 border-t-4 border-primary sticky top-32 border border-border">
               
-              <div className="flex justify-between items-end mb-8 pb-8 border-b border-gray-100">
+              <div className="flex justify-between items-end mb-8 pb-8 border-b border-border">
                 <div>
-                  <h4 className="text-2xl font-extrabold text-[#1a1a1a] uppercase tracking-tight mb-1">Reserve Now</h4>
-                  <p className="text-xs text-gray-500 font-bold tracking-widest uppercase">Select your dates</p>
+                  <h4 className="text-2xl font-extrabold text-foreground uppercase tracking-tight mb-1">Reserve Now</h4>
+                  <p className="text-xs text-muted-foreground font-bold tracking-widest uppercase">Select your dates</p>
                 </div>
                 <div className="text-right">
                   <div className="text-3xl font-black text-primary">${vehicle.pricePerDay}</div>
-                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-[2px]">Per Day</div>
+                  <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-[2px]">Per Day</div>
                 </div>
               </div>
               
@@ -249,12 +258,12 @@ export default function VehicleDetailsPage() {
                   <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/30">
                     <CheckCircle2 className="w-8 h-8 text-emerald-500" />
                   </div>
-                  <h3 className="text-xl font-black text-[#1a1a1a] mb-2 uppercase tracking-wide">Reservation Sent!</h3>
-                  <p className="text-gray-600 mb-6 font-medium text-xs leading-loose">
+                  <h3 className="text-xl font-black text-foreground mb-2 uppercase tracking-wide">Reservation Sent!</h3>
+                  <p className="text-muted-foreground mb-6 font-medium text-xs leading-loose">
                     Your rental request has been received. Our team will contact you shortly to confirm the vehicle availability and arrange pickup.
                   </p>
                   <Button 
-                    className="w-full bg-transparent border-2 border-gray-200 text-gray-700 hover:bg-[#1a1a1a] hover:text-white hover:border-[#1a1a1a] rounded-sm font-bold uppercase tracking-widest text-[11px] h-12 transition-colors"
+                    className="w-full bg-transparent border-2 border-border text-gray-700 hover:bg-zinc-800 hover:text-white hover:border-[#1a1a1a] rounded-sm font-bold uppercase tracking-widest text-[11px] h-12 transition-colors"
                     onClick={() => setBooked(false)}
                   >
                     Modify Request
@@ -265,24 +274,24 @@ export default function VehicleDetailsPage() {
                   
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-[2px] text-gray-500 mb-2 flex items-center gap-2">
+                      <label className="block text-[10px] font-bold uppercase tracking-[2px] text-muted-foreground mb-2 flex items-center gap-2">
                         <Calendar className="w-3 h-3 text-primary" /> Pickup Date
                       </label>
                       <input 
                         type="date" 
-                        className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm"
+                        className="w-full bg-muted/40 border border-border text-foreground p-4 font-semibold outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm"
                         required
                         value={pickupDate}
                         onChange={(e) => setPickupDate(e.target.value)}
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-[2px] text-gray-500 mb-2 flex items-center gap-2">
+                      <label className="block text-[10px] font-bold uppercase tracking-[2px] text-muted-foreground mb-2 flex items-center gap-2">
                         <Clock className="w-3 h-3 text-primary" /> Pickup Time
                       </label>
                       <input 
                         type="time" 
-                        className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm"
+                        className="w-full bg-muted/40 border border-border text-foreground p-4 font-semibold outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm"
                         required
                         value={pickupTime}
                         onChange={(e) => setPickupTime(e.target.value)}
@@ -290,14 +299,14 @@ export default function VehicleDetailsPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-4 pt-4 border-t border-gray-100">
+                  <div className="space-y-4 pt-4 border-t border-border">
                     <div>
-                      <label className="block text-[10px] font-bold uppercase tracking-[2px] text-gray-500 mb-2 flex items-center gap-2">
+                      <label className="block text-[10px] font-bold uppercase tracking-[2px] text-muted-foreground mb-2 flex items-center gap-2">
                         <Calendar className="w-3 h-3 text-primary" /> Return Date
                       </label>
                       <input 
                         type="date" 
-                        className="w-full bg-gray-50 border border-gray-200 text-[#1a1a1a] p-4 font-semibold outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm"
+                        className="w-full bg-muted/40 border border-border text-foreground p-4 font-semibold outline-none text-sm focus:border-primary focus:ring-1 focus:ring-primary transition-all rounded-sm"
                         required
                         value={returnDate}
                         onChange={(e) => setReturnDate(e.target.value)}
@@ -309,7 +318,7 @@ export default function VehicleDetailsPage() {
                     {error && <div className="text-red-500 text-sm mb-4 font-bold">{error}</div>}
                     <Button 
                       type="submit" 
-                      className="w-full h-14 bg-primary hover:bg-[#1a1a1a] text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] transition-colors duration-300 shadow-lg"
+                      className="w-full h-14 bg-primary hover:bg-zinc-800 text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] transition-colors duration-300 shadow-lg"
                       disabled={bookingLoading}
                     >
                       {bookingLoading ? "Processing..." : "Confirm Rental"}

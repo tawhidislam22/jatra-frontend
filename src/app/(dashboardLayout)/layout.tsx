@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Car, LayoutDashboard, CalendarDays, Wrench, CreditCard, LogOut, Heart, Wallet, MessageSquare, Bell, User as UserIcon, Star } from "lucide-react";
+import { Car, LayoutDashboard, CalendarDays, Wrench, CreditCard, LogOut, Heart, Wallet, MessageSquare, Bell, User as UserIcon, Star, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { authService } from "@/services/auth.service";
-import { User } from "@/types/jatra";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useState, useEffect } from "react";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 const dummyNotifications = [
   { id: 1, title: "New Booking Request #1029", time: "5m ago", read: false },
@@ -27,14 +27,14 @@ function NotificationsPopover() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className="relative text-gray-500 hover:text-primary transition-colors focus:outline-none">
+        <button className="relative text-muted-foreground hover:text-primary transition-colors focus:outline-none">
           <Bell className="h-5 w-5" />
           <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
         </button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0 shadow-lg border-2 border-muted/20">
         <div className="p-4 border-b bg-card">
-          <h3 className="font-bold text-sm text-[#1a1a1a]">Notifications</h3>
+          <h3 className="font-bold text-sm text-foreground">Notifications</h3>
           <div className="flex gap-2 mt-3">
             <button onClick={() => setFilter('all')} className={`text-[10px] uppercase tracking-wider px-3 py-1 rounded-full font-bold transition-all ${filter === 'all' ? 'bg-primary text-white shadow-sm' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>All</button>
             <button onClick={() => setFilter('unread')} className={`text-[10px] uppercase tracking-wider px-3 py-1 rounded-full font-bold transition-all ${filter === 'unread' ? 'bg-primary text-white shadow-sm' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>Unread</button>
@@ -46,7 +46,7 @@ function NotificationsPopover() {
             filtered.map((n) => (
               <div key={n.id} className={`p-4 border-b last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer ${!n.read ? 'bg-primary/5' : ''}`}>
                 <div className="flex justify-between items-start gap-4">
-                  <p className={`text-xs leading-tight ${!n.read ? 'font-bold text-[#1a1a1a]' : 'font-medium text-muted-foreground'}`}>{n.title}</p>
+                  <p className={`text-xs leading-tight ${!n.read ? 'font-bold text-foreground' : 'font-medium text-muted-foreground'}`}>{n.title}</p>
                   {!n.read && <span className="w-2 h-2 rounded-full bg-primary mt-1 shrink-0" />}
                 </div>
                 <p className="text-[10px] text-muted-foreground mt-2 font-medium">{n.time}</p>
@@ -66,57 +66,20 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
+  const { user, logout } = useAuth();
+
+  const isMechanic = user?.role === 'MECHANIC';
+  const isOwner = user?.role === 'OWNER' || user?.role === 'ADMIN' || !!user?.managedCenter;
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await authService.getMe();
-        if (response && response.data) {
-          // Redirect OWNER users to owner dashboard only if they completed onboarding
-          if (response.data.role === 'OWNER') {
-            try {
-              const token = localStorage.getItem("token");
-              const centersRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/automotive-centers?adminId=${response.data.id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-              }).then(r => r.json());
-              
-              if (centersRes?.data?.length > 0) {
-                const center = centersRes.data[0];
-                if (center.servicesOffered && center.servicesOffered.length > 0) {
-                  router.push('/owner/dashboard');
-                  return;
-                }
-              }
-              // If we reach here, they are an ADMIN but haven't finished onboarding
-              router.push('/onboarding');
-              return;
-            } catch (e) {
-              console.error(e);
-            }
-          }
-          setUser(response.data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
-      }
-    };
-    fetchUser();
-  }, [router]);
-
-  const handleLogout = async () => {
-    try {
-      await authService.logout();
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-      }
-      router.push('/login');
-    } catch (error) {
-      console.error("Failed to logout:", error);
+    if (isMechanic && pathname === '/dashboard') {
+      router.replace('/mechanic/dashboard');
+    } else if (isOwner && pathname === '/dashboard') {
+      router.replace('/owner/dashboard');
     }
-  };
+  }, [isMechanic, isOwner, pathname, router]);
 
   const isActive = (path: string) => {
     if (path === '/dashboard' && pathname !== '/dashboard') return false;
@@ -140,6 +103,34 @@ export default function DashboardLayout({
         </Link>
         
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          {isMechanic && (
+            <div className="mb-4 p-3 bg-amber-500/10 rounded-lg border border-amber-500/20 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-600">Mechanic Portal</span>
+                <span className="text-[9px] font-bold bg-amber-600 text-white px-1.5 py-0.5 rounded">MECHANIC</span>
+              </div>
+              <Link href="/mechanic/dashboard">
+                <Button className="w-full bg-amber-600 hover:bg-zinc-800 text-white text-[11px] font-bold uppercase tracking-wider h-9">
+                  <Wrench className="mr-1.5 h-3.5 w-3.5" /> Mechanic Dashboard &rarr;
+                </Button>
+              </Link>
+            </div>
+          )}
+
+          {isOwner && !isMechanic && (
+            <div className="mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-primary">Owner Account</span>
+                <span className="text-[9px] font-bold bg-primary text-white px-1.5 py-0.5 rounded">OWNER</span>
+              </div>
+              <Link href="/owner/dashboard">
+                <Button className="w-full bg-primary hover:bg-zinc-800 text-white text-[11px] font-bold uppercase tracking-wider h-9">
+                  <Building2 className="mr-1.5 h-3.5 w-3.5" /> Owner Dashboard &rarr;
+                </Button>
+              </Link>
+            </div>
+          )}
+
           <Link href="/dashboard">
             <Button variant={isActive("/dashboard") ? "secondary" : "ghost"} className={getLinkClasses("/dashboard")}>
               <LayoutDashboard className="mr-2 h-4 w-4" /> Overview
@@ -194,18 +185,22 @@ export default function DashboardLayout({
         
         {/* Sidebar Bottom: User Profile & Logout */}
         <div className="p-4 border-t flex items-center justify-between bg-card">
-          <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold shrink-0">
-              {user?.fullName?.charAt(0)?.toUpperCase() || "U"}
+          <div className="flex items-center gap-3 overflow-hidden" suppressHydrationWarning>
+            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold shrink-0" suppressHydrationWarning>
+              {(user?.fullName || user?.name || user?.email || "U").charAt(0).toUpperCase()}
             </div>
-            <div className="flex flex-col overflow-hidden">
-              <span className="font-bold text-sm leading-tight text-[#1a1a1a] truncate">{user?.fullName || "Loading..."}</span>
-              <span className="text-[10px] text-muted-foreground font-medium truncate">{user?.role || "Welcome"}</span>
+            <div className="flex flex-col overflow-hidden" suppressHydrationWarning>
+              <span className="font-bold text-sm leading-tight text-foreground truncate" suppressHydrationWarning>
+                {user?.fullName || user?.name || user?.email?.split('@')[0] || "Customer"}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider truncate" suppressHydrationWarning>
+                {user?.role || "CUSTOMER"}
+              </span>
             </div>
           </div>
           
           <Button 
-            onClick={handleLogout} 
+            onClick={() => logout()} 
             variant="ghost" 
             size="icon" 
             className="shrink-0 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-xl h-10 w-10 transition-colors"
@@ -218,7 +213,8 @@ export default function DashboardLayout({
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Top Navbar */}
-        <header className="h-16 border-b bg-card flex items-center justify-end px-8 shrink-0">
+        <header className="h-16 border-b bg-card flex items-center justify-end px-8 gap-4 shrink-0">
+          <ThemeToggle />
           <NotificationsPopover />
         </header>
 
