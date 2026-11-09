@@ -17,67 +17,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
-
-const dummyNotifications = [
-  { id: 1, title: "New Service Request Assigned #SR-882", time: "2m ago", read: false },
-  { id: 2, title: "Workshop schedule updated", time: "1d ago", read: true },
-];
-
-function MechanicNotificationsPopover() {
-  const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
-  
-  const filtered = dummyNotifications.filter(n => {
-    if (filter === 'unread') return !n.read;
-    if (filter === 'read') return n.read;
-    return true;
-  });
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <button className="relative text-muted-foreground hover:text-amber-600 transition-colors focus:outline-none">
-          <Bell className="h-5 w-5" />
-          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-white animate-pulse"></span>
-        </button>
-      </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-0 shadow-lg border-2 border-muted/20">
-        <div className="p-4 border-b bg-card">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-sm text-foreground">Mechanic Alerts</h3>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded">
-              Live
-            </span>
-          </div>
-          <div className="flex gap-2 mt-3">
-            <button onClick={() => setFilter('all')} className={`text-[10px] uppercase tracking-wider px-3 py-1 rounded-full font-bold transition-all ${filter === 'all' ? 'bg-amber-600 text-white shadow-sm' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>All</button>
-            <button onClick={() => setFilter('unread')} className={`text-[10px] uppercase tracking-wider px-3 py-1 rounded-full font-bold transition-all ${filter === 'unread' ? 'bg-amber-600 text-white shadow-sm' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>Unread</button>
-            <button onClick={() => setFilter('read')} className={`text-[10px] uppercase tracking-wider px-3 py-1 rounded-full font-bold transition-all ${filter === 'read' ? 'bg-amber-600 text-white shadow-sm' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>Read</button>
-          </div>
-        </div>
-        <div className="max-h-80 overflow-y-auto bg-card">
-          {filtered.length > 0 ? (
-            filtered.map((n) => (
-              <div key={n.id} className={`p-4 border-b last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer ${!n.read ? 'bg-amber-500/5' : ''}`}>
-                <div className="flex justify-between items-start gap-4">
-                  <p className={`text-xs leading-tight ${!n.read ? 'font-bold text-foreground' : 'font-medium text-muted-foreground'}`}>{n.title}</p>
-                  {!n.read && <span className="w-2 h-2 rounded-full bg-amber-600 mt-1 shrink-0" />}
-                </div>
-                <p className="text-[10px] text-muted-foreground mt-2 font-medium flex items-center gap-1">
-                  <Clock className="w-3 h-3" /> {n.time}
-                </p>
-              </div>
-            ))
-          ) : (
-            <div className="p-8 text-center text-xs font-medium text-muted-foreground">No alerts found.</div>
-          )}
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-}
+import { NotificationsPopover } from "@/components/shared/NotificationsPopover";
 
 export default function MechanicDashboardLayout({
   children,
@@ -220,7 +162,7 @@ export default function MechanicDashboardLayout({
 
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <MechanicNotificationsPopover />
+            <NotificationsPopover badgeClassName="bg-amber-600 text-white" />
             <Link href="/" className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors hidden sm:block">
               Main Site
             </Link>

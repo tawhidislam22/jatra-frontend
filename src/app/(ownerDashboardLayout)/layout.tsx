@@ -1,65 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Car, LayoutDashboard, Building2, CalendarDays, Wrench, Users, CreditCard, Star, Settings, LogOut, Bell } from "lucide-react";
+import { Car, LayoutDashboard, Building2, CalendarDays, Wrench, Users, CreditCard, Star, Settings, LogOut, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useState } from "react";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
-
-const dummyNotifications = [
-  { id: 1, title: "New Booking Request #1029", time: "5m ago", read: false },
-  { id: 2, title: "Payment Successful for Toyota Camry", time: "1h ago", read: false },
-  { id: 3, title: "Profile details updated", time: "2d ago", read: true },
-];
-
-function NotificationsPopover() {
-  const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
-  
-  const filtered = dummyNotifications.filter(n => {
-    if (filter === 'unread') return !n.read;
-    if (filter === 'read') return n.read;
-    return true;
-  });
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <button className="relative text-muted-foreground hover:text-primary transition-colors focus:outline-none">
-          <Bell className="h-5 w-5" />
-          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-        </button>
-      </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-0 shadow-lg border-2 border-muted/20">
-        <div className="p-4 border-b bg-card">
-          <h3 className="font-bold text-sm text-foreground">Notifications</h3>
-          <div className="flex gap-2 mt-3">
-            <button onClick={() => setFilter('all')} className={`text-[10px] uppercase tracking-wider px-3 py-1 rounded-full font-bold transition-all ${filter === 'all' ? 'bg-primary text-white shadow-sm' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>All</button>
-            <button onClick={() => setFilter('unread')} className={`text-[10px] uppercase tracking-wider px-3 py-1 rounded-full font-bold transition-all ${filter === 'unread' ? 'bg-primary text-white shadow-sm' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>Unread</button>
-            <button onClick={() => setFilter('read')} className={`text-[10px] uppercase tracking-wider px-3 py-1 rounded-full font-bold transition-all ${filter === 'read' ? 'bg-primary text-white shadow-sm' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>Read</button>
-          </div>
-        </div>
-        <div className="max-h-80 overflow-y-auto bg-card">
-          {filtered.length > 0 ? (
-            filtered.map((n) => (
-              <div key={n.id} className={`p-4 border-b last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer ${!n.read ? 'bg-primary/5' : ''}`}>
-                <div className="flex justify-between items-start gap-4">
-                  <p className={`text-xs leading-tight ${!n.read ? 'font-bold text-foreground' : 'font-medium text-muted-foreground'}`}>{n.title}</p>
-                  {!n.read && <span className="w-2 h-2 rounded-full bg-primary mt-1 shrink-0" />}
-                </div>
-                <p className="text-[10px] text-muted-foreground mt-2 font-medium">{n.time}</p>
-              </div>
-            ))
-          ) : (
-            <div className="p-8 text-center text-xs font-medium text-muted-foreground">No notifications found.</div>
-          )}
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-}
+import { NotificationsPopover } from "@/components/shared/NotificationsPopover";
 
 export default function OwnerDashboardLayout({
   children,
@@ -124,6 +71,11 @@ export default function OwnerDashboardLayout({
           <Link href="/owner/dashboard/earnings">
             <Button variant={isActive("/owner/dashboard/earnings") ? "secondary" : "ghost"} className={getLinkClasses("/owner/dashboard/earnings")}>
               <CreditCard className="mr-2 h-4 w-4" /> Earnings
+            </Button>
+          </Link>
+          <Link href="/owner/dashboard/messages">
+            <Button variant={isActive("/owner/dashboard/messages") ? "secondary" : "ghost"} className={getLinkClasses("/owner/dashboard/messages")}>
+              <MessageSquare className="mr-2 h-4 w-4" /> Messages
             </Button>
           </Link>
           <Link href="/owner/dashboard/reviews">

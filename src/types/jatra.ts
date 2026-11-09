@@ -95,3 +95,81 @@ export interface Review {
   centerId?: string;
 }
 
+export interface Notification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: string;
+  read: boolean;
+  link?: string | null;
+  createdAt: string;
+}
+
+export interface Message {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  content: string;
+  read: boolean;
+  createdAt: string;
+  sender?: {
+    id: string;
+    name: string;
+    fullName?: string;
+    image?: string;
+    role?: string;
+  };
+}
+
+export interface Conversation {
+  id: string;
+  otherParticipant: {
+    id: string;
+    name: string;
+    fullName?: string;
+    email: string;
+    image?: string;
+    role: string;
+  };
+  center?: {
+    id: string;
+    name: string;
+    address: string;
+    phone?: string;
+    images?: string[];
+  };
+  rentalBooking?: {
+    id: string;
+    pickupDate: string;
+    returnDate: string;
+    totalAmount: number;
+    status: string;
+    vehicle?: {
+      id: string;
+      make: string;
+      model: string;
+      year?: number;
+      images?: string[];
+    };
+  };
+  serviceRequest?: {
+    id: string;
+    serviceType: string;
+    scheduledDate: string;
+    status: string;
+    issueDescription?: string;
+    vehicle?: {
+      id: string;
+      make: string;
+      model: string;
+      year?: number;
+    };
+  };
+  lastMessage?: string;
+  lastMessageAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  unreadCount?: number;
+}
+
