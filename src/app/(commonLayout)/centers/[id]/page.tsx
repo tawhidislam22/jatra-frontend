@@ -23,6 +23,7 @@ import {
   Car,
   Image as ImageIcon
 } from "lucide-react";
+import { WishlistButton } from "@/components/ui/WishlistButton";
 import { serviceRequestsService } from "@/services/services.service";
 import { centersService } from "@/services/centers.service";
 import { WORKSHOP_SERVICES, getServiceByNameOrId } from "@/constants/serviceCatalog";
@@ -308,6 +309,7 @@ export default function CenterDetailsPage() {
                   <CheckCircle2 className="h-3.5 w-3.5" /> Verified
                 </span>
               )}
+              <WishlistButton centerId={center.id} size="sm" showLabel className="bg-white/10 text-white border-white/20 hover:bg-white/20" />
             </div>
             <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tight">
               {center.name}

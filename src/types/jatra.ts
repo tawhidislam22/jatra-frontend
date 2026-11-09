@@ -60,6 +60,8 @@ export interface Vehicle {
   images?: string[];
   centerId?: string;
   ownerId?: string;
+  center?: AutomotiveCenter;
+  owner?: User;
 }
 
 export interface RentalBooking {
@@ -268,5 +270,28 @@ export interface Conversation {
   createdAt: string;
   updatedAt: string;
   unreadCount?: number;
+}
+
+export interface WishlistVehicleItem {
+  wishlistId: string;
+  addedAt: string;
+  vehicle: Vehicle;
+}
+
+export interface WishlistCenterItem {
+  wishlistId: string;
+  addedAt: string;
+  center: AutomotiveCenter;
+}
+
+export interface WishlistData {
+  total: number;
+  vehicles: WishlistVehicleItem[];
+  centers: WishlistCenterItem[];
+}
+
+export interface WishlistIds {
+  vehicleIds: string[];
+  centerIds: string[];
 }
 

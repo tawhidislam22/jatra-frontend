@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Vehicle } from "@/types/jatra";
 import { Settings, Users, Fuel, Gauge, ArrowRight } from "lucide-react";
 import Image from "next/image";
+import { WishlistButton } from "@/components/ui/WishlistButton";
 
 interface VehicleCardProps {
   vehicle: Vehicle;
@@ -19,6 +20,11 @@ export function VehicleCard({ vehicle, onRent }: VehicleCardProps) {
       {/* Badge */}
       <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-sm z-10">
         {isFleet ? 'Jatra Fleet' : 'Customer Car'}
+      </div>
+
+      {/* Wishlist Button */}
+      <div className="absolute top-4 right-4 z-20">
+        <WishlistButton vehicleId={vehicle.id} size="sm" />
       </div>
       
       <div className="bg-muted/40 p-8 aspect-video flex items-center justify-center relative overflow-hidden group-hover:bg-zinc-800 transition-colors duration-500">

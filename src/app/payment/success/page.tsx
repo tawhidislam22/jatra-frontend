@@ -15,7 +15,9 @@ export default function PaymentSuccessPage() {
   useEffect(() => {
     if (sessionId) {
       paymentService.verifyPayment(sessionId)
-        .catch(err => console.error("Verification failed:", err))
+        .catch(err => {
+          console.warn("Payment verification status check:", err?.message || err);
+        })
         .finally(() => setVerifying(false));
     } else {
       setVerifying(false);

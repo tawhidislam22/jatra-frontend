@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { AutomotiveCenter } from "@/types/jatra";
 import { MapPin, Star, Phone, CheckCircle2, Wrench, ArrowRight, Clock, Users } from "lucide-react";
+import { WishlistButton } from "@/components/ui/WishlistButton";
 
 interface CenterCardProps {
   center: AutomotiveCenter;
@@ -32,6 +33,11 @@ export function CenterCard({ center, onBook }: CenterCardProps) {
             )}
           </div>
         ) : null}
+      </div>
+
+      {/* Top Right Wishlist Button */}
+      <div className="absolute top-4 right-4 z-20">
+        <WishlistButton centerId={center.id} size="sm" />
       </div>
       
       {/* Cover Image */}

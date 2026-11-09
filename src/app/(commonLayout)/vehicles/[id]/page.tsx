@@ -28,6 +28,7 @@ import { motion } from "framer-motion";
 import { bookingsService } from "@/services/bookings.service";
 import { vehiclesService } from "@/services/vehicles.service";
 import { useAuth } from "@/context/AuthContext";
+import { WishlistButton } from "@/components/ui/WishlistButton";
 import Link from "next/link";
 
 const getFeatureIcon = (feature: string) => {
@@ -252,7 +253,7 @@ export default function VehicleDetailsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <h3 className="text-primary font-bold uppercase tracking-[3px] text-xs flex items-center gap-2">
                   <span className="w-8 h-[2px] bg-primary"></span>
                   Rental Fleet Vehicle
@@ -260,6 +261,7 @@ export default function VehicleDetailsPage() {
                 <span className={`text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-sm flex items-center gap-1 ${vehicle.isAvailable !== false ? "bg-emerald-600" : "bg-red-600"}`}>
                   <CheckCircle2 className="h-3 w-3" /> {vehicle.isAvailable !== false ? "Active for Rent" : "Inactive"}
                 </span>
+                <WishlistButton vehicleId={vehicle.id} size="sm" showLabel className="bg-white/10 text-white border-white/20 hover:bg-white/20" />
               </div>
               <h1 className="text-4xl md:text-6xl font-extrabold text-white uppercase tracking-tight">
                 {vehicle.make} <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-500">{vehicle.model}</span>
