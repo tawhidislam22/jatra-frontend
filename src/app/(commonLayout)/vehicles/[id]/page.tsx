@@ -119,7 +119,7 @@ export default function VehicleDetailsPage() {
 
     const diffTime = rDate.getTime() - pDate.getTime();
     const days = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-    const totalAmount = Number((days * Number(vehicle.pricePerDay)).toFixed(2));
+    const totalAmount = Number((days * Number(vehicle?.pricePerDay || 0)).toFixed(2));
 
     return { days, totalAmount, isValid: true };
   }, [pickupDate, pickupTime, returnDate, vehicle]);

@@ -11,7 +11,12 @@ import {
   Building2, 
   User, 
   Car,
-  Filter
+  Filter,
+  Eye,
+  Camera,
+  Maximize2,
+  ExternalLink,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +28,8 @@ export default function AdminServiceRequestsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const fetchRequests = async () => {
     try {
@@ -172,11 +179,23 @@ export default function AdminServiceRequestsPage() {
                         )}
                       </td>
 
-                      {/* Issue */}
-                      <td className="p-4 max-w-xs">
-                        <span className="bg-zinc-900 text-zinc-300 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-zinc-800 inline-block mb-1">
-                          {r.serviceType}
-                        </span>
+                      {/* Issue & Photos */}
+                      <td className="p-4 max-w-xs space-y-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="bg-zinc-900 text-zinc-300 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-zinc-800 inline-block">
+                            {r.serviceName || r.serviceType}
+                          </span>
+                          {r.problemImages && r.problemImages.length > 0 && (
+                            <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1">
+                              <Camera className="w-3 h-3" /> {r.problemImages.length}
+                            </span>
+                          )}
+                          {r.completionImages && r.completionImages.length > 0 && (
+                            <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3" /> {r.completionImages.length}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-zinc-300 truncate" title={r.issueDescription}>
                           {r.issueDescription || "No issue description"}
                         </p>
@@ -197,26 +216,212 @@ export default function AdminServiceRequestsPage() {
                         </span>
                       </td>
 
-                      {/* Status Selector Action */}
+                      {/* Status Selector & Inspect Action */}
                       <td className="p-4 text-right">
-                        <select
-                          value={r.status}
-                          disabled={updatingId === r.id}
-                          onChange={(e) => handleStatusUpdate(r.id, e.target.value)}
-                          className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 rounded-lg px-2.5 py-1 text-[11px] font-bold outline-none cursor-pointer"
-                        >
-                          <option value="PENDING">PENDING</option>
-                          <option value="ACCEPTED">ACCEPTED</option>
-                          <option value="IN_PROGRESS">IN_PROGRESS</option>
-                          <option value="COMPLETED">COMPLETED</option>
-                          <option value="CANCELLED">CANCELLED</option>
-                        </select>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => setSelectedRequest(r)}
+                            title="Inspect Photos & Details"
+                            className="p-1.5 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <select
+                            value={r.status}
+                            disabled={updatingId === r.id}
+                            onChange={(e) => handleStatusUpdate(r.id, e.target.value)}
+                            className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 rounded-lg px-2.5 py-1 text-[11px] font-bold outline-none cursor-pointer"
+                          >
+                            <option value="PENDING">PENDING</option>
+                            <option value="ACCEPTED">ACCEPTED</option>
+                            <option value="IN_PROGRESS">IN_PROGRESS</option>
+                            <option value="COMPLETED">COMPLETED</option>
+                            <option value="CANCELLED">CANCELLED</option>
+                          </select>
+                        </div>
                       </td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Inspection Modal */}
+      {selectedRequest && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-6 shadow-2xl relative text-zinc-200">
+            <button
+              onClick={() => setSelectedRequest(null)}
+              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-widest text-amber-500 font-mono">
+                Booking ID: {selectedRequest.id}
+              </span>
+              <h2 className="text-2xl font-black uppercase tracking-tight text-white">
+                {selectedRequest.serviceName || selectedRequest.serviceType}
+              </h2>
+              <div className="flex items-center gap-2 pt-1">
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border bg-zinc-900 border-zinc-800 text-zinc-300">
+                  {selectedRequest.status}
+                </span>
+                <span className="text-xs text-zinc-400">
+                  Scheduled: {new Date(selectedRequest.scheduledDate).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}
+                </span>
+              </div>
+            </div>
+
+            {/* Quick Overview */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Customer</span>
+                <p className="font-extrabold text-white">{selectedRequest.customer?.fullName || selectedRequest.customer?.name || "Customer"}</p>
+                <p className="text-zinc-400 text-[11px]">{selectedRequest.customer?.email || selectedRequest.customer?.phone || "No contact"}</p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Vehicle</span>
+                <p className="font-extrabold text-white">
+                  {selectedRequest.vehicle?.make} {selectedRequest.vehicle?.model} ({selectedRequest.vehicle?.year})
+                </p>
+                <p className="text-zinc-400 text-[11px]">Plate: {selectedRequest.vehicle?.licensePlate}</p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Workshop & Mechanic</span>
+                <p className="font-extrabold text-white">{selectedRequest.center?.name || "Automotive Center"}</p>
+                <p className="text-zinc-400 text-[11px]">
+                  {selectedRequest.mechanic?.fullName || selectedRequest.mechanic?.name ? `Mech: ${selectedRequest.mechanic.fullName || selectedRequest.mechanic.name}` : "Pending assignment"}
+                </p>
+              </div>
+            </div>
+
+            {/* Side-by-side Photo Inspection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Problem Photos */}
+              <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                    <Camera className="w-4 h-4" /> Customer Problem Photos ({selectedRequest.problemImages?.length || 0})
+                  </h4>
+                </div>
+
+                {selectedRequest.issueDescription && (
+                  <p className="text-xs text-zinc-300 bg-zinc-900 p-2.5 rounded-lg border border-zinc-800 italic">
+                    &ldquo;{selectedRequest.issueDescription}&rdquo;
+                  </p>
+                )}
+
+                {selectedRequest.problemImages && selectedRequest.problemImages.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    {selectedRequest.problemImages.map((img: string, i: number) => (
+                      <div
+                        key={i}
+                        onClick={() => setPreviewImage(img)}
+                        className="group relative rounded-xl overflow-hidden border border-zinc-800 bg-black aspect-video cursor-pointer hover:border-amber-500 transition-all shadow-sm"
+                      >
+                        <img src={img} alt="Problem Photo" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 text-white text-[11px] font-bold">
+                          <Maximize2 className="w-3.5 h-3.5" /> Enlarge
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-zinc-500 italic">No customer problem photos submitted.</p>
+                )}
+              </div>
+
+              {/* Completion Photos */}
+              <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4" /> Mechanic Completion Photos ({selectedRequest.completionImages?.length || 0})
+                  </h4>
+                </div>
+
+                {selectedRequest.completionImages && selectedRequest.completionImages.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    {selectedRequest.completionImages.map((img: string, i: number) => (
+                      <div
+                        key={i}
+                        onClick={() => setPreviewImage(img)}
+                        className="group relative rounded-xl overflow-hidden border border-zinc-800 bg-black aspect-video cursor-pointer hover:border-emerald-500 transition-all shadow-sm"
+                      >
+                        <img src={img} alt="Completion Photo" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 text-white text-[11px] font-bold">
+                          <Maximize2 className="w-3.5 h-3.5" /> Enlarge
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-6 text-center text-xs text-zinc-500">
+                    Mechanic has not uploaded completion photos yet.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-3 border-t border-zinc-800">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedRequest(null)}
+                className="text-xs font-bold uppercase tracking-wider h-9 rounded-xl border-zinc-800 hover:bg-zinc-900 text-zinc-300"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Lightbox */}
+      {previewImage && (
+        <div 
+          onClick={() => setPreviewImage(null)}
+          className="fixed inset-0 z-[70] bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()} 
+            className="relative max-w-4xl max-h-[90vh] bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col w-full"
+          >
+            <div className="p-3.5 border-b border-zinc-800 flex items-center justify-between bg-zinc-900 shrink-0 text-white">
+              <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <Camera className="w-4 h-4 text-amber-500" />
+                Service Photo Preview
+              </span>
+              <div className="flex items-center gap-2">
+                <a
+                  href={previewImage}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-xl border border-zinc-700 hover:bg-zinc-800 text-white transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" /> Open Original
+                </a>
+                <button
+                  onClick={() => setPreviewImage(null)}
+                  className="p-1.5 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <div className="p-4 overflow-auto flex items-center justify-center bg-black max-h-[calc(90vh-65px)]">
+              <img
+                src={previewImage}
+                alt="Enlarged photo view"
+                className="max-h-[75vh] w-auto max-w-full object-contain rounded-xl shadow-xl"
+              />
+            </div>
           </div>
         </div>
       )}

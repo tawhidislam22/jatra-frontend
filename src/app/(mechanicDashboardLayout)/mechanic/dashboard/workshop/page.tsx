@@ -133,7 +133,7 @@ export default function MechanicWorkshopPage() {
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-1 text-amber-500 font-black text-xl">
                     <Star className="w-5 h-5 fill-amber-500" />
-                    <span>{Number(workshop.rating || 4.5).toFixed(1)}</span>
+                    <span>{Number(workshop?.rating || 4.5).toFixed(1)}</span>
                   </div>
                   <span className="text-[10px] uppercase font-bold text-muted-foreground">Rating</span>
                 </div>

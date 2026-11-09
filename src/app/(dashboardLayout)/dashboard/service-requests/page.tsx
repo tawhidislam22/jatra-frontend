@@ -19,7 +19,10 @@ import {
   User,
   ShieldAlert,
   Wallet,
-  Receipt
+  Receipt,
+  Camera,
+  Maximize2,
+  ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -30,6 +33,7 @@ export default function CustomerServiceRequestsPage() {
 
   // Detail Modal
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // Review Modal
   const [reviewRequest, setReviewRequest] = useState<ServiceRequest | null>(null);
@@ -280,25 +284,50 @@ export default function CustomerServiceRequestsPage() {
                           </span>
                         )}
                       </div>
-                      {req.refundAmount !== undefined && (
+                      {req.refundAmount != null && (
                         <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-600">
-                          <Wallet className="w-3 h-3" /> Refunded to Wallet: ${req.refundAmount.toFixed(2)}
+                          <Wallet className="w-3 h-3" /> Refunded to Wallet: ${Number(req.refundAmount).toFixed(2)}
                         </div>
                       )}
                     </div>
                   )}
 
-                  {/* Problem Photo Badge */}
-                  {req.problemImages && req.problemImages.length > 0 && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded">
-                        {req.problemImages.length} Problem Photo{req.problemImages.length > 1 ? "s" : ""}
-                      </span>
-                      {req.completionImages && req.completionImages.length > 0 && (
-                        <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded">
-                          {req.completionImages.length} Completion Photo{req.completionImages.length > 1 ? "s" : ""}
-                        </span>
-                      )}
+                  {/* Problem & Completion Photo Badges & Preview Thumbnails */}
+                  {((req.problemImages && req.problemImages.length > 0) || (req.completionImages && req.completionImages.length > 0)) && (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                        {req.problemImages && req.problemImages.length > 0 && (
+                          <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded flex items-center gap-1">
+                            <Camera className="w-3 h-3" />
+                            {req.problemImages.length} Problem Photo{req.problemImages.length > 1 ? "s" : ""}
+                          </span>
+                        )}
+                        {req.completionImages && req.completionImages.length > 0 && (
+                          <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" />
+                            {req.completionImages.length} Completed Photo{req.completionImages.length > 1 ? "s" : ""}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Photo Thumbnails */}
+                      <div className="flex items-center gap-1.5 pt-0.5">
+                        {req.problemImages?.slice(0, 2).map((img, i) => (
+                          <div key={`prob-${i}`} className="w-12 h-9 rounded-lg border border-amber-500/30 overflow-hidden shrink-0 bg-black/40">
+                            <img src={img} alt="Problem thumbnail" className="w-full h-full object-cover" loading="lazy" />
+                          </div>
+                        ))}
+                        {req.completionImages?.slice(0, 2).map((img, i) => (
+                          <div key={`comp-${i}`} className="w-12 h-9 rounded-lg border border-emerald-500/30 overflow-hidden shrink-0 bg-black/40">
+                            <img src={img} alt="Completion thumbnail" className="w-full h-full object-cover" loading="lazy" />
+                          </div>
+                        ))}
+                        {(Number(req.problemImages?.length || 0) + Number(req.completionImages?.length || 0) > 4) && (
+                          <span className="text-[10px] font-bold text-muted-foreground px-1.5 py-0.5 rounded bg-muted">
+                            +{Number(req.problemImages?.length || 0) + Number(req.completionImages?.length || 0) - 4} more
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )}
 
@@ -395,6 +424,145 @@ export default function CustomerServiceRequestsPage() {
               </div>
             </div>
 
+            {/* Schedule & Mechanic Info Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="p-3.5 rounded-xl bg-muted/40 space-y-1.5 border border-border/50">
+                <div className="flex items-center gap-1.5 text-amber-500 font-bold uppercase tracking-wider text-[10px]">
+                  <Calendar className="w-3.5 h-3.5" /> Scheduled Appointment
+                </div>
+                <p className="font-extrabold text-foreground">
+                  {new Date(selectedRequest.scheduledDate).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}
+                </p>
+                <p className="text-muted-foreground flex items-center gap-1 text-[11px]">
+                  <Clock className="w-3 h-3 text-muted-foreground" />
+                  Estimated: {selectedRequest.estimatedDuration || 60} mins
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-muted/40 space-y-1.5 border border-border/50">
+                <div className="flex items-center gap-1.5 text-blue-500 font-bold uppercase tracking-wider text-[10px]">
+                  <User className="w-3.5 h-3.5" /> Assigned Mechanic
+                </div>
+                <p className="font-extrabold text-foreground">
+                  {selectedRequest.mechanic?.fullName || selectedRequest.mechanic?.name || "Pending workshop assignment"}
+                </p>
+                <p className="text-muted-foreground text-[11px]">
+                  {selectedRequest.mechanic?.phone ? `Direct Contact: ${selectedRequest.mechanic.phone}` : "Workshop technician will be assigned shortly"}
+                </p>
+              </div>
+            </div>
+
+            {/* Customer Problem Photos & Description */}
+            <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                  <Camera className="w-4 h-4" /> Your Uploaded Problem Photos
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                    {selectedRequest.problemImages?.length || 0} photo{selectedRequest.problemImages?.length !== 1 ? "s" : ""}
+                  </span>
+                </h4>
+              </div>
+
+              {selectedRequest.issueDescription && (
+                <div className="p-3 rounded-lg bg-card border text-xs space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                    Reported Issue Description:
+                  </span>
+                  <p className="text-foreground leading-relaxed italic">
+                    &ldquo;{selectedRequest.issueDescription}&rdquo;
+                  </p>
+                </div>
+              )}
+
+              {selectedRequest.problemImages && selectedRequest.problemImages.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
+                  {selectedRequest.problemImages.map((img, i) => (
+                    <div
+                      key={i}
+                      onClick={() => setPreviewImage(img)}
+                      className="group relative rounded-xl overflow-hidden border border-border bg-black/40 aspect-video cursor-pointer hover:border-amber-500 transition-all shadow-sm"
+                    >
+                      <img
+                        src={img}
+                        alt={`Problem photo ${i + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-white text-[11px] font-bold">
+                        <Maximize2 className="w-4 h-4" />
+                        <span>Enlarge</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground italic">No problem photos submitted with this request.</p>
+              )}
+            </div>
+
+            {/* Mechanic Completion & Inspection Photos */}
+            <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4" /> Mechanic Completion & Inspection Photos
+                  {selectedRequest.completionImages && selectedRequest.completionImages.length > 0 && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                      {selectedRequest.completionImages.length} photo{selectedRequest.completionImages.length !== 1 ? "s" : ""}
+                    </span>
+                  )}
+                </h4>
+              </div>
+
+              {selectedRequest.completionImages && selectedRequest.completionImages.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
+                  {selectedRequest.completionImages.map((img, i) => (
+                    <div
+                      key={i}
+                      onClick={() => setPreviewImage(img)}
+                      className="group relative rounded-xl overflow-hidden border border-border bg-black/40 aspect-video cursor-pointer hover:border-emerald-500 transition-all shadow-sm"
+                    >
+                      <img
+                        src={img}
+                        alt={`Completion photo ${i + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-white text-[11px] font-bold">
+                        <Maximize2 className="w-4 h-4" />
+                        <span>Enlarge</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-4 rounded-lg bg-card/60 border text-center space-y-1.5">
+                  <Clock className="w-6 h-6 text-muted-foreground mx-auto opacity-70" />
+                  <p className="text-xs font-bold text-foreground">
+                    {selectedRequest.status === "COMPLETED" || selectedRequest.status === "DONE"
+                      ? "No completion photos uploaded by mechanic."
+                      : "Inspection & work in progress"}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {selectedRequest.status === "COMPLETED" || selectedRequest.status === "DONE"
+                      ? "The workshop completed service without attaching extra photos."
+                      : "Mechanic completion photos and inspection reports will appear here once service is finalized."}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Quality Tuning / Rework Notes Alert */}
+            {selectedRequest.status === "REASSIGNMENT_REQUIRED" && selectedRequest.reworkNotes && (
+              <div className="p-3.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-xs space-y-1">
+                <span className="font-bold flex items-center gap-1 text-[11px] uppercase tracking-wider text-orange-600 dark:text-orange-400">
+                  <ShieldAlert className="w-3.5 h-3.5" /> Quality Tuning & Rework in Progress
+                </span>
+                <p className="text-foreground italic">&ldquo;{selectedRequest.reworkNotes}&rdquo;</p>
+              </div>
+            )}
+
             {/* Cancelled Info */}
             {selectedRequest.status === "CANCELLED" && (
               <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-xs space-y-2">
@@ -407,12 +575,12 @@ export default function CustomerServiceRequestsPage() {
                   )}
                 </div>
                 <div className="flex gap-4 text-muted-foreground">
-                  {selectedRequest.cancellationFee !== undefined && (
-                    <span>Fee Retained: <strong className="text-foreground">${selectedRequest.cancellationFee.toFixed(2)}</strong></span>
+                  {selectedRequest.cancellationFee != null && (
+                    <span>Fee Retained: <strong className="text-foreground">${Number(selectedRequest.cancellationFee).toFixed(2)}</strong></span>
                   )}
-                  {selectedRequest.refundAmount !== undefined && (
+                  {selectedRequest.refundAmount != null && (
                     <span className="text-emerald-600 font-bold flex items-center gap-1">
-                      <Wallet className="w-3.5 h-3.5" /> Refunded to Wallet: ${selectedRequest.refundAmount.toFixed(2)}
+                      <Wallet className="w-3.5 h-3.5" /> Refunded to Wallet: ${Number(selectedRequest.refundAmount).toFixed(2)}
                     </span>
                   )}
                 </div>
@@ -453,6 +621,49 @@ export default function CustomerServiceRequestsPage() {
               >
                 Close
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox Modal for enlarged image preview */}
+      {previewImage && (
+        <div 
+          onClick={() => setPreviewImage(null)}
+          className="fixed inset-0 z-[70] bg-black/85 backdrop-blur-md flex items-center justify-center p-4"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()} 
+            className="relative max-w-4xl max-h-[90vh] bg-card border rounded-2xl overflow-hidden shadow-2xl flex flex-col w-full"
+          >
+            <div className="p-3.5 border-b flex items-center justify-between bg-card shrink-0">
+              <span className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <Camera className="w-4 h-4 text-amber-500" />
+                Service Photo Preview
+              </span>
+              <div className="flex items-center gap-2">
+                <a
+                  href={previewImage}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-xl border border-border hover:bg-muted text-foreground transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" /> Open Original
+                </a>
+                <button
+                  onClick={() => setPreviewImage(null)}
+                  className="p-1.5 rounded-full hover:bg-muted text-muted-foreground transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <div className="p-4 overflow-auto flex items-center justify-center bg-black/90 max-h-[calc(90vh-65px)]">
+              <img
+                src={previewImage}
+                alt="Enlarged photo view"
+                className="max-h-[75vh] w-auto max-w-full object-contain rounded-xl shadow-xl"
+              />
             </div>
           </div>
         </div>
@@ -512,17 +723,17 @@ export default function CustomerServiceRequestsPage() {
                       <div className="space-y-1.5 pt-2 border-t">
                         <div className="flex justify-between text-muted-foreground">
                           <span>Service Booking Cost:</span>
-                          <span className="font-mono font-bold text-foreground">${est.amount.toFixed(2)}</span>
+                          <span className="font-mono font-bold text-foreground">${Number(est.amount || 0).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-red-600 dark:text-red-400">
                           <span>Cancellation Fee ({est.feePercent}%):</span>
-                          <span className="font-mono font-bold">-${est.cancellationFee.toFixed(2)}</span>
+                          <span className="font-mono font-bold">-${Number(est.cancellationFee || 0).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold text-sm pt-1 border-t">
                           <span className="flex items-center gap-1">
                             <Wallet className="w-4 h-4" /> Wallet Refund Amount:
                           </span>
-                          <span className="font-mono font-black">+${est.refundAmount.toFixed(2)}</span>
+                          <span className="font-mono font-black">+${Number(est.refundAmount || 0).toFixed(2)}</span>
                         </div>
                       </div>
                     </div>

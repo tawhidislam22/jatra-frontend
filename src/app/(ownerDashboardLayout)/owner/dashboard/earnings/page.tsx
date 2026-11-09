@@ -203,7 +203,7 @@ export default function EarningsPage() {
                     )}
                   </td>
                   <td className="p-4 text-sm font-medium">{tx.customer}</td>
-                  <td className="p-4 text-sm font-black">${tx.amount.toFixed(2)}</td>
+                  <td className="p-4 text-sm font-black">${Number(tx.amount || 0).toFixed(2)}</td>
                   <td className="p-4">{getStatusBadge(tx.status)}</td>
                   <td className="p-4 text-sm text-muted-foreground">{tx.date.toLocaleDateString()}</td>
                 </tr>

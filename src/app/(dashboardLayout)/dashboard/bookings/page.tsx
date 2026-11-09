@@ -208,9 +208,9 @@ export default function BookingsPage() {
                         {new Date(booking.pickupDate).toLocaleDateString()} &rarr; {new Date(booking.returnDate).toLocaleDateString()}
                       </span>
 
-                      {booking.dailyPriceSnapshot && (
+                      {booking.dailyPriceSnapshot != null && (
                         <span className="flex items-center gap-1 font-mono text-[11px] bg-muted/60 px-2 py-0.5 rounded border">
-                          Locked Rate: ${booking.dailyPriceSnapshot.toFixed(2)}/day
+                          Locked Rate: ${Number(booking.dailyPriceSnapshot).toFixed(2)}/day
                         </span>
                       )}
                     </div>
@@ -227,12 +227,12 @@ export default function BookingsPage() {
                           )}
                         </div>
                         <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
-                          {booking.cancellationFee !== undefined && (
-                            <span>Fee Retained: <strong className="text-foreground">${booking.cancellationFee.toFixed(2)}</strong></span>
+                          {booking.cancellationFee != null && (
+                            <span>Fee Retained: <strong className="text-foreground">${Number(booking.cancellationFee).toFixed(2)}</strong></span>
                           )}
-                          {booking.refundAmount !== undefined && (
+                          {booking.refundAmount != null && (
                             <span className="text-emerald-600 font-bold flex items-center gap-1">
-                              <Wallet className="w-3 h-3" /> Refunded to Wallet: ${booking.refundAmount.toFixed(2)}
+                              <Wallet className="w-3 h-3" /> Refunded to Wallet: ${Number(booking.refundAmount).toFixed(2)}
                             </span>
                           )}
                         </div>
@@ -253,7 +253,7 @@ export default function BookingsPage() {
                       Total Paid
                     </p>
                     <p className="text-xl md:text-2xl font-black text-foreground">
-                      ${booking.totalAmount.toFixed(2)}
+                      ${Number(booking.totalAmount || 0).toFixed(2)}
                     </p>
                   </div>
 
@@ -338,17 +338,17 @@ export default function BookingsPage() {
                       <div className="space-y-1.5 pt-2 border-t">
                         <div className="flex justify-between text-muted-foreground">
                           <span>Total Amount Paid:</span>
-                          <span className="font-mono font-bold text-foreground">${cancellingBooking.totalAmount.toFixed(2)}</span>
+                          <span className="font-mono font-bold text-foreground">${Number(cancellingBooking.totalAmount || 0).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-red-600 dark:text-red-400">
                           <span>Cancellation Fee ({est.feePercent}%):</span>
-                          <span className="font-mono font-bold">-${est.cancellationFee.toFixed(2)}</span>
+                          <span className="font-mono font-bold">-${Number(est.cancellationFee || 0).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold text-sm pt-1 border-t">
                           <span className="flex items-center gap-1">
                             <Wallet className="w-4 h-4" /> Wallet Refund Amount:
                           </span>
-                          <span className="font-mono font-black">+${est.refundAmount.toFixed(2)}</span>
+                          <span className="font-mono font-black">+${Number(est.refundAmount || 0).toFixed(2)}</span>
                         </div>
                       </div>
                     </div>

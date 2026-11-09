@@ -57,7 +57,7 @@ export function CenterCard({ center, onBook }: CenterCardProps) {
         <div className="absolute -top-7 right-6 bg-primary text-white w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-lg transform group-hover:-translate-y-1 transition-transform duration-300 border-2 border-background">
           <span className="text-base font-black leading-none flex items-center">
             <Star className="w-3.5 h-3.5 fill-white mr-0.5" />
-            {center.rating?.toFixed(1) || "5.0"}
+            {center.rating != null ? Number(center.rating).toFixed(1) : "5.0"}
           </span>
           <span className="text-[9px] font-bold uppercase tracking-tighter opacity-80 mt-0.5">Rating</span>
         </div>

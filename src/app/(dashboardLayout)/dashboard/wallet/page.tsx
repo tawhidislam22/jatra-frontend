@@ -114,7 +114,7 @@ export default function WalletPage() {
               Total Refunds Credited
             </span>
             <h3 className="text-3xl font-black mt-3 tracking-tight font-mono text-foreground">
-              ${totalRefunds.toFixed(2)}
+              ${Number(totalRefunds || 0).toFixed(2)}
             </h3>
           </div>
           <p className="text-xs text-muted-foreground font-medium">
@@ -221,13 +221,13 @@ export default function WalletPage() {
                       )}
 
                       {/* Fee and Refund Breakdown if recorded */}
-                      {(tx.cancellationFee !== undefined || tx.refundAmount !== undefined) && (
+                      {(tx.cancellationFee != null || tx.refundAmount != null) && (
                         <div className="flex items-center gap-3 text-[11px] text-muted-foreground pt-0.5">
-                          {tx.cancellationFee !== undefined && (
-                            <span>Fee: <strong>${tx.cancellationFee.toFixed(2)}</strong></span>
+                          {tx.cancellationFee != null && (
+                            <span>Fee: <strong>${Number(tx.cancellationFee).toFixed(2)}</strong></span>
                           )}
-                          {tx.refundAmount !== undefined && (
-                            <span>Refund: <strong className="text-emerald-600">${tx.refundAmount.toFixed(2)}</strong></span>
+                          {tx.refundAmount != null && (
+                            <span>Refund: <strong className="text-emerald-600">${Number(tx.refundAmount).toFixed(2)}</strong></span>
                           )}
                         </div>
                       )}
@@ -245,7 +245,7 @@ export default function WalletPage() {
                         ? "text-emerald-600 dark:text-emerald-400"
                         : "text-foreground"
                     }`}>
-                      {isCredit ? "+" : "-"}${tx.amount.toFixed(2)}
+                      {isCredit ? "+" : "-"}${Number(tx.amount || 0).toFixed(2)}
                     </span>
                   </div>
                 </div>

@@ -256,9 +256,9 @@ export default function WishlistPage() {
                             alt={`${vehicle.make} ${vehicle.model}`}
                             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                           />
-                          {vehicle.pricePerDay && (
+                          {vehicle.pricePerDay != null && (
                             <div className="absolute top-3 right-3 bg-primary text-primary-foreground text-xs font-black px-2.5 py-1 rounded-lg shadow-md font-mono">
-                              ${vehicle.pricePerDay.toFixed(2)}/day
+                              ${Number(vehicle.pricePerDay || 0).toFixed(2)}/day
                             </div>
                           )}
                           <div className="absolute top-3 left-3 bg-background/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border">
@@ -370,7 +370,7 @@ export default function WishlistPage() {
                           
                           <div className="absolute top-3 right-3 bg-amber-500 text-black text-xs font-black px-2 py-0.5 rounded-lg shadow-md flex items-center gap-1">
                             <Star className="w-3.5 h-3.5 fill-black" />
-                            <span>{center.rating?.toFixed(1) || "5.0"}</span>
+                            <span>{center.rating != null ? Number(center.rating).toFixed(1) : "5.0"}</span>
                           </div>
 
                           <div className="absolute bottom-3 left-3 right-3 text-white">

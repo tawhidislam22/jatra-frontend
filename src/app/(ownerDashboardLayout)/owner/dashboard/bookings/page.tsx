@@ -211,20 +211,20 @@ export default function BookingsPage() {
 
                       <td className="p-4">
                         <span className="font-mono text-xs font-bold bg-muted/60 px-2 py-0.5 rounded border text-foreground">
-                          ${(b.dailyPriceSnapshot || vehicle?.pricePerDay || 0).toFixed(2)}/day
+                          ${Number(b.dailyPriceSnapshot || vehicle?.pricePerDay || 0).toFixed(2)}/day
                         </span>
                       </td>
 
                       <td className="p-4 font-black font-mono text-foreground text-sm">
-                        ${b.totalAmount.toFixed(2)}
+                        ${Number(b.totalAmount || 0).toFixed(2)}
                       </td>
 
                       <td className="p-4">
                         <div className="space-y-1">
                           {getStatusBadge(b.status)}
-                          {b.status === 'CANCELLED' && b.refundAmount !== undefined && (
+                          {b.status === 'CANCELLED' && b.refundAmount != null && (
                             <p className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
-                              <Wallet className="w-3 h-3" /> Refunded: ${b.refundAmount.toFixed(2)}
+                              <Wallet className="w-3 h-3" /> Refunded: ${Number(b.refundAmount).toFixed(2)}
                             </p>
                           )}
                         </div>
@@ -338,7 +338,7 @@ export default function BookingsPage() {
               </div>
               <div className="flex justify-between text-base font-black pt-2 border-t text-foreground">
                 <span>Total Amount:</span>
-                <span className="font-mono">${selectedBooking.totalAmount.toFixed(2)}</span>
+                <span className="font-mono">${Number(selectedBooking.totalAmount || 0).toFixed(2)}</span>
               </div>
             </div>
 
@@ -436,17 +436,17 @@ export default function BookingsPage() {
                       <div className="space-y-1.5 pt-2 border-t">
                         <div className="flex justify-between text-muted-foreground">
                           <span>Total Paid by Customer:</span>
-                          <span className="font-mono font-bold text-foreground">${cancellingBooking.totalAmount.toFixed(2)}</span>
+                          <span className="font-mono font-bold text-foreground">${Number(cancellingBooking.totalAmount || 0).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-foreground">
                           <span>Host Retained Fee ({est.feePercent}%):</span>
-                          <span className="font-mono font-bold">${est.cancellationFee.toFixed(2)}</span>
+                          <span className="font-mono font-bold">${Number(est.cancellationFee || 0).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold text-sm pt-1 border-t">
                           <span className="flex items-center gap-1">
                             <Wallet className="w-4 h-4" /> Customer Wallet Refund:
                           </span>
-                          <span className="font-mono font-black">${est.refundAmount.toFixed(2)}</span>
+                          <span className="font-mono font-black">${Number(est.refundAmount || 0).toFixed(2)}</span>
                         </div>
                       </div>
                     </div>
