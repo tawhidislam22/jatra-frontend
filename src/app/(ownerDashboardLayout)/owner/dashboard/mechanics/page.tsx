@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { centersService } from "@/services/centers.service";
 import { useAuth } from "@/context/AuthContext";
-import { Plus, X, Building2, MapPin, Wrench } from "lucide-react";
+import { Plus, X, Building2, MapPin, Wrench, UserMinus, ShieldAlert } from "lucide-react";
+import { toast } from "sonner";
 
 export default function MechanicsPage() {
   const { user } = useAuth();
@@ -18,6 +19,7 @@ export default function MechanicsPage() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [submitting, setSubmitting] = useState(false);
   const [modalError, setModalError] = useState("");
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -33,7 +35,7 @@ export default function MechanicsPage() {
       if (user?.id) {
         try {
           const centerRes = await centersService.getAllCenters({ adminId: user.id });
-          if (centerRes?.data?.length > 0) {
+          if (Array.isArray(centerRes?.data) && centerRes.data.length > 0) {
             ownerCenters = centerRes.data;
           }
         } catch (err) {
@@ -41,33 +43,63 @@ export default function MechanicsPage() {
         }
       }
 
-      if (ownerCenters.length === 0 && user?.managedCenter) {
-        ownerCenters = [user.managedCenter];
+      if (ownerCenters.length === 0) {
+        if (Array.isArray(user?.managedCenters) && user.managedCenters.length > 0) {
+          ownerCenters = user.managedCenters;
+        } else if (user?.managedCenter) {
+          ownerCenters = [user.managedCenter];
+        }
       }
 
-      setCenters(ownerCenters);
+      const normalizedCenters = ownerCenters
+        .map((c) => {
+          if (typeof c === "string") {
+            return { id: c, name: "Automotive Center" };
+          }
+          return {
+            ...c,
+            id: c?.id || c?._id,
+            name: c?.name || "Automotive Center",
+          };
+        })
+        .filter((c) => c.id && typeof c.id === "string" && c.id.trim() !== "" && c.id !== "undefined" && c.id !== "null");
 
-      const activeCenterId = selectedCenterId || (ownerCenters.length > 0 ? ownerCenters[0].id : null);
-      if (activeCenterId) {
+      setCenters(normalizedCenters);
+
+      const targetCenter = normalizedCenters.find(c => c.id === selectedCenterId) || (normalizedCenters.length > 0 ? normalizedCenters[0] : null);
+      const activeCenterId = targetCenter?.id;
+
+      if (activeCenterId && typeof activeCenterId === 'string' && activeCenterId.trim() !== '' && activeCenterId !== 'undefined' && activeCenterId !== 'null') {
         setSelectedCenterId(activeCenterId);
-        const centerRes = await centersService.getCenterById(activeCenterId);
-        setMechanics(centerRes.data?.mechanics || []);
+        try {
+          const centerRes = await centersService.getCenterById(activeCenterId);
+          setMechanics(centerRes?.data?.mechanics || []);
+        } catch (err) {
+          console.error("Failed to load mechanics for center", err);
+          setMechanics([]);
+        }
+      } else {
+        setSelectedCenterId("");
+        setMechanics([]);
       }
     } catch (error) {
       console.error("Failed to load mechanics", error);
+      setMechanics([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleCenterChange = async (cId: string) => {
+    if (!cId || typeof cId !== 'string' || cId.trim() === '' || cId === 'undefined' || cId === 'null') return;
     setSelectedCenterId(cId);
     setLoading(true);
     try {
       const centerRes = await centersService.getCenterById(cId);
-      setMechanics(centerRes.data?.mechanics || []);
+      setMechanics(centerRes?.data?.mechanics || []);
     } catch (err) {
       console.error("Failed to switch center mechanics", err);
+      setMechanics([]);
     } finally {
       setLoading(false);
     }
@@ -83,18 +115,37 @@ export default function MechanicsPage() {
     setModalError("");
     try {
       await centersService.addMechanic(selectedCenterId, formData);
+      toast.success("Mechanic successfully assigned to workshop center");
       setShowModal(false);
       setFormData({ name: '', email: '', password: '' });
       await loadData();
     } catch (error: any) {
       console.error("Failed to add mechanic", error);
-      setModalError(
+      const errMsg =
         error?.response?.data?.message ||
         error?.message ||
-        "Failed to add mechanic. Please check your inputs and try again."
-      );
+        "Failed to add mechanic. Please check your inputs and try again.";
+      setModalError(errMsg);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleRemoveMechanic = async (mechanicId: string, mechanicName: string) => {
+    if (!currentCenter?.id || !mechanicId) return;
+    if (!confirm(`Are you sure you want to remove ${mechanicName || "this mechanic"} from ${currentCenter.name}? Once unassigned, they can be assigned to another workshop.`)) {
+      return;
+    }
+    setRemovingId(mechanicId);
+    try {
+      await centersService.removeMechanic(currentCenter.id, mechanicId);
+      toast.success(`${mechanicName || "Mechanic"} removed from ${currentCenter.name}`);
+      await loadData();
+    } catch (err: any) {
+      console.error("Failed to remove mechanic", err);
+      toast.error(err?.response?.data?.message || "Failed to remove mechanic from center");
+    } finally {
+      setRemovingId(null);
     }
   };
 
@@ -132,6 +183,9 @@ export default function MechanicsPage() {
           <Button 
             onClick={() => {
               setModalError("");
+              if (!selectedCenterId && centers.length > 0) {
+                setSelectedCenterId(centers[0].id);
+              }
               setShowModal(true);
             }}
             className="bg-[#E60000] hover:bg-red-700 text-white font-bold uppercase tracking-wider rounded-sm h-10 px-4"
@@ -169,32 +223,48 @@ export default function MechanicsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mechanics.map((mechanic) => (
-            <div key={mechanic.id || mechanic._id} className="bg-card border rounded-xl p-6 shadow-sm flex flex-col justify-between space-y-4 hover:border-primary/40 transition-all">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center text-xl font-bold shrink-0">
-                  {(mechanic.fullName || mechanic.name || 'M')[0].toUpperCase()}
+          {mechanics.map((mechanic) => {
+            const mId = mechanic.id || mechanic._id;
+            const mName = mechanic.fullName || mechanic.name || "Mechanic";
+            return (
+              <div key={mId} className="bg-card border rounded-xl p-6 shadow-sm flex flex-col justify-between space-y-4 hover:border-primary/40 transition-all">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center text-xl font-bold shrink-0">
+                    {mName[0].toUpperCase()}
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <h3 className="font-bold text-sm text-foreground truncate">{mName}</h3>
+                    <p className="text-xs text-muted-foreground truncate">{mechanic.email}</p>
+                  </div>
+                  <span className="px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-700 shrink-0">
+                    Active
+                  </span>
                 </div>
-                <div className="flex-1 overflow-hidden">
-                  <h3 className="font-bold text-sm text-foreground truncate">{mechanic.fullName || mechanic.name}</h3>
-                  <p className="text-xs text-muted-foreground truncate">{mechanic.email}</p>
-                </div>
-                <span className="px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-700 shrink-0">
-                  Active
-                </span>
-              </div>
 
-              <div className="pt-3 border-t flex items-center justify-between text-xs text-muted-foreground font-medium">
-                <span className="flex items-center gap-1 truncate">
-                  <Building2 className="w-3 h-3 text-primary shrink-0" />
-                  {currentCenter?.name || "Workshop Center"}
-                </span>
-                <span className="text-[10px] uppercase font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
-                  On Duty
-                </span>
+                <div className="pt-3 border-t flex items-center justify-between text-xs text-muted-foreground font-medium">
+                  <span className="flex items-center gap-1 truncate">
+                    <Building2 className="w-3 h-3 text-primary shrink-0" />
+                    {currentCenter?.name || "Workshop Center"}
+                  </span>
+                  
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] uppercase font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                      On Duty
+                    </span>
+                    <button
+                      type="button"
+                      title="Unassign mechanic from this workshop"
+                      onClick={() => handleRemoveMechanic(mId, mName)}
+                      disabled={removingId === mId}
+                      className="text-muted-foreground hover:text-red-600 transition-colors p-1 rounded hover:bg-red-50 focus:outline-none"
+                    >
+                      <UserMinus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -204,18 +274,22 @@ export default function MechanicsPage() {
           <div className="bg-card rounded-xl shadow-2xl w-full max-w-md p-6 relative border animate-in fade-in zoom-in-95 duration-200">
             <button 
               onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 text-muted-foreground hover:text-muted-foreground focus:outline-none"
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground focus:outline-none"
             >
               <X className="h-5 w-5" />
             </button>
             
-            <h2 className="text-xl font-black text-foreground uppercase tracking-wider mb-5">
+            <h2 className="text-xl font-black text-foreground uppercase tracking-wider mb-2">
               Add New Mechanic
             </h2>
+            <p className="text-xs text-muted-foreground mb-4">
+              A mechanic can only be assigned to one automotive workshop at a time.
+            </p>
             
             {modalError && (
-              <div className="mb-4 p-3 bg-red-50 text-red-600 text-xs font-bold uppercase tracking-wider rounded border border-red-100">
-                {modalError}
+              <div className="mb-4 p-3 bg-red-50 text-red-600 text-xs font-bold rounded border border-red-200 flex items-start gap-2">
+                <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{modalError}</span>
               </div>
             )}
 
@@ -274,7 +348,7 @@ export default function MechanicsPage() {
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold uppercase tracking-wider text-foreground">Email</Label>
                 <Input 
-                  type="email"
+                  type="email" 
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}

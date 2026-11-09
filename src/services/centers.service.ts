@@ -3,7 +3,10 @@ import { AutomotiveCenter } from '../types/jatra';
 
 export const centersService = {
   registerCenter: async (data: any) => {
-    const response = await api.post('/automotive-centers', data);
+    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
+    const response = await api.post('/automotive-centers', data, {
+      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined,
+    });
     return response.data;
   },
   getAllCenters: async (params?: any) => {
@@ -15,12 +18,22 @@ export const centersService = {
     const response = await api.post(`/automotive-centers/${centerId}/mechanics`, data);
     return response.data;
   },
+  removeMechanic: async (centerId: string, mechanicId: string) => {
+    const response = await api.delete(`/automotive-centers/${centerId}/mechanics/${mechanicId}`);
+    return response.data;
+  },
   getCenterById: async (id: string) => {
-    const response = await api.get(`/automotive-centers/${id}`);
+    if (!id || typeof id !== 'string' || id.trim() === '' || id === 'undefined' || id === 'null') {
+      return { success: false, data: null };
+    }
+    const response = await api.get(`/automotive-centers/${encodeURIComponent(id.trim())}`);
     return response.data;
   },
   updateCenter: async (id: string, data: any) => {
-    const response = await api.patch(`/automotive-centers/${id}`, data);
+    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
+    const response = await api.patch(`/automotive-centers/${id}`, data, {
+      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined,
+    });
     return response.data;
   },
 };
