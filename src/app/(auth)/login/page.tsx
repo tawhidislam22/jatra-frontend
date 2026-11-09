@@ -22,6 +22,11 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  const handleGoogleLogin = () => {
+    const redirectParam = searchParams.get("redirect") || "/dashboard";
+    window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login/google?redirect=${encodeURIComponent(redirectParam)}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -143,7 +148,7 @@ function LoginForm() {
 
         <Button 
           type="button" 
-          onClick={() => window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login/google`}
+          onClick={handleGoogleLogin}
           className="w-full h-14 bg-card border border-border text-gray-700 hover:bg-muted/60 rounded-sm font-extrabold uppercase tracking-[1px] text-[13px] transition-all duration-300 flex items-center justify-center gap-3"
         >
           <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
