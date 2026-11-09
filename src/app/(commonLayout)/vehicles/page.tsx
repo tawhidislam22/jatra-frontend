@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { VehicleCard } from "@/components/modules/vehicles/VehicleCard";
 import { Vehicle } from "@/types/jatra";
 import { motion } from "framer-motion";
@@ -8,14 +9,9 @@ import { vehiclesService } from "@/services/vehicles.service";
 import { Search, SlidersHorizontal, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Car } from "lucide-react";
 
 export default function VehiclesPage() {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [loading, setLoading] = useState(true);
-
   // Pagination & Filtering State
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
   
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -34,50 +30,39 @@ export default function VehiclesPage() {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchTerm);
       setPage(1); // Reset to first page on search
-    }, 500);
+    }, 400);
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  const fetchVehicles = async () => {
-    setLoading(true);
-    try {
-      const params: any = {
-        page,
-        limit,
-        sortBy,
-        sortOrder,
-      };
-
-      if (debouncedSearch) params.searchTerm = debouncedSearch;
-      if (minPrice) params["pricePerDay[gte]"] = minPrice;
-      if (maxPrice) params["pricePerDay[lte]"] = maxPrice;
-      if (pickupDate && returnDate) {
-        params.pickupDate = pickupDate;
-        params.returnDate = returnDate;
-      }
-      params.type = "RENTAL_FLEET";
-
-      const response = await vehiclesService.getAllVehicles(params);
-      
-      if (response && response.data) {
-        setVehicles(response.data);
-        if (response.meta) {
-          setTotal(response.meta.total);
-          setTotalPages(response.meta.totalPages);
-        }
-      } else {
-        setVehicles(Array.isArray(response) ? response : []);
-      }
-    } catch (error) {
-      console.error("Failed to fetch vehicles:", error);
-    } finally {
-      setLoading(false);
+  const queryParams = useMemo(() => {
+    const params: any = {
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+      type: "RENTAL_FLEET",
+      availableOnly: "true",
+    };
+    if (debouncedSearch) params.searchTerm = debouncedSearch;
+    if (minPrice) params["pricePerDay[gte]"] = minPrice;
+    if (maxPrice) params["pricePerDay[lte]"] = maxPrice;
+    if (pickupDate && returnDate) {
+      params.pickupDate = pickupDate;
+      params.returnDate = returnDate;
     }
-  };
+    return params;
+  }, [page, limit, sortBy, sortOrder, debouncedSearch, minPrice, maxPrice, pickupDate, returnDate]);
 
-  useEffect(() => {
-    fetchVehicles();
-  }, [page, limit, debouncedSearch, sortBy, sortOrder, minPrice, maxPrice, pickupDate, returnDate]);
+  const { data: response, isLoading: loading } = useQuery({
+    queryKey: ["vehicles", queryParams],
+    queryFn: () => vehiclesService.getAllVehicles(queryParams),
+    placeholderData: (previousData) => previousData,
+    staleTime: 60 * 1000,
+  });
+
+  const vehicles: Vehicle[] = response?.data || (Array.isArray(response) ? response : []);
+  const total = response?.meta?.total || vehicles.length;
+  const totalPages = response?.meta?.totalPages || 1;
 
   // Handle Sort Change
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

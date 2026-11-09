@@ -15,7 +15,11 @@ export function ThemeVehicleModels() {
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const response = await vehiclesService.getAllVehicles();
+        const response = await vehiclesService.getAllVehicles({
+          type: "RENTAL_FLEET",
+          availableOnly: "true",
+          limit: 4
+        });
         if (response && response.data) {
           setVehicles(response.data.slice(0, 4));
         } else if (Array.isArray(response)) {

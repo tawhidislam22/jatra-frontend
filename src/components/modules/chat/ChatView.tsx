@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   MessageSquare, 
@@ -107,18 +107,26 @@ export function ChatView({ basePath = "/dashboard/messages", portalTitle = "Mess
     sendMutation.mutate(inputText.trim());
   };
 
+  const pathname = usePathname();
   const isOwnerOrMechanic =
     user?.role === "OWNER" ||
     user?.role === "MECHANIC" ||
     user?.role === "ADMIN" ||
     basePath.includes("/owner") ||
     basePath.includes("/mechanic") ||
-    basePath.includes("/admin");
+    basePath.includes("/admin") ||
+    pathname.startsWith("/owner") ||
+    pathname.startsWith("/mechanic") ||
+    pathname.startsWith("/admin");
 
   const getConversationDetails = (conv: Conversation) => {
-    // When viewed from Owner/Mechanic/Admin portal:
+    const isCenterAdmin = Boolean(user?.id && conv.center?.adminId && user.id === conv.center.adminId);
+    const otherIsCustomer = conv.otherParticipant?.role === "CUSTOMER";
+    const shouldShowCustomer = isOwnerOrMechanic || isCenterAdmin || (otherIsCustomer && user?.role !== "CUSTOMER");
+
+    // When viewed from Owner/Mechanic/Admin portal or when the other participant is the customer:
     // ALWAYS display the customer's actual full name, avatar, and contact details!
-    if (isOwnerOrMechanic) {
+    if (shouldShowCustomer) {
       const customer =
         conv.serviceRequest?.customer ||
         conv.rentalBooking?.customer ||

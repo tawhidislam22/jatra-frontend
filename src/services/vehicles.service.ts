@@ -23,7 +23,10 @@ export const vehiclesService = {
     return response.data;
   },
   updateVehicle: async (id: string, data: any) => {
-    const response = await api.patch(`/vehicles/${id}`, data);
+    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
+    const response = await api.patch(`/vehicles/${id}`, data, {
+      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined,
+    });
     return response.data;
   }
 };

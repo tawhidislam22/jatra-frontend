@@ -13,6 +13,7 @@ interface VehicleCardProps {
 
 export function VehicleCard({ vehicle, onRent }: VehicleCardProps) {
   const isFleet = vehicle.type === 'RENTAL_FLEET';
+  const isCurrentlyRented = (vehicle as any).isCurrentlyRented === true || vehicle.isAvailable === false;
   const defaultImage = "https://demo.xpeedstudio.com/carrental/onepage-v4/wp-content/uploads/sites/9/2020/07/image7.png"; // Zauto style demo image
 
   return (
@@ -31,6 +32,8 @@ export function VehicleCard({ vehicle, onRent }: VehicleCardProps) {
         <img 
           src={vehicle.images?.[0] || defaultImage} 
           alt={`${vehicle.make} ${vehicle.model}`}
+          loading="lazy"
+          decoding="async"
           className="w-full h-auto object-contain group-hover:scale-110 group-hover:drop-shadow-[0_10px_20px_rgba(255,255,255,0.2)] transition-all duration-500"
         />
       </div>
@@ -67,9 +70,9 @@ export function VehicleCard({ vehicle, onRent }: VehicleCardProps) {
           <Button 
             className="w-full h-12 mt-auto bg-transparent border-2 border-border text-foreground group-hover:border-primary group-hover:bg-primary group-hover:text-white rounded-sm font-bold uppercase tracking-widest text-[11px] transition-all duration-300 flex items-center justify-between px-6"
             onClick={() => onRent && onRent(vehicle.id)}
-            disabled={vehicle.isAvailable === false}
+            disabled={isCurrentlyRented}
           >
-            {vehicle.isAvailable === false ? 'Currently Rented' : 'Rent This Car'} <ArrowRight className="w-4 h-4" />
+            {isCurrentlyRented ? 'Currently Rented' : 'Rent This Car'} <ArrowRight className="w-4 h-4" />
           </Button>
         ) : (
           <Button className="w-full h-12 mt-auto bg-transparent border-2 border-border text-muted-foreground rounded-sm font-bold uppercase tracking-widest text-[11px] flex items-center justify-between px-6" disabled>

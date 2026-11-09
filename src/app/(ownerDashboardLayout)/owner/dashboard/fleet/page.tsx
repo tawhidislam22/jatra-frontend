@@ -55,6 +55,9 @@ export default function FleetPage() {
     pricePerDay: "",
     features: "",
   });
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+  const editFileInputRef = useRef<HTMLInputElement>(null);
   const [submittingEdit, setSubmittingEdit] = useState(false);
   const [editError, setEditError] = useState("");
 
@@ -312,11 +315,34 @@ export default function FleetPage() {
                       <td className="p-4 font-mono text-xs font-bold uppercase text-foreground">{v.licensePlate}</td>
                       <td className="p-4 font-mono font-bold text-foreground">${v.pricePerDay || 0}/day</td>
                       <td className="p-4">
-                        <span className={`px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-widest ${
-                          v.isAvailable !== false ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                        }`}>
-                          {v.isAvailable !== false ? 'Available' : 'Deactivated'}
-                        </span>
+                        {(() => {
+                          const now = new Date();
+                          const activeRental = v.rentalBookings?.find((b: any) => {
+                            const p = new Date(b.pickupDate);
+                            const r = new Date(b.returnDate);
+                            return p <= now && r > now && ['ACCEPTED', 'IN_PROGRESS', 'PENDING'].includes(b.status);
+                          });
+
+                          if (v.isAvailable === false) {
+                            return (
+                              <span className="px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-widest bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                                Deactivated
+                              </span>
+                            );
+                          }
+                          if (activeRental) {
+                            return (
+                              <span className="px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-widest bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                                Currently Rented
+                              </span>
+                            );
+                          }
+                          return (
+                            <span className="px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                              Available
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2">

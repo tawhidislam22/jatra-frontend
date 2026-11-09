@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { CenterCard } from "@/components/modules/centers/CenterCard";
 import { AutomotiveCenter } from "@/types/jatra";
 import { useRouter } from "next/navigation";
@@ -10,14 +11,10 @@ import { Search, SlidersHorizontal, ChevronLeft, ChevronRight, ChevronsLeft, Che
 
 export default function CentersPage() {
   const router = useRouter();
-  const [centers, setCenters] = useState<AutomotiveCenter[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // Pagination & Filtering State
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
   
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -30,43 +27,31 @@ export default function CentersPage() {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchTerm);
       setPage(1); // Reset to first page on search
-    }, 500);
+    }, 400);
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
-  const fetchCenters = async () => {
-    setLoading(true);
-    try {
-      const params: any = {
-        page,
-        limit,
-        sortBy,
-        sortOrder,
-      };
+  const queryParams = useMemo(() => {
+    const params: any = {
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+    };
+    if (debouncedSearch) params.searchTerm = debouncedSearch;
+    return params;
+  }, [page, limit, sortBy, sortOrder, debouncedSearch]);
 
-      if (debouncedSearch) params.searchTerm = debouncedSearch;
+  const { data: response, isLoading: loading } = useQuery({
+    queryKey: ["centers", queryParams],
+    queryFn: () => centersService.getAllCenters(queryParams),
+    placeholderData: (previousData) => previousData,
+    staleTime: 60 * 1000,
+  });
 
-      const response = await centersService.getAllCenters(params);
-      
-      if (response && response.data) {
-        setCenters(response.data);
-        if (response.meta) {
-          setTotal(response.meta.total);
-          setTotalPages(response.meta.totalPages);
-        }
-      } else {
-        setCenters(Array.isArray(response) ? response : []);
-      }
-    } catch (error) {
-      console.error("Failed to fetch centers:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCenters();
-  }, [page, limit, debouncedSearch, sortBy, sortOrder]);
+  const centers: AutomotiveCenter[] = response?.data || (Array.isArray(response) ? response : []);
+  const total = response?.meta?.total || centers.length;
+  const totalPages = response?.meta?.totalPages || 1;
 
   // Handle Sort Change
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

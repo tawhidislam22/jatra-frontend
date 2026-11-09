@@ -45,6 +45,8 @@ export function CenterCard({ center, onBook }: CenterCardProps) {
         <img 
           src={defaultImage} 
           alt={center.name} 
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover group-hover:scale-105 group-hover:opacity-75 transition-all duration-500"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-80" />
