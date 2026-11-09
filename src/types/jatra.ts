@@ -59,20 +59,42 @@ export interface RentalBooking {
   payment?: Payment;
 }
 
+export interface ServiceAssignmentHistory {
+  id: string;
+  serviceRequestId: string;
+  mechanicId: string;
+  assignedById: string;
+  status: string;
+  notes?: string;
+  assignedAt: string;
+  mechanic?: User;
+  assignedBy?: User;
+}
+
 export interface ServiceRequest {
   id: string;
   serviceType: 'WORKSHOP' | 'DOORSTEP';
+  serviceName?: string;
   scheduledDate: string;
-  issueDescription: string;
+  issueDescription?: string;
+  problemImages?: string[];
+  completionImages?: string[];
+  reworkNotes?: string;
+  estimatedDuration?: number;
+  totalAmount?: number;
+  approvedAt?: string;
   vehicleId: string;
   centerId: string;
   mechanicId?: string;
   customerId?: string;
-  status: 'PENDING' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  status: 'PENDING' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED_PENDING_REVIEW' | 'DONE' | 'COMPLETED' | 'REASSIGNMENT_REQUIRED' | 'CANCELLED';
   vehicle?: Vehicle;
   customer?: User;
+  center?: AutomotiveCenter;
   mechanic?: User;
   payment?: Payment;
+  review?: Review;
+  assignmentHistory?: ServiceAssignmentHistory[];
 }
 
 export interface Payment {
