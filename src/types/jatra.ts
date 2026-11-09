@@ -13,6 +13,16 @@ export interface User {
   employedAtCenter?: AutomotiveCenter;
 }
 
+export interface IWorkshopServicePackage {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  estimatedDuration: number;
+  category?: string;
+  iconName?: string;
+}
+
 export interface AutomotiveCenter {
   id: string;
   name: string;
@@ -24,6 +34,7 @@ export interface AutomotiveCenter {
   rating?: number;
   isApproved?: boolean;
   servicesOffered?: string[];
+  customServices?: IWorkshopServicePackage[];
   images?: string[];
   adminId?: string;
   admin?: User;

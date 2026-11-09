@@ -53,7 +53,7 @@ export default function CenterDetailsPage() {
   const [myVehicles, setMyVehicles] = useState<any[]>([]);
   const [myRequests, setMyRequests] = useState<any[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState("");
-  const [selectedService, setSelectedService] = useState<any>(WORKSHOP_SERVICES[0]);
+  const [selectedService, setSelectedService] = useState<any>(null);
   const [date, setDate] = useState(() => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -119,6 +119,39 @@ export default function CenterDetailsPage() {
   }, [myRequests]);
 
   const currentVehicleActiveBooking = selectedVehicle ? activeBookedVehicles.get(selectedVehicle) : null;
+
+  // Resolve center's specific services and rates (configured by center owner)
+  const centerServices = useMemo(() => {
+    if (center?.customServices && Array.isArray(center.customServices) && center.customServices.length > 0) {
+      return center.customServices;
+    }
+    if (center?.servicesOffered && Array.isArray(center.servicesOffered) && center.servicesOffered.length > 0) {
+      return center.servicesOffered.map((sName: string, idx: number) => {
+        const match = WORKSHOP_SERVICES.find(ws => ws.name.toLowerCase() === sName.toLowerCase());
+        return match || {
+          id: `service-${idx}`,
+          name: sName,
+          description: `Certified ${sName} performed by certified workshop mechanics.`,
+          price: 50,
+          estimatedDuration: 60,
+          category: "General",
+          iconName: "Wrench"
+        };
+      });
+    }
+    return WORKSHOP_SERVICES;
+  }, [center]);
+
+  // Auto-select first service when centerServices updates
+  useEffect(() => {
+    if (centerServices.length > 0) {
+      setSelectedService((prev: any) => {
+        if (!prev) return centerServices[0];
+        const match = centerServices.find((s: any) => s.id === prev.id || s.name === prev.name);
+        return match || centerServices[0];
+      });
+    }
+  }, [centerServices]);
 
   // Fetch Slot Availability whenever center, date, or selected service changes
   useEffect(() => {
@@ -307,11 +340,11 @@ export default function CenterDetailsPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {WORKSHOP_SERVICES.map((pkg) => {
-                  const isSelected = selectedService?.id === pkg.id;
+                {centerServices.map((pkg: any) => {
+                  const isSelected = selectedService?.id === pkg.id || selectedService?.name === pkg.name;
                   return (
                     <div 
-                      key={pkg.id}
+                      key={pkg.id || pkg.name}
                       onClick={() => setSelectedService(pkg)}
                       className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
                         isSelected 
@@ -321,7 +354,7 @@ export default function CenterDetailsPage() {
                     >
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
-                          {getServiceIcon(pkg.iconName)}
+                          {getServiceIcon(pkg.iconName || "Wrench")}
                         </div>
                         <div className="text-right">
                           <span className="text-lg font-black text-foreground">${pkg.price}</span>

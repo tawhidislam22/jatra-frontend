@@ -98,10 +98,24 @@ export function CenterCard({ center, onBook }: CenterCardProps) {
           <h5 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-1.5">
             <Wrench className="w-3 h-3 text-primary" /> Supported Services
           </h5>
-          {center.servicesOffered && center.servicesOffered.length > 0 ? (
+          {center.customServices && center.customServices.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {center.customServices.slice(0, 4).map((s, i) => (
+                <span key={i} className="text-[10px] bg-muted text-foreground px-2 py-0.5 rounded font-bold uppercase tracking-wider flex items-center gap-1 border border-border/50">
+                  <span>{s.name}</span>
+                  <span className="text-amber-500 font-black">${s.price}</span>
+                </span>
+              ))}
+              {center.customServices.length > 4 && (
+                <span className="text-[10px] bg-muted/70 text-muted-foreground px-2 py-0.5 rounded font-bold uppercase">
+                  +{center.customServices.length - 4} more
+                </span>
+              )}
+            </div>
+          ) : center.servicesOffered && center.servicesOffered.length > 0 ? (
             <div className="flex flex-wrap gap-1.5">
               {center.servicesOffered.slice(0, 4).map((service, i) => (
-                <span key={i} className="text-[10px] bg-muted text-foreground px-2 py-0.5 rounded font-bold uppercase tracking-wider">
+                <span key={i} className="text-[10px] bg-muted text-foreground px-2 py-0.5 rounded font-bold uppercase tracking-wider border border-border/50">
                   {service}
                 </span>
               ))}
