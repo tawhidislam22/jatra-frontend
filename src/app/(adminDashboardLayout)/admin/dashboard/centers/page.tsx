@@ -10,6 +10,7 @@ import {
   Eye, 
   MapPin, 
   Phone, 
+  Mail,
   Star, 
   Users, 
   Car, 
@@ -34,7 +35,7 @@ export default function AdminCentersPage() {
   const fetchCenters = async () => {
     try {
       setLoading(true);
-      const res = await centersService.getAllCenters();
+      const res = await centersService.getAllCenters({ forAdmin: "true", limit: 100 });
       const rawList = res?.data || (Array.isArray(res) ? res : []);
       setCenters(Array.isArray(rawList) ? rawList : []);
     } catch (err) {
@@ -83,11 +84,14 @@ export default function AdminCentersPage() {
       filterTab === "PENDING" ? !c.isApproved :
       filterTab === "APPROVED" ? c.isApproved : true;
 
+    const centerEmail = c.admin?.email || c.email || "";
+
     const matchesSearch = 
       (c.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       (c.address || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       (c.admin?.fullName || c.admin?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (c.phone || "").includes(searchQuery);
+      centerEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.phone || c.admin?.phone || "").includes(searchQuery);
 
     return matchesTab && matchesSearch;
   });
@@ -114,12 +118,12 @@ export default function AdminCentersPage() {
 
         {/* Filter Controls & Search */}
         <div className="flex flex-col sm:flex-row items-center gap-3">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search center, city, or owner..."
+              placeholder="Search center, email, city, or owner..."
               className="pl-9 bg-zinc-900 border-zinc-800 text-xs text-white rounded-xl h-10 focus:border-red-500"
             />
           </div>
@@ -177,7 +181,7 @@ export default function AdminCentersPage() {
                 <tr>
                   <th className="p-4">Workshop Center</th>
                   <th className="p-4">Location</th>
-                  <th className="p-4">Owner / Contact</th>
+                  <th className="p-4">Owner & Email Contact</th>
                   <th className="p-4">Mechanics</th>
                   <th className="p-4">Rating</th>
                   <th className="p-4">Status</th>
@@ -187,6 +191,7 @@ export default function AdminCentersPage() {
               <tbody className="divide-y divide-zinc-800/60 font-medium">
                 {filteredCenters.map((c) => {
                   const centerImg = c.images && c.images.length > 0 ? c.images[0] : null;
+                  const centerEmail = c.admin?.email || c.email || null;
 
                   return (
                     <tr key={c.id} className="hover:bg-zinc-900/40 transition-colors">
@@ -219,15 +224,27 @@ export default function AdminCentersPage() {
                         </div>
                       </td>
 
-                      {/* Owner & Phone */}
+                      {/* Owner, Email & Phone */}
                       <td className="p-4">
-                        <div>
+                        <div className="space-y-1">
                           <p className="font-semibold text-zinc-200">
                             {c.admin?.fullName || c.admin?.name || "Owner Partner"}
                           </p>
-                          <p className="text-[11px] text-zinc-500 flex items-center gap-1 mt-0.5">
-                            <Phone className="w-3 h-3 text-zinc-600" />
-                            {c.phone || c.admin?.phone || "No phone"}
+                          {centerEmail && (
+                            <div className="flex items-center gap-1.5 text-[11px]">
+                              <Mail className="w-3 h-3 text-red-500 shrink-0" />
+                              <a
+                                href={`mailto:${centerEmail}`}
+                                className="text-zinc-300 hover:text-red-400 hover:underline transition-colors font-mono truncate max-w-[190px]"
+                                title={centerEmail}
+                              >
+                                {centerEmail}
+                              </a>
+                            </div>
+                          )}
+                          <p className="text-[11px] text-zinc-500 flex items-center gap-1.5">
+                            <Phone className="w-3 h-3 text-zinc-600 shrink-0" />
+                            <span>{c.phone || c.admin?.phone || "No phone"}</span>
                           </p>
                         </div>
                       </td>
@@ -333,9 +350,16 @@ export default function AdminCentersPage() {
               </div>
               <div>
                 <h2 className="text-xl font-black uppercase tracking-tight text-white">{selectedCenter.name}</h2>
-                <p className="text-xs text-zinc-400 flex items-center gap-1.5 mt-0.5">
-                  <MapPin className="w-3.5 h-3.5 text-zinc-500" /> {selectedCenter.address}
-                </p>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-400 mt-0.5">
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-zinc-500" /> {selectedCenter.address}
+                  </span>
+                  {(selectedCenter.admin?.email || selectedCenter.email) && (
+                    <span className="flex items-center gap-1.5 font-mono text-zinc-300">
+                      <Mail className="w-3.5 h-3.5 text-red-500" /> {selectedCenter.admin?.email || selectedCenter.email}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -345,10 +369,26 @@ export default function AdminCentersPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+              <div className="bg-zinc-900 p-3.5 rounded-xl border border-zinc-800/80">
+                <p className="text-[10px] uppercase font-black tracking-widest text-zinc-500">Center Email</p>
+                <p className="text-xs font-bold text-white mt-1 flex items-center gap-1.5 truncate">
+                  <Mail className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                  <a 
+                    href={`mailto:${selectedCenter.admin?.email || selectedCenter.email}`}
+                    className="hover:text-red-400 hover:underline truncate"
+                    title={selectedCenter.admin?.email || selectedCenter.email || "No email"}
+                  >
+                    {selectedCenter.admin?.email || selectedCenter.email || "Not specified"}
+                  </a>
+                </p>
+              </div>
               <div className="bg-zinc-900 p-3.5 rounded-xl border border-zinc-800/80">
                 <p className="text-[10px] uppercase font-black tracking-widest text-zinc-500">Owner Contact</p>
-                <p className="text-xs font-bold text-white mt-1">{selectedCenter.phone || "Not specified"}</p>
+                <p className="text-xs font-bold text-white mt-1 flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                  {selectedCenter.phone || selectedCenter.admin?.phone || "Not specified"}
+                </p>
               </div>
               <div className="bg-zinc-900 p-3.5 rounded-xl border border-zinc-800/80">
                 <p className="text-[10px] uppercase font-black tracking-widest text-zinc-500">Customer Rating</p>
