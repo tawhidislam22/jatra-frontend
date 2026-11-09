@@ -102,16 +102,83 @@ export function ChatView({ basePath = "/dashboard/messages", portalTitle = "Mess
     sendMutation.mutate(inputText.trim());
   };
 
+  const isOwnerOrMechanic =
+    user?.role === "OWNER" ||
+    user?.role === "MECHANIC" ||
+    user?.role === "ADMIN" ||
+    basePath.includes("/owner") ||
+    basePath.includes("/mechanic") ||
+    basePath.includes("/admin");
+
+  const getConversationDetails = (conv: Conversation) => {
+    const other = conv.otherParticipant;
+    const isOtherCustomer = other?.role === "CUSTOMER";
+
+    // When viewed by an Owner/Mechanic, or when the other participant is a CUSTOMER:
+    // Always display the customer's actual name, avatar initial, and contact info!
+    if (isOwnerOrMechanic || isOtherCustomer) {
+      const name =
+        other?.fullName?.trim() ||
+        other?.name?.trim() ||
+        (other?.email ? other.email.split("@")[0] : "") ||
+        "Customer";
+
+      const initial = name.charAt(0).toUpperCase();
+      const badge = other?.role || "CUSTOMER";
+      const subtitle = [other?.email, other?.phone].filter(Boolean).join(" • ") || (conv.center?.name ? `Customer at ${conv.center.name}` : "Customer");
+
+      return {
+        title: name,
+        initial,
+        badge,
+        subtitle,
+        isCustomerUser: true,
+        centerName: conv.center?.name,
+      };
+    }
+
+    // Customer view communicating with a workshop center or vehicle host:
+    const name =
+      conv.center?.name ||
+      other?.fullName?.trim() ||
+      other?.name?.trim() ||
+      (other?.email ? other.email.split("@")[0] : "") ||
+      "Workshop Host";
+
+    const initial = name.charAt(0).toUpperCase();
+    const badge = conv.center ? "WORKSHOP" : (other?.role || "PARTNER");
+    const subtitle = conv.center?.address || other?.email || "Service Workshop";
+
+    return {
+      title: name,
+      initial,
+      badge,
+      subtitle,
+      isCustomerUser: false,
+      centerName: conv.center?.name,
+    };
+  };
+
   // Filter conversations by search input
   const filteredConversations = conversations.filter((c) => {
-    const participantName = (c.otherParticipant?.fullName || c.otherParticipant?.name || c.otherParticipant?.email || "").toLowerCase();
+    const details = getConversationDetails(c);
+    const title = details.title.toLowerCase();
+    const subtitle = details.subtitle.toLowerCase();
     const centerName = (c.center?.name || "").toLowerCase();
     const vehicleName = c.rentalBooking?.vehicle ? `${c.rentalBooking.vehicle.make} ${c.rentalBooking.vehicle.model}`.toLowerCase() : "";
     const lastMsg = (c.lastMessage || "").toLowerCase();
     const q = searchQuery.toLowerCase();
 
-    return participantName.includes(q) || centerName.includes(q) || vehicleName.includes(q) || lastMsg.includes(q);
+    return (
+      title.includes(q) ||
+      subtitle.includes(q) ||
+      centerName.includes(q) ||
+      vehicleName.includes(q) ||
+      lastMsg.includes(q)
+    );
   });
+
+  const activeDetails = activeConversation ? getConversationDetails(activeConversation) : null;
 
   const formatMessageTime = (dateStr: string) => {
     try {
@@ -188,8 +255,7 @@ export function ChatView({ basePath = "/dashboard/messages", portalTitle = "Mess
               filteredConversations.map((c) => {
                 const isSelected = c.id === selectedId;
                 const hasUnread = (c.unreadCount || 0) > 0;
-                const other = c.otherParticipant;
-                const displayName = c.center?.name || other?.fullName || other?.name || other?.email?.split("@")[0] || "Workshop Host";
+                const details = getConversationDetails(c);
 
                 return (
                   <div
@@ -207,7 +273,7 @@ export function ChatView({ basePath = "/dashboard/messages", portalTitle = "Mess
                     {/* Avatar */}
                     <div className="relative shrink-0">
                       <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-primary/30 to-primary/10 border border-primary/20 flex items-center justify-center font-bold text-primary text-sm shadow-sm">
-                        {displayName.charAt(0).toUpperCase()}
+                        {details.initial}
                       </div>
                       <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-card" />
                     </div>
@@ -215,7 +281,7 @@ export function ChatView({ basePath = "/dashboard/messages", portalTitle = "Mess
                     {/* Details */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-baseline justify-between gap-1 mb-1">
-                        <h4 className="font-bold text-xs truncate text-foreground">{displayName}</h4>
+                        <h4 className="font-bold text-xs truncate text-foreground">{details.title}</h4>
                         <span className="text-[10px] text-muted-foreground shrink-0 font-medium">
                           {formatRelative(c.lastMessageAt || c.updatedAt)}
                         </span>
@@ -232,7 +298,7 @@ export function ChatView({ basePath = "/dashboard/messages", portalTitle = "Mess
                       {c.serviceRequest && (
                         <div className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-bold mb-1 truncate">
                           <Wrench className="w-3 h-3 shrink-0" />
-                          <span>Service: {c.serviceRequest.serviceType}</span>
+                          <span>Service: {c.serviceRequest.serviceType}{details.isCustomerUser && c.center ? ` • ${c.center.name}` : ""}</span>
                         </div>
                       )}
 
@@ -271,57 +337,59 @@ export function ChatView({ basePath = "/dashboard/messages", portalTitle = "Mess
           ) : (
             <>
               {/* Chat Header */}
-              <div className="p-3.5 border-b bg-card flex items-center justify-between shrink-0 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setShowMobileChat(false)}
-                    className="md:hidden p-1.5 rounded-lg text-muted-foreground hover:bg-muted"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
+              {activeDetails && (
+                <div className="p-3.5 border-b bg-card flex items-center justify-between shrink-0 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setShowMobileChat(false)}
+                      className="md:hidden p-1.5 rounded-lg text-muted-foreground hover:bg-muted"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
 
-                  <div className="w-10 h-10 rounded-full bg-primary/15 text-primary border border-primary/20 flex items-center justify-center font-bold text-sm shrink-0">
-                    {(activeConversation.center?.name || activeConversation.otherParticipant?.fullName || activeConversation.otherParticipant?.name || "J").charAt(0).toUpperCase()}
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-sm text-foreground">
-                        {activeConversation.center?.name || activeConversation.otherParticipant?.fullName || activeConversation.otherParticipant?.name || "Participant"}
-                      </h3>
-                      <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
-                        {activeConversation.otherParticipant?.role || "PARTNER"}
-                      </span>
+                    <div className="w-10 h-10 rounded-full bg-primary/15 text-primary border border-primary/20 flex items-center justify-center font-bold text-sm shrink-0">
+                      {activeDetails.initial}
                     </div>
 
-                    <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      <span>{activeConversation.center?.address || activeConversation.otherParticipant?.email}</span>
-                    </p>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-sm text-foreground">
+                          {activeDetails.title}
+                        </h3>
+                        <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
+                          {activeDetails.badge}
+                        </span>
+                      </div>
+
+                      <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span>{activeDetails.subtitle}</span>
+                      </p>
+                    </div>
                   </div>
+
+                  {/* Booking or Service quick shortcut */}
+                  {activeConversation.rentalBooking && (
+                    <Link href={isOwnerOrMechanic ? "/owner/dashboard/earnings" : "/dashboard/bookings"}>
+                      <Button variant="outline" size="sm" className="text-xs font-bold hidden sm:flex items-center gap-1 rounded-xl h-8">
+                        <Car className="w-3.5 h-3.5 text-primary" />
+                        <span>Booking #{activeConversation.rentalBooking.id.slice(0, 8)}</span>
+                        <ExternalLink className="w-3 h-3 ml-1 opacity-60" />
+                      </Button>
+                    </Link>
+                  )}
+
+                  {activeConversation.serviceRequest && (
+                    <Link href={isOwnerOrMechanic ? "/owner/dashboard/service-requests" : "/dashboard/service-requests"}>
+                      <Button variant="outline" size="sm" className="text-xs font-bold hidden sm:flex items-center gap-1 rounded-xl h-8">
+                        <Wrench className="w-3.5 h-3.5 text-primary" />
+                        <span>Service Request</span>
+                        <ExternalLink className="w-3 h-3 ml-1 opacity-60" />
+                      </Button>
+                    </Link>
+                  )}
                 </div>
-
-                {/* Booking or Service quick shortcut */}
-                {activeConversation.rentalBooking && (
-                  <Link href="/dashboard/bookings">
-                    <Button variant="outline" size="sm" className="text-xs font-bold hidden sm:flex items-center gap-1 rounded-xl h-8">
-                      <Car className="w-3.5 h-3.5 text-primary" />
-                      <span>Booking #{activeConversation.rentalBooking.id.slice(0, 8)}</span>
-                      <ExternalLink className="w-3 h-3 ml-1 opacity-60" />
-                    </Button>
-                  </Link>
-                )}
-
-                {activeConversation.serviceRequest && (
-                  <Link href="/dashboard/service-requests">
-                    <Button variant="outline" size="sm" className="text-xs font-bold hidden sm:flex items-center gap-1 rounded-xl h-8">
-                      <Wrench className="w-3.5 h-3.5 text-primary" />
-                      <span>Service Request</span>
-                      <ExternalLink className="w-3 h-3 ml-1 opacity-60" />
-                    </Button>
-                  </Link>
-                )}
-              </div>
+              )}
 
               {/* Related Context Banner */}
               {(activeConversation.rentalBooking || activeConversation.serviceRequest) && (
@@ -335,7 +403,9 @@ export function ChatView({ basePath = "/dashboard/messages", portalTitle = "Mess
                     )}
                     {activeConversation.serviceRequest && (
                       <span>
-                        Service appointment for <strong>{activeConversation.serviceRequest.serviceType}</strong> • Scheduled on {new Date(activeConversation.serviceRequest.scheduledDate).toLocaleDateString()}
+                        Service appointment for <strong>{activeConversation.serviceRequest.serviceType}</strong>
+                        {activeDetails?.centerName ? ` at ${activeDetails.centerName}` : ""}
+                        {activeConversation.serviceRequest.scheduledDate ? ` • Scheduled on ${new Date(activeConversation.serviceRequest.scheduledDate).toLocaleDateString()}` : ""}
                       </span>
                     )}
                   </div>
@@ -371,7 +441,7 @@ export function ChatView({ basePath = "/dashboard/messages", portalTitle = "Mess
                         >
                           {!isMe && (
                             <span className="block text-[10px] font-black uppercase tracking-wider opacity-70 mb-1">
-                              {m.sender?.fullName || m.sender?.name || "Partner"}
+                              {m.sender?.fullName || m.sender?.name || (m.sender?.role === "CUSTOMER" ? "Customer" : (activeConversation.center?.name || "Partner"))}
                             </span>
                           )}
                           <p className="whitespace-pre-wrap break-words">{m.content}</p>

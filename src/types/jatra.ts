@@ -167,6 +167,7 @@ export interface Conversation {
     name: string;
     fullName?: string;
     email: string;
+    phone?: string;
     image?: string;
     role: string;
   };
