@@ -16,6 +16,7 @@ import {
   Info
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function BookingsPage() {
   const [bookings, setBookings] = useState<RentalBooking[]>([]);
@@ -112,13 +113,16 @@ export default function BookingsPage() {
       });
 
       setCancelSuccess(true);
+      toast.success("Rental booking cancelled. Refund credited to your wallet!");
       await fetchBookings();
       setTimeout(() => {
         setCancellingBooking(null);
       }, 1500);
     } catch (err: any) {
       console.error("Cancellation error:", err);
-      setCancelError(err?.response?.data?.message || err?.message || "Failed to cancel booking.");
+      const errMsg = err?.response?.data?.message || err?.message || "Failed to cancel booking.";
+      setCancelError(errMsg);
+      toast.error(errMsg);
     } finally {
       setSubmittingCancel(false);
     }

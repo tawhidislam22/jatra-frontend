@@ -24,6 +24,7 @@ import {
   Image as ImageIcon
 } from "lucide-react";
 import { WishlistButton } from "@/components/ui/WishlistButton";
+import { toast } from "sonner";
 import { serviceRequestsService } from "@/services/services.service";
 import { centersService } from "@/services/centers.service";
 import { WORKSHOP_SERVICES, getServiceByNameOrId } from "@/constants/serviceCatalog";
@@ -207,26 +208,34 @@ export default function CenterDetailsPage() {
     setError("");
 
     if (!user) {
+      toast.error("Please sign in to book a service appointment.");
       router.push(`/login?redirect=/centers/${params.id}`);
       return;
     }
 
     if (!selectedVehicle) {
-      setError("Please select a vehicle from your registered fleet or add one first.");
+      const msg = "Please select a vehicle from your registered fleet or add one first.";
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
     if (currentVehicleActiveBooking) {
-      setError("This car already has an ongoing service booking in progress. A single vehicle cannot have multiple active service bookings simultaneously.");
+      const msg = "This car already has an ongoing service booking in progress. A single vehicle cannot have multiple active service bookings simultaneously.";
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
     if (problemFiles.length === 0) {
-      setError("At least one problem image showing your car issue is mandatory to proceed.");
+      const msg = "At least one problem image showing your car issue is mandatory to proceed.";
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
     setBookingLoading(true);
+    const toastId = toast.loading("Booking appointment & preparing checkout...");
 
     try {
       const scheduledDateTime = new Date(`${date}T${time}:00`);
@@ -259,13 +268,17 @@ export default function CenterDetailsPage() {
       });
 
       if (session?.data?.url) {
+        toast.success("Appointment created! Redirecting to checkout...", { id: toastId });
         window.location.href = session.data.url;
       } else {
+        toast.success("Service appointment booked successfully!", { id: toastId });
         router.push("/dashboard/service-requests");
       }
     } catch (err: any) {
       console.error("Booking error:", err);
-      setError(err?.response?.data?.message || err.message || "Failed to process booking. Please try another slot.");
+      const errMsg = err?.response?.data?.message || err.message || "Failed to process booking. Please try another slot.";
+      setError(errMsg);
+      toast.error(errMsg, { id: toastId });
       setBookingLoading(false);
     }
   };

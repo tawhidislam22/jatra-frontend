@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { centersService } from "@/services/centers.service";
 import { vehiclesService } from "@/services/vehicles.service";
+import { toast } from "sonner";
 import { 
   Car, 
   Plus, 
@@ -152,6 +153,7 @@ export default function FleetPage() {
       }
 
       await vehiclesService.registerVehicle(payload);
+      toast.success("Vehicle registered to your fleet!");
       setShowAddModal(false);
       setFormData({ 
         make: "", 
@@ -166,7 +168,9 @@ export default function FleetPage() {
       fetchFleet();
     } catch (error: any) {
       console.error("Error registering vehicle:", error);
-      setErrorMessage(error?.response?.data?.message || "Failed to register vehicle. Please check details.");
+      const errMsg = error?.response?.data?.message || "Failed to register vehicle. Please check details.";
+      setErrorMessage(errMsg);
+      toast.error(errMsg);
     } finally {
       setSubmitting(false);
     }
@@ -202,11 +206,14 @@ export default function FleetPage() {
         features: editFormData.features.split(',').map((f: string) => f.trim()).filter(Boolean)
       });
 
+      toast.success("Vehicle details and pricing updated!");
       setEditingVehicle(null);
       await fetchFleet();
     } catch (err: any) {
       console.error("Error updating vehicle:", err);
-      setEditError(err?.response?.data?.message || err?.message || "Failed to update vehicle.");
+      const errMsg = err?.response?.data?.message || err?.message || "Failed to update vehicle.";
+      setEditError(errMsg);
+      toast.error(errMsg);
     } finally {
       setSubmittingEdit(false);
     }
@@ -217,9 +224,11 @@ export default function FleetPage() {
       await vehiclesService.updateVehicle(id, { 
         isAvailable: !isAvailable 
       });
+      toast.info(isAvailable ? "Vehicle deactivated from rental availability." : "Vehicle activated for rental!");
       fetchFleet();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating status:", error);
+      toast.error("Failed to update vehicle status.");
     }
   };
 

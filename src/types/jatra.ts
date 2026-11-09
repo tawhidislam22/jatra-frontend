@@ -233,6 +233,7 @@ export interface Conversation {
   };
   center?: {
     id: string;
+    adminId?: string;
     name: string;
     address: string;
     phone?: string;
@@ -244,6 +245,15 @@ export interface Conversation {
     returnDate: string;
     totalAmount: number;
     status: string;
+    customer?: {
+      id: string;
+      name: string;
+      fullName?: string;
+      email: string;
+      phone?: string;
+      image?: string;
+      role: string;
+    };
     vehicle?: {
       id: string;
       make: string;
@@ -255,9 +265,19 @@ export interface Conversation {
   serviceRequest?: {
     id: string;
     serviceType: string;
+    serviceName?: string;
     scheduledDate: string;
     status: string;
     issueDescription?: string;
+    customer?: {
+      id: string;
+      name: string;
+      fullName?: string;
+      email: string;
+      phone?: string;
+      image?: string;
+      role: string;
+    };
     vehicle?: {
       id: string;
       make: string;

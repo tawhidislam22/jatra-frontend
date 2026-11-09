@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { vehiclesService } from "@/services/vehicles.service";
 import { CarFront, X, Upload, Image as ImageIcon, Trash2, Car } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function MyVehiclesPage() {
   const [vehicles, setVehicles] = useState<any[]>([]);
@@ -87,8 +88,11 @@ export default function MyVehiclesPage() {
       setLicensePlate("");
       handleRemoveImage();
       fetchVehicles();
+      toast.success("Vehicle registered successfully!");
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || "Failed to add vehicle");
+      const msg = err.response?.data?.message || err.message || "Failed to add vehicle";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setAdding(false);
     }

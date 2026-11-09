@@ -25,6 +25,7 @@ import { serviceRequestsService } from "@/services/services.service";
 import { useAuth } from "@/context/AuthContext";
 import { centersService } from "@/services/centers.service";
 import { ServiceRequest } from "@/types/jatra";
+import { toast } from "sonner";
 
 export default function OwnerServiceRequestsPage() {
   const { user } = useAuth();
@@ -98,9 +99,11 @@ export default function OwnerServiceRequestsPage() {
     setActionLoading(true);
     try {
       await serviceRequestsService.assignMechanic(id, mechanicId);
+      toast.success("Mechanic assigned successfully!");
       await loadData();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to assign mechanic", error);
+      toast.error(error?.response?.data?.message || "Failed to assign mechanic.");
     } finally {
       setActionLoading(false);
     }
@@ -110,10 +113,12 @@ export default function OwnerServiceRequestsPage() {
     setActionLoading(true);
     try {
       await serviceRequestsService.verifyCompletion(id, { action: "APPROVE" });
+      toast.success("Service approved and marked completed!");
       setInspectRequest(null);
       await loadData();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to approve work", error);
+      toast.error(error?.response?.data?.message || "Failed to approve service.");
     } finally {
       setActionLoading(false);
     }
@@ -129,12 +134,14 @@ export default function OwnerServiceRequestsPage() {
         notes: reworkNotes.trim(),
         newMechanicId: reassignMechanicId || undefined
       });
+      toast.info("Rework requested and assigned to mechanic.");
       setInspectRequest(null);
       setShowReworkInput(false);
       setReworkNotes("");
       await loadData();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to request rework", error);
+      toast.error(error?.response?.data?.message || "Failed to request rework.");
     } finally {
       setActionLoading(false);
     }
@@ -149,11 +156,13 @@ export default function OwnerServiceRequestsPage() {
       await serviceRequestsService.reopenForRework(reopenRequest.id, {
         reason: reopenReason.trim()
       });
+      toast.info("Service job reopened for quality rework.");
       setReopenRequest(null);
       setReopenReason("");
       await loadData();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to reopen job", error);
+      toast.error(error?.response?.data?.message || "Failed to reopen job.");
     } finally {
       setActionLoading(false);
     }

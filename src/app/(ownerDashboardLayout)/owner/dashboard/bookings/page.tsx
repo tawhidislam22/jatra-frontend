@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { bookingsService } from "@/services/bookings.service";
+import { toast } from "sonner";
 import { 
   Calendar, 
   Car, 
@@ -52,9 +53,11 @@ export default function BookingsPage() {
   const handleUpdateStatus = async (id: string, status: string) => {
     try {
       await bookingsService.updateStatus(id, { status });
+      toast.success(`Booking status updated to ${status}`);
       fetchBookings();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating booking status:", error);
+      toast.error(error?.response?.data?.message || "Failed to update booking status.");
     }
   };
 
@@ -108,13 +111,16 @@ export default function BookingsPage() {
       });
 
       setCancelSuccess(true);
+      toast.success("Booking cancelled and customer refunded.");
       await fetchBookings();
       setTimeout(() => {
         setCancellingBooking(null);
       }, 1500);
     } catch (err: any) {
       console.error("Cancellation error:", err);
-      setCancelError(err?.response?.data?.message || err?.message || "Failed to cancel booking.");
+      const errMsg = err?.response?.data?.message || err?.message || "Failed to cancel booking.";
+      setCancelError(errMsg);
+      toast.error(errMsg);
     } finally {
       setSubmittingCancel(false);
     }

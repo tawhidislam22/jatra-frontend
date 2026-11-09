@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { toast } from "sonner";
 
 type TabType = "all" | "vehicles" | "centers";
 
@@ -58,8 +59,10 @@ export default function WishlistPage() {
       }));
 
       await wishlistService.removeWishlistItem(wishlistId);
+      toast.success("Item removed from your wishlist.");
     } catch (err) {
       console.error("Failed to remove item:", err);
+      toast.error("Failed to remove item. Please try again.");
       // Re-fetch on error
       fetchWishlist();
     } finally {

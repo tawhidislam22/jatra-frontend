@@ -30,6 +30,7 @@ import { vehiclesService } from "@/services/vehicles.service";
 import { useAuth } from "@/context/AuthContext";
 import { WishlistButton } from "@/components/ui/WishlistButton";
 import Link from "next/link";
+import { toast } from "sonner";
 
 const getFeatureIcon = (feature: string) => {
   switch (feature.toLowerCase()) {
@@ -157,26 +158,34 @@ export default function VehicleDetailsPage() {
     setError("");
 
     if (!isAuthenticated) {
+      toast.error("Please sign in to book this rental vehicle.");
       router.push(`/login?redirect=${encodeURIComponent(`/vehicles/${params.id}`)}`);
       return;
     }
 
     if (!rentalCalculation.isValid) {
-      setError("Please select a valid pickup date and return date (return date must be after pickup).");
+      const msg = "Please select a valid pickup date and return date (return date must be after pickup).";
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
     if (isVehicleBookedForDates) {
-      setError("This vehicle is already reserved for the selected date range. Please select different dates.");
+      const msg = "This vehicle is already reserved for the selected date range. Please select different dates.";
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
     if (isCustomerConflict) {
-      setError("You already have an active car rental during this period. One user cannot rent multiple vehicles simultaneously.");
+      const msg = "You already have an active car rental during this period. One user cannot rent multiple vehicles simultaneously.";
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
     setBookingLoading(true);
+    const toastId = toast.loading("Reserving vehicle & preparing secure checkout...");
     
     try {
       const pDate = new Date(`${pickupDate}T${pickupTime || "00:00"}:00`);
@@ -201,13 +210,17 @@ export default function VehicleDetailsPage() {
       
       // 3. Redirect to Stripe Checkout
       if (checkoutResponse.success && checkoutResponse.data?.url) {
+        toast.success("Reservation confirmed! Redirecting to payment...", { id: toastId });
         window.location.href = checkoutResponse.data.url;
       } else {
+        toast.success("Booking placed successfully!", { id: toastId });
         setBooked(true);
       }
     } catch (err: any) {
       console.error("Booking error:", err);
-      setError(err.response?.data?.message || "Failed to create booking & payment. Please check your dates.");
+      const errMsg = err.response?.data?.message || "Failed to create booking & payment. Please check your dates.";
+      setError(errMsg);
+      toast.error(errMsg, { id: toastId });
       setBookingLoading(false);
     }
   };

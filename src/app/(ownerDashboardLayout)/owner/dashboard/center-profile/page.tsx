@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { centersService } from "@/services/centers.service";
 import { WORKSHOP_SERVICES, IStandardService } from "@/constants/serviceCatalog";
 import { IWorkshopServicePackage } from "@/types/jatra";
+import { toast } from "sonner";
 import { 
   Building2, 
   MapPin, 
@@ -305,9 +306,12 @@ export default function CenterProfilePage() {
       }
       setIsEditing(false);
       await fetchCenters();
+      toast.success("Workshop profile and service catalog updated successfully!");
     } catch (error: any) {
       console.error("Error updating workshop:", error);
-      setErrorMessage(error?.response?.data?.message || "Failed to update workshop information.");
+      const msg = error?.response?.data?.message || "Failed to update workshop information.";
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setSavingEdit(false);
     }
@@ -363,9 +367,12 @@ export default function CenterProfilePage() {
       if (created?.data?.id) {
         setSelectedCenterId(created.data.id);
       }
+      toast.success("New workshop center registered successfully!");
     } catch (error: any) {
       console.error("Error creating workshop:", error);
-      setErrorMessage(error?.response?.data?.message || "Failed to create new workshop.");
+      const msg = error?.response?.data?.message || "Failed to create new workshop.";
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setSubmittingAdd(false);
     }

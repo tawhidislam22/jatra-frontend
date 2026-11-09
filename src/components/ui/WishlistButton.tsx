@@ -5,6 +5,7 @@ import { Heart } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { wishlistService } from "@/services/wishlist.service";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface WishlistButtonProps {
   vehicleId?: string;
@@ -39,6 +40,7 @@ export function WishlistButton({
     e.stopPropagation();
 
     if (!user) {
+      toast.error("Please log in to save to your wishlist.");
       router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
@@ -61,8 +63,15 @@ export function WishlistButton({
       if (onToggle && serverState !== nextState) {
         onToggle(serverState);
       }
+
+      if (serverState) {
+        toast.success(vehicleId ? "Vehicle saved to your wishlist!" : "Workshop center saved to your wishlist!");
+      } else {
+        toast.info(vehicleId ? "Vehicle removed from your wishlist." : "Workshop center removed from your wishlist.");
+      }
     } catch (err) {
       console.error("Failed to toggle wishlist:", err);
+      toast.error("Failed to update wishlist. Please try again.");
       // Revert on error
       setIsWishlisted(!nextState);
       if (onToggle) onToggle(!nextState);

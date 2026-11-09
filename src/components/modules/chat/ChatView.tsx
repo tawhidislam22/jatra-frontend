@@ -26,6 +26,7 @@ import { Conversation, Message } from "@/types/jatra";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 interface ChatViewProps {
   basePath?: string;
@@ -93,7 +94,11 @@ export function ChatView({ basePath = "/dashboard/messages", portalTitle = "Mess
       setInputText("");
       queryClient.invalidateQueries({ queryKey: ["messages", selectedId] });
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      toast.success("Message sent");
     },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || "Failed to send message");
+    }
   });
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -111,21 +116,26 @@ export function ChatView({ basePath = "/dashboard/messages", portalTitle = "Mess
     basePath.includes("/admin");
 
   const getConversationDetails = (conv: Conversation) => {
-    const other = conv.otherParticipant;
-    const isOtherCustomer = other?.role === "CUSTOMER";
+    // When viewed from Owner/Mechanic/Admin portal:
+    // ALWAYS display the customer's actual full name, avatar, and contact details!
+    if (isOwnerOrMechanic) {
+      const customer =
+        conv.serviceRequest?.customer ||
+        conv.rentalBooking?.customer ||
+        (conv.otherParticipant?.role === "CUSTOMER" ? conv.otherParticipant : null) ||
+        conv.otherParticipant;
 
-    // When viewed by an Owner/Mechanic, or when the other participant is a CUSTOMER:
-    // Always display the customer's actual name, avatar initial, and contact info!
-    if (isOwnerOrMechanic || isOtherCustomer) {
       const name =
-        other?.fullName?.trim() ||
-        other?.name?.trim() ||
-        (other?.email ? other.email.split("@")[0] : "") ||
+        customer?.fullName?.trim() ||
+        customer?.name?.trim() ||
+        (customer?.email ? customer.email.split("@")[0] : "") ||
         "Customer";
 
       const initial = name.charAt(0).toUpperCase();
-      const badge = other?.role || "CUSTOMER";
-      const subtitle = [other?.email, other?.phone].filter(Boolean).join(" • ") || (conv.center?.name ? `Customer at ${conv.center.name}` : "Customer");
+      const badge = customer?.role || "CUSTOMER";
+      const subtitle =
+        [customer?.email, customer?.phone].filter(Boolean).join(" • ") ||
+        (conv.center?.name ? `Customer at ${conv.center.name}` : "Customer");
 
       return {
         title: name,
@@ -140,14 +150,14 @@ export function ChatView({ basePath = "/dashboard/messages", portalTitle = "Mess
     // Customer view communicating with a workshop center or vehicle host:
     const name =
       conv.center?.name ||
-      other?.fullName?.trim() ||
-      other?.name?.trim() ||
-      (other?.email ? other.email.split("@")[0] : "") ||
+      conv.otherParticipant?.fullName?.trim() ||
+      conv.otherParticipant?.name?.trim() ||
+      (conv.otherParticipant?.email ? conv.otherParticipant.email.split("@")[0] : "") ||
       "Workshop Host";
 
     const initial = name.charAt(0).toUpperCase();
-    const badge = conv.center ? "WORKSHOP" : (other?.role || "PARTNER");
-    const subtitle = conv.center?.address || other?.email || "Service Workshop";
+    const badge = conv.center ? "WORKSHOP" : (conv.otherParticipant?.role || "PARTNER");
+    const subtitle = conv.center?.address || conv.otherParticipant?.email || "Service Workshop";
 
     return {
       title: name,
@@ -298,7 +308,7 @@ export function ChatView({ basePath = "/dashboard/messages", portalTitle = "Mess
                       {c.serviceRequest && (
                         <div className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-bold mb-1 truncate">
                           <Wrench className="w-3 h-3 shrink-0" />
-                          <span>Service: {c.serviceRequest.serviceType}{details.isCustomerUser && c.center ? ` • ${c.center.name}` : ""}</span>
+                          <span>Service: {c.serviceRequest.serviceName || c.serviceRequest.serviceType}{details.isCustomerUser && c.center ? ` • ${c.center.name}` : ""}</span>
                         </div>
                       )}
 
@@ -403,7 +413,7 @@ export function ChatView({ basePath = "/dashboard/messages", portalTitle = "Mess
                     )}
                     {activeConversation.serviceRequest && (
                       <span>
-                        Service appointment for <strong>{activeConversation.serviceRequest.serviceType}</strong>
+                        Service appointment for <strong>{activeConversation.serviceRequest.serviceName || activeConversation.serviceRequest.serviceType}</strong>
                         {activeDetails?.centerName ? ` at ${activeDetails.centerName}` : ""}
                         {activeConversation.serviceRequest.scheduledDate ? ` • Scheduled on ${new Date(activeConversation.serviceRequest.scheduledDate).toLocaleDateString()}` : ""}
                       </span>

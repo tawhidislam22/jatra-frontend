@@ -22,6 +22,7 @@ import {
   Receipt
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function CustomerServiceRequestsPage() {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
@@ -85,13 +86,16 @@ export default function CustomerServiceRequestsPage() {
       });
 
       setReviewSuccess(true);
+      toast.success("Review submitted! Thank you for your feedback.");
       await fetchRequests();
       setTimeout(() => {
         setReviewRequest(null);
       }, 1500);
     } catch (err: any) {
       console.error("Review error:", err);
-      setReviewError(err?.response?.data?.message || err.message || "Failed to submit review.");
+      const errMsg = err?.response?.data?.message || err.message || "Failed to submit review.";
+      setReviewError(errMsg);
+      toast.error(errMsg);
     } finally {
       setSubmittingReview(false);
     }
@@ -148,6 +152,7 @@ export default function CustomerServiceRequestsPage() {
       });
 
       setCancelSuccess(true);
+      toast.success("Service appointment cancelled. Refund credited to your wallet!");
       await fetchRequests();
       if (selectedRequest?.id === cancellingRequest.id) {
         setSelectedRequest(null);
@@ -157,7 +162,9 @@ export default function CustomerServiceRequestsPage() {
       }, 1500);
     } catch (err: any) {
       console.error("Service cancellation error:", err);
-      setCancelError(err?.response?.data?.message || err?.message || "Failed to cancel service request.");
+      const errMsg = err?.response?.data?.message || err?.message || "Failed to cancel service request.";
+      setCancelError(errMsg);
+      toast.error(errMsg);
     } finally {
       setSubmittingCancel(false);
     }
