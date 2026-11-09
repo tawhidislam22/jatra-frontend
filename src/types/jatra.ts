@@ -29,6 +29,11 @@ export interface AutomotiveCenter {
   admin?: User;
   mechanics?: User[];
   rentalFleet?: Vehicle[];
+  totalMechanicsCount?: number;
+  freeSlotsCount?: number;
+  nextFreeSlot?: string | null;
+  availableSlots?: string[];
+  isBookable?: boolean;
 }
 
 export interface Vehicle {

@@ -212,7 +212,7 @@ export default function CentersPage() {
         <div className="flex justify-between items-center mb-8 border-b border-border pb-4">
           <div className="text-muted-foreground font-bold uppercase tracking-widest text-sm flex items-center gap-2">
             <SlidersHorizontal className="w-4 h-4" />
-            Showing {centers.length > 0 ? (page - 1) * limit + 1 : 0} - {Math.min(page * limit, total)} of {total} Workshops
+            Showing {centers.length} Available Workshop{centers.length !== 1 ? 's' : ''} (With Active Mechanics & Open Slots)
           </div>
         </div>
 
@@ -241,16 +241,20 @@ export default function CentersPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-24 bg-card rounded-md border border-border">
-            <Wrench className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-            <h3 className="text-2xl font-bold text-foreground mb-2">No Workshops Found</h3>
-            <p className="text-muted-foreground font-medium">Try adjusting your search to find what you're looking for.</p>
-            <button 
-              onClick={() => { setSearchTerm(""); setPage(1); }}
-              className="mt-6 px-6 py-3 bg-primary text-white font-bold uppercase tracking-widest text-xs rounded-sm hover:bg-orange-600 transition-colors"
-            >
-              Clear Search
-            </button>
+          <div className="text-center py-24 bg-card rounded-xl border border-border space-y-3">
+            <Wrench className="w-16 h-16 mx-auto text-muted-foreground opacity-40 mb-2" />
+            <h3 className="text-2xl font-black text-foreground uppercase tracking-tight">No Available Workshops At This Time</h3>
+            <p className="text-muted-foreground text-xs font-medium max-w-md mx-auto">
+              Workshops only appear when they have certified mechanics on duty with open booking slots. When workshops add active mechanics or complete active jobs, their free slots appear here automatically.
+            </p>
+            {searchTerm && (
+              <button 
+                onClick={() => { setSearchTerm(""); setPage(1); }}
+                className="mt-4 px-6 py-2.5 bg-primary text-white font-bold uppercase tracking-wider text-xs rounded-lg hover:bg-orange-600 transition-colors"
+              >
+                Clear Search
+              </button>
+            )}
           </div>
         )}
 
