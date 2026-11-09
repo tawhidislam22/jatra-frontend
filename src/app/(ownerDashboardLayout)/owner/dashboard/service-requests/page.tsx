@@ -49,9 +49,11 @@ export default function OwnerServiceRequestsPage() {
   // Reopen Job Drawer
   const [reopenRequest, setReopenRequest] = useState<ServiceRequest | null>(null);
   const [reopenReason, setReopenReason] = useState("");
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadData = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const centerId = user?.managedCenter?.id;
       const [requestsRes, centerRes] = await Promise.all([
@@ -71,8 +73,9 @@ export default function OwnerServiceRequestsPage() {
           setMechanics(detailRes?.data?.mechanics || []);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to load service requests", error);
+      setLoadError(error?.response?.data?.message || error?.message || "Failed to connect to backend server.");
     } finally {
       setLoading(false);
     }
@@ -236,6 +239,26 @@ export default function OwnerServiceRequestsPage() {
           </p>
         </div>
       </div>
+
+      {/* Network / Connection Error Banner */}
+      {loadError && (
+        <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" />
+            <div>
+              <p className="text-xs font-bold text-red-500">Failed to load workshop service requests</p>
+              <p className="text-[11px] text-zinc-400 mt-0.5">{loadError}</p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => loadData()}
+            className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold shrink-0"
+          >
+            Retry Connection
+          </Button>
+        </div>
+      )}
 
       {/* Mechanics Roster & Live Capacity Card */}
       <div className="bg-card border rounded-xl p-5 space-y-3 shadow-sm">

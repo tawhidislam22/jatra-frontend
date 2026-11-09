@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { 
@@ -51,6 +51,7 @@ export default function CenterDetailsPage() {
 
   // Form State
   const [myVehicles, setMyVehicles] = useState<any[]>([]);
+  const [myRequests, setMyRequests] = useState<any[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState("");
   const [selectedService, setSelectedService] = useState<any>(WORKSHOP_SERVICES[0]);
   const [date, setDate] = useState(() => {
@@ -74,10 +75,12 @@ export default function CenterDetailsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [centerRes, vehiclesRes] = await Promise.all([
+        const [centerRes, vehiclesRes, requestsRes] = await Promise.all([
           centersService.getCenterById(params.id as string),
           import("@/services/vehicles.service")
             .then(m => m.vehiclesService.getMyVehicles())
+            .catch(() => ({ data: [] })),
+          serviceRequestsService.getRequests()
             .catch(() => ({ data: [] }))
         ]);
         
@@ -89,6 +92,10 @@ export default function CenterDetailsPage() {
 
         const rawVehicles = vehiclesRes?.data || (Array.isArray(vehiclesRes) ? vehiclesRes : []);
         setMyVehicles(rawVehicles);
+
+        const rawRequests = requestsRes?.data || (Array.isArray(requestsRes) ? requestsRes : []);
+        setMyRequests(rawRequests);
+
         if (rawVehicles.length > 0) setSelectedVehicle(rawVehicles[0].id);
       } catch (err) {
         console.error("Failed to fetch center data:", err);
@@ -99,6 +106,19 @@ export default function CenterDetailsPage() {
     
     fetchData();
   }, [params.id]);
+
+  // Active vehicles already in service
+  const activeBookedVehicles = useMemo(() => {
+    const map = new Map<string, any>();
+    (myRequests || []).forEach((r: any) => {
+      if (['PENDING', 'ACCEPTED', 'IN_PROGRESS', 'COMPLETED_PENDING_REVIEW', 'REASSIGNMENT_REQUIRED'].includes(r.status)) {
+        map.set(r.vehicleId, r);
+      }
+    });
+    return map;
+  }, [myRequests]);
+
+  const currentVehicleActiveBooking = selectedVehicle ? activeBookedVehicles.get(selectedVehicle) : null;
 
   // Fetch Slot Availability whenever center, date, or selected service changes
   useEffect(() => {
@@ -159,6 +179,11 @@ export default function CenterDetailsPage() {
 
     if (!selectedVehicle) {
       setError("Please select a vehicle from your registered fleet or add one first.");
+      return;
+    }
+
+    if (currentVehicleActiveBooking) {
+      setError("This car already has an ongoing service booking in progress. A single vehicle cannot have multiple active service bookings simultaneously.");
       return;
     }
 
@@ -375,12 +400,28 @@ export default function CenterDetailsPage() {
                       required
                     >
                       <option value="">-- Choose a Vehicle --</option>
-                      {myVehicles.map(v => (
-                        <option key={v.id} value={v.id}>
-                          {v.make} {v.model} ({v.year}) - {v.licensePlate}
-                        </option>
-                      ))}
+                      {myVehicles.map(v => {
+                        const isBusy = activeBookedVehicles.has(v.id);
+                        return (
+                          <option key={v.id} value={v.id}>
+                            {v.make} {v.model} ({v.year}) - {v.licensePlate} {isBusy ? " [In Service]" : ""}
+                          </option>
+                        );
+                      })}
                     </select>
+                  )}
+
+                  {/* Active booking warning for selected vehicle */}
+                  {currentVehicleActiveBooking && (
+                    <div className="mt-2.5 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-xs text-amber-500 space-y-1">
+                      <div className="flex items-center gap-1.5 font-bold">
+                        <AlertTriangle className="w-4 h-4 shrink-0" />
+                        <span>Active Booking in Progress</span>
+                      </div>
+                      <p className="text-[11px] text-zinc-300 leading-relaxed font-medium">
+                        This car already has an ongoing service request ({currentVehicleActiveBooking.serviceName || "Service"} &bull; Status: {currentVehicleActiveBooking.status?.replace(/_/g, " ")}). A vehicle cannot have multiple active service bookings simultaneously.
+                      </p>
+                    </div>
                   )}
                 </div>
 
@@ -509,7 +550,7 @@ export default function CenterDetailsPage() {
                 <div className="pt-2">
                   <Button
                     type="submit"
-                    disabled={bookingLoading || problemFiles.length === 0 || !selectedVehicle}
+                    disabled={bookingLoading || problemFiles.length === 0 || !selectedVehicle || !!currentVehicleActiveBooking}
                     className="w-full bg-amber-500 hover:bg-amber-600 text-black font-black uppercase tracking-widest text-xs h-12 rounded-xl shadow-lg transition-transform active:scale-[0.98]"
                   >
                     {bookingLoading ? (
