@@ -25,4 +25,22 @@ api.interceptors.request.use((config) => {
   return config;
 }, (error) => Promise.reject(error));
 
+// Response interceptor: automatically retry transient network errors once
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const config = error.config;
+    if (config && error.message === 'Network Error' && !config._retry) {
+      config._retry = true;
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        return await api(config);
+      } catch (retryError) {
+        return Promise.reject(retryError);
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;
