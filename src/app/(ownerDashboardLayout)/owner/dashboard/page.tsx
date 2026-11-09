@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Car, CalendarDays, Wrench, Star, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { centersService } from "@/services/centers.service";
@@ -9,48 +9,31 @@ import { serviceRequestsService } from "@/services/services.service";
 
 export default function OwnerDashboardPage() {
   const { user } = useAuth();
-  const [center, setCenter] = useState<any>(null);
-  const [bookings, setBookings] = useState<any[]>([]);
-  const [serviceRequests, setServiceRequests] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const centerId = user?.managedCenter?.id;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const centerId = user?.managedCenter?.id;
+  const { data: centerRes, isLoading: loadingCenter } = useQuery({
+    queryKey: ["ownerCenter", centerId || user?.id],
+    queryFn: () => centerId ? centersService.getCenterById(centerId) : (user?.id ? centersService.getAllCenters({ adminId: user.id }) : null),
+    enabled: !!(centerId || user?.id),
+    staleTime: 60 * 1000,
+  });
 
-        const [centerRes, bookingsRes, requestsRes] = await Promise.all([
-          centerId ? centersService.getCenterById(centerId) : (user?.id ? centersService.getAllCenters({ adminId: user.id }) : Promise.resolve(null)),
-          bookingsService.getBookings(),
-          serviceRequestsService.getRequests(),
-        ]);
+  const { data: bookingsRes, isLoading: loadingBookings } = useQuery({
+    queryKey: ["ownerBookings"],
+    queryFn: () => bookingsService.getBookings(),
+    staleTime: 60 * 1000,
+  });
 
-        if (centerRes?.data) {
-          // If getAllCenters array format or single getCenterById format
-          const centerData = Array.isArray(centerRes.data) ? centerRes.data[0] : centerRes.data;
-          setCenter(centerData || null);
-        }
+  const { data: requestsRes, isLoading: loadingRequests } = useQuery({
+    queryKey: ["ownerRequests"],
+    queryFn: () => serviceRequestsService.getRequests(),
+    staleTime: 60 * 1000,
+  });
 
-        if (bookingsRes?.data) {
-          setBookings(bookingsRes.data);
-        } else if (Array.isArray(bookingsRes)) {
-          setBookings(bookingsRes);
-        }
-        
-        if (requestsRes?.data) {
-          setServiceRequests(requestsRes.data);
-        } else if (Array.isArray(requestsRes)) {
-          setServiceRequests(requestsRes);
-        }
-      } catch (error) {
-        console.error("Failed to fetch dashboard data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [user]);
+  const center = centerRes?.data ? (Array.isArray(centerRes.data) ? centerRes.data[0] : centerRes.data) : null;
+  const bookings: any[] = bookingsRes?.data || (Array.isArray(bookingsRes) ? bookingsRes : []);
+  const serviceRequests: any[] = requestsRes?.data || (Array.isArray(requestsRes) ? requestsRes : []);
+  const isLoading = loadingCenter || loadingBookings || loadingRequests;
 
   if (isLoading) {
     return <div className="flex items-center justify-center h-full min-h-[400px]"><p className="text-muted-foreground font-medium">Loading dashboard...</p></div>;
@@ -155,10 +138,10 @@ export default function OwnerDashboardPage() {
                 <tbody className="divide-y divide-gray-100">
                   {bookings.slice(0, 5).map((booking, idx) => (
                     <tr key={booking.id || idx} className="hover:bg-muted/60/50 transition-colors">
-                      <td className="px-6 py-4 font-medium text-foreground">{booking.user?.fullName || 'Customer'}</td>
+                      <td className="px-6 py-4 font-medium text-foreground">{booking.customer?.fullName || booking.customer?.name || booking.user?.fullName || 'Customer'}</td>
                       <td className="px-6 py-4 text-muted-foreground">{booking.vehicle?.make || 'Unknown'} {booking.vehicle?.model || ''}</td>
                       <td className="px-6 py-4 text-muted-foreground whitespace-nowrap">
-                        {booking.startDate ? new Date(booking.startDate).toLocaleDateString() : 'N/A'}
+                        {booking.pickupDate ? new Date(booking.pickupDate).toLocaleDateString() : (booking.startDate ? new Date(booking.startDate).toLocaleDateString() : 'N/A')}
                       </td>
                       <td className="px-6 py-4 text-right">{getStatusBadge(booking.status)}</td>
                     </tr>
@@ -189,10 +172,10 @@ export default function OwnerDashboardPage() {
                 <tbody className="divide-y divide-gray-100">
                   {serviceRequests.slice(0, 5).map((request, idx) => (
                     <tr key={request.id || idx} className="hover:bg-muted/60/50 transition-colors">
-                      <td className="px-6 py-4 font-medium text-foreground">{request.user?.fullName || 'Customer'}</td>
+                      <td className="px-6 py-4 font-medium text-foreground">{request.customer?.fullName || request.customer?.name || request.user?.fullName || 'Customer'}</td>
                       <td className="px-6 py-4 text-muted-foreground">{request.vehicle?.make || 'Unknown'} {request.vehicle?.model || ''}</td>
                       <td className="px-6 py-4 text-muted-foreground whitespace-nowrap">
-                        {request.createdAt ? new Date(request.createdAt).toLocaleDateString() : 'N/A'}
+                        {request.scheduledDate ? new Date(request.scheduledDate).toLocaleDateString() : (request.createdAt ? new Date(request.createdAt).toLocaleDateString() : 'N/A')}
                       </td>
                       <td className="px-6 py-4 text-right">{getStatusBadge(request.status)}</td>
                     </tr>

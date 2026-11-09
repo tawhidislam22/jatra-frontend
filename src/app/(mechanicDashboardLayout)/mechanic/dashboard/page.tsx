@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { 
   Wrench, 
   CheckCircle2, 
@@ -21,60 +21,32 @@ import Link from "next/link";
 
 export default function MechanicOverviewPage() {
   const { user } = useAuth();
-  const [serviceRequests, setServiceRequests] = useState<any[]>([]);
-  const [workshop, setWorkshop] = useState<any>(user?.employedAtCenter || null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [servicesRes, meRes] = await Promise.all([
-          serviceRequestsService.getRequests(),
-          authService.getMe().catch(() => null),
-        ]);
+  const { data: servicesRes, isLoading: loadingServices } = useQuery({
+    queryKey: ["mechanicRequests"],
+    queryFn: () => serviceRequestsService.getRequests(),
+    staleTime: 60 * 1000,
+  });
 
-        const rawServices = servicesRes?.data || (Array.isArray(servicesRes) ? servicesRes : []);
-        const meUser = meRes?.data || user;
+  const { data: meRes, isLoading: loadingMe } = useQuery({
+    queryKey: ["meProfile"],
+    queryFn: () => authService.getMe().catch(() => null),
+    staleTime: 5 * 60 * 1000,
+  });
 
-        let centerData = meUser?.employedAtCenter || user?.employedAtCenter || null;
-        const centerId = meUser?.employedAtCenterId || user?.employedAtCenterId || centerData?.id;
+  const meUser = meRes?.data || user;
+  const centerId = meUser?.employedAtCenterId || user?.employedAtCenterId || meUser?.employedAtCenter?.id;
 
-        if (!centerData && centerId) {
-          try {
-            const centerRes = await centersService.getCenterById(centerId);
-            centerData = centerRes?.data || null;
-          } catch (err) {
-            console.error("Failed to query center details", err);
-          }
-        }
+  const { data: centerRes } = useQuery({
+    queryKey: ["mechanicWorkshop", centerId],
+    queryFn: () => centerId ? centersService.getCenterById(centerId) : null,
+    enabled: !!centerId,
+    staleTime: 5 * 60 * 1000,
+  });
 
-        if (!centerData && meUser?.id) {
-          try {
-            const allCentersRes = await centersService.getAllCenters();
-            const centersList = allCentersRes?.data || [];
-            const found = centersList.find((c: any) => 
-              c.mechanics?.some((m: any) => m.id === meUser.id || m.email === meUser.email)
-            );
-            if (found) {
-              centerData = found;
-            }
-          } catch (err) {
-            console.error("Failed to query all centers for mechanic match", err);
-          }
-        }
-
-        setWorkshop(centerData);
-        setServiceRequests(rawServices);
-      } catch (err) {
-        console.error("Failed to load mechanic dashboard data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [user]);
+  const serviceRequests: any[] = servicesRes?.data || (Array.isArray(servicesRes) ? servicesRes : []);
+  const workshop = centerRes?.data || meUser?.employedAtCenter || user?.employedAtCenter || null;
+  const loading = loadingServices || loadingMe;
 
   const activeServices = serviceRequests.filter(
     (s) => s.status === "ACCEPTED" || s.status === "IN_PROGRESS" || s.status === "PENDING"

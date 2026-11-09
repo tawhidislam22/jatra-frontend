@@ -182,6 +182,11 @@ export default function FleetPage() {
   const handleOpenEdit = (v: any) => {
     setEditingVehicle(v);
     setEditError("");
+    setEditImageFile(null);
+    setEditImagePreview(v.images && v.images.length > 0 ? v.images[0] : null);
+    if (editFileInputRef.current) {
+      editFileInputRef.current.value = "";
+    }
     setEditFormData({
       make: v.make || "",
       model: v.model || "",
@@ -192,6 +197,22 @@ export default function FleetPage() {
     });
   };
 
+  const handleEditImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setEditImageFile(file);
+      setEditImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleRemoveEditImage = () => {
+    setEditImageFile(null);
+    setEditImagePreview(null);
+    if (editFileInputRef.current) {
+      editFileInputRef.current.value = "";
+    }
+  };
+
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingVehicle) return;
@@ -200,17 +221,31 @@ export default function FleetPage() {
     setEditError("");
 
     try {
-      await vehiclesService.updateVehicle(editingVehicle.id, {
+      const payloadData: any = {
         make: editFormData.make,
         model: editFormData.model,
         year: parseInt(editFormData.year),
         licensePlate: editFormData.licensePlate,
         pricePerDay: parseFloat(editFormData.pricePerDay),
         features: editFormData.features.split(',').map((f: string) => f.trim()).filter(Boolean)
-      });
+      };
 
-      toast.success("Vehicle details and pricing updated!");
+      if (editImageFile) {
+        const payload = new FormData();
+        payload.append('data', JSON.stringify(payloadData));
+        payload.append('image', editImageFile);
+        await vehiclesService.updateVehicle(editingVehicle.id, payload);
+      } else {
+        if (!editImagePreview) {
+          payloadData.images = [];
+        }
+        await vehiclesService.updateVehicle(editingVehicle.id, payloadData);
+      }
+
+      toast.success("Vehicle details and photo updated!");
       setEditingVehicle(null);
+      setEditImageFile(null);
+      setEditImagePreview(null);
       await fetchFleet();
     } catch (err: any) {
       console.error("Error updating vehicle:", err);
@@ -481,6 +516,55 @@ export default function FleetPage() {
                   onChange={(e) => setEditFormData({...editFormData, features: e.target.value})} 
                   className="w-full border rounded-xl p-2.5 outline-none focus:border-primary text-xs font-medium bg-background" 
                 />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                  Vehicle Photo
+                </label>
+                <div className="flex items-center gap-4">
+                  {editImagePreview ? (
+                    <div className="relative w-28 h-20 rounded-xl overflow-hidden border bg-muted">
+                      <img src={editImagePreview} alt="Vehicle Preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={handleRemoveEditImage}
+                        title="Remove photo"
+                        className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full hover:bg-red-700 transition-colors shadow-sm"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div 
+                      onClick={() => editFileInputRef.current?.click()}
+                      className="w-28 h-20 rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary flex flex-col items-center justify-center text-muted-foreground bg-muted/20 cursor-pointer transition-colors"
+                    >
+                      <ImageIcon className="w-5 h-5 text-muted-foreground mb-1" />
+                      <span className="text-[10px] uppercase font-bold text-muted-foreground">Add Photo</span>
+                    </div>
+                  )}
+
+                  <div className="flex-1 space-y-1">
+                    <input
+                      ref={editFileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={handleEditImageChange}
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => editFileInputRef.current?.click()}
+                      className="h-9 text-xs font-bold uppercase tracking-wider rounded-xl"
+                    >
+                      <Upload className="w-3.5 h-3.5 mr-1.5" /> {editImagePreview ? "Change Photo" : "Upload Photo"}
+                    </Button>
+                    <p className="text-[10px] text-muted-foreground">Select a new image to replace current car photo.</p>
+                  </div>
+                </div>
               </div>
 
               <div className="flex justify-end gap-2 pt-4 border-t">

@@ -58,7 +58,15 @@ export default function MechanicAssignedServicesPage() {
     loadRequests();
   }, []);
 
-  const handleStartWork = async (id: string) => {
+  const handleStartWork = async (id: string, scheduledDate?: string) => {
+    if (scheduledDate && new Date() < new Date(scheduledDate)) {
+      const schedTime = new Date(scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setMessage({ 
+        type: 'error', 
+        text: `Cannot start repair work before its scheduled appointment time (${schedTime}).` 
+      });
+      return;
+    }
     setUpdatingId(id);
     setMessage(null);
     try {
@@ -297,23 +305,51 @@ export default function MechanicAssignedServicesPage() {
               </div>
 
               {/* Action Buttons for Mechanic */}
-              <div className="pt-3 border-t flex items-center justify-between gap-2">
-                <span className="text-[10px] text-muted-foreground font-semibold">
-                  Scheduled: {new Date(req.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
+              <div className="pt-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                {(() => {
+                  const schedDate = new Date(req.scheduledDate);
+                  const now = new Date();
+                  const isBeforeSchedule = now < schedDate;
+                  const isToday = schedDate.toDateString() === now.toDateString();
+                  const formattedSched = isToday 
+                    ? `Today at ${schedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                    : `${schedDate.toLocaleDateString([], { month: 'short', day: 'numeric' })} at ${schedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
 
-                <div className="flex items-center gap-2">
-                  {/* Start Repair Button */}
-                  {req.status === 'ACCEPTED' && (
-                    <Button 
-                      size="sm"
-                      onClick={() => handleStartWork(req.id)}
-                      disabled={updatingId === req.id}
-                      className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-wider h-8"
-                    >
-                      <PlayCircle className="w-3.5 h-3.5 mr-1" /> Start Repair
-                    </Button>
-                  )}
+                  return (
+                    <>
+                      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
+                        <Clock className="w-3.5 h-3.5 text-primary" />
+                        <span>Scheduled: <strong className="text-foreground">{formattedSched}</strong></span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {/* Start Repair Button */}
+                        {req.status === 'ACCEPTED' && (
+                          isBeforeSchedule ? (
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/20 flex items-center gap-1">
+                                <Clock className="w-3 h-3" /> Scheduled for {schedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                              <Button 
+                                size="sm"
+                                disabled
+                                title={`Cannot start repair before scheduled appointment time (${formattedSched})`}
+                                className="bg-muted text-muted-foreground border border-border text-xs font-bold uppercase tracking-wider h-8 cursor-not-allowed opacity-60"
+                              >
+                                <PlayCircle className="w-3.5 h-3.5 mr-1" /> Start Repair
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button 
+                              size="sm"
+                              onClick={() => handleStartWork(req.id, req.scheduledDate)}
+                              disabled={updatingId === req.id}
+                              className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-wider h-8 shadow-sm transition-all"
+                            >
+                              <PlayCircle className="w-3.5 h-3.5 mr-1" /> Start Repair
+                            </Button>
+                          )
+                        )}
 
                   {/* Submit Completed Work Button (Mandatory Photo Modal) */}
                   {(req.status === 'IN_PROGRESS' || req.status === 'REASSIGNMENT_REQUIRED') && (
@@ -343,7 +379,10 @@ export default function MechanicAssignedServicesPage() {
                     </span>
                   )}
                 </div>
-              </div>
+              </>
+            );
+          })()}
+        </div>
             </div>
           ))}
         </div>
