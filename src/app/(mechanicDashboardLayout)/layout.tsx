@@ -15,9 +15,9 @@ import {
   Clock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { NotificationsPopover } from "@/components/shared/NotificationsPopover";
 
@@ -27,8 +27,27 @@ export default function MechanicDashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, logout } = useAuth();
   const [dutyStatus, setDutyStatus] = useState<'ONLINE' | 'BUSY' | 'OFFLINE'>('ONLINE');
+
+  useEffect(() => {
+    if (!user) return;
+    if (user.role === 'CUSTOMER') {
+      router.replace('/dashboard');
+    } else if (user.role === 'OWNER') {
+      router.replace('/owner/dashboard');
+    }
+  }, [user, router]);
+
+  // One user only one dashboard: Non-mechanic should never render mechanic dashboard
+  if (user && user.role !== 'MECHANIC' && user.role !== 'ADMIN') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const isActive = (path: string) => {
     if (path === '/mechanic/dashboard' && pathname !== '/mechanic/dashboard') return false;

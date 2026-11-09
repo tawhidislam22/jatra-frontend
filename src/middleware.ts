@@ -91,17 +91,15 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(destination, request.url));
   }
 
-  // 6. Owner, Admin, or Mechanic accessing root customer dashboard -> redirect to their role dashboard
-  if (pathname === "/dashboard" && isAuthenticated) {
-    if (userRole === "ADMIN") {
-      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-    }
-    if (userRole === "OWNER") {
-      return NextResponse.redirect(new URL("/owner/dashboard", request.url));
-    }
-    if (userRole === "MECHANIC") {
-      return NextResponse.redirect(new URL("/mechanic/dashboard", request.url));
-    }
+  // 6. Customer dashboard route protection (Only CUSTOMER)
+  // Owner, Mechanic, or Admin accessing ANY customer dashboard route (/dashboard, /dashboard/*) -> redirect to their role dashboard
+  if (isCustomerDashboardRoute && isAuthenticated && userRole !== "CUSTOMER") {
+    const destination = userRole === "ADMIN"
+      ? "/admin/dashboard"
+      : userRole === "OWNER"
+      ? "/owner/dashboard"
+      : "/mechanic/dashboard";
+    return NextResponse.redirect(new URL(destination, request.url));
   }
 
   return NextResponse.next();
@@ -109,10 +107,15 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/dashboard",
     "/dashboard/:path*",
+    "/admin/dashboard",
     "/admin/dashboard/:path*",
+    "/owner/dashboard",
     "/owner/dashboard/:path*",
+    "/mechanic/dashboard",
     "/mechanic/dashboard/:path*",
+    "/onboarding",
     "/onboarding/:path*",
     "/login",
     "/register",

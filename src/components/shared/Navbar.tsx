@@ -127,9 +127,9 @@ export function Navbar({ initialUser }: NavbarProps) {
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator className="bg-border" />
                       <DropdownMenuItem asChild className="cursor-pointer">
-                        <Link href={isAdmin ? "/admin/dashboard" : (isMechanic ? "/mechanic/dashboard/profile" : "/dashboard/profile")} className="flex items-center w-full">
+                        <Link href={isAdmin ? "/admin/dashboard" : (isMechanic ? "/mechanic/dashboard/profile" : (isOwner ? "/owner/dashboard/settings" : "/dashboard/profile"))} className="flex items-center w-full">
                           <UserIcon className="mr-2 h-4 w-4" />
-                          <span>{isAdmin ? "Admin Overview" : "Profile"}</span>
+                          <span>{isAdmin ? "Admin Overview" : (isOwner ? "Settings & Profile" : "Profile")}</span>
                         </Link>
                       </DropdownMenuItem>
                       {!isOwner && !isMechanic && !isAdmin && (

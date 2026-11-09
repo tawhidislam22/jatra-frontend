@@ -18,16 +18,25 @@ export default function DashboardLayout({
   const router = useRouter();
   const { user, logout } = useAuth();
 
-  const isMechanic = user?.role === 'MECHANIC';
-  const isOwner = user?.role === 'OWNER' || user?.role === 'ADMIN' || !!user?.managedCenter;
-
   useEffect(() => {
-    if (isMechanic && pathname === '/dashboard') {
-      router.replace('/mechanic/dashboard');
-    } else if (isOwner && pathname === '/dashboard') {
+    if (!user) return;
+    if (user.role === 'ADMIN') {
+      router.replace('/admin/dashboard');
+    } else if (user.role === 'OWNER' || !!user?.managedCenter) {
       router.replace('/owner/dashboard');
+    } else if (user.role === 'MECHANIC') {
+      router.replace('/mechanic/dashboard');
     }
-  }, [isMechanic, isOwner, pathname, router]);
+  }, [user, router]);
+
+  // One user, only one dashboard: If user is not CUSTOMER, never render customer dashboard!
+  if (user && user.role !== 'CUSTOMER') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const isActive = (path: string) => {
     if (path === '/dashboard' && pathname !== '/dashboard') return false;
@@ -51,34 +60,6 @@ export default function DashboardLayout({
         </Link>
         
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          {isMechanic && (
-            <div className="mb-4 p-3 bg-amber-500/10 rounded-lg border border-amber-500/20 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-600">Mechanic Portal</span>
-                <span className="text-[9px] font-bold bg-amber-600 text-white px-1.5 py-0.5 rounded">MECHANIC</span>
-              </div>
-              <Link href="/mechanic/dashboard">
-                <Button className="w-full bg-amber-600 hover:bg-zinc-800 text-white text-[11px] font-bold uppercase tracking-wider h-9">
-                  <Wrench className="mr-1.5 h-3.5 w-3.5" /> Mechanic Dashboard &rarr;
-                </Button>
-              </Link>
-            </div>
-          )}
-
-          {isOwner && !isMechanic && (
-            <div className="mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-primary">Owner Account</span>
-                <span className="text-[9px] font-bold bg-primary text-white px-1.5 py-0.5 rounded">OWNER</span>
-              </div>
-              <Link href="/owner/dashboard">
-                <Button className="w-full bg-primary hover:bg-zinc-800 text-white text-[11px] font-bold uppercase tracking-wider h-9">
-                  <Building2 className="mr-1.5 h-3.5 w-3.5" /> Owner Dashboard &rarr;
-                </Button>
-              </Link>
-            </div>
-          )}
-
           <Link href="/dashboard">
             <Button variant={isActive("/dashboard") ? "secondary" : "ghost"} className={getLinkClasses("/dashboard")}>
               <LayoutDashboard className="mr-2 h-4 w-4" /> Overview

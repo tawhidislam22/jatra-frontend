@@ -52,14 +52,21 @@ export default function GoogleCallbackPage() {
         const meRes = await authService.getMe();
         const role = meRes?.data?.role;
 
-        if (redirectPath && redirectPath !== "/dashboard") {
-          router.replace(redirectPath);
-          return;
+        if (role === "ADMIN") {
+          const target = redirectPath && redirectPath.startsWith("/admin") ? redirectPath : "/admin/dashboard";
+          router.replace(target);
+        } else if (role === "OWNER") {
+          const target = redirectPath && redirectPath.startsWith("/owner") ? redirectPath : "/owner/dashboard";
+          router.replace(target);
+        } else if (role === "MECHANIC") {
+          const target = redirectPath && redirectPath.startsWith("/mechanic") ? redirectPath : "/mechanic/dashboard";
+          router.replace(target);
+        } else {
+          const target = redirectPath && !redirectPath.startsWith("/owner") && !redirectPath.startsWith("/mechanic") && !redirectPath.startsWith("/admin") ? redirectPath : "/dashboard";
+          router.replace(target);
         }
-
-        router.replace(getDashboardPath(role));
       } catch {
-        router.replace(redirectPath);
+        router.replace("/dashboard");
       }
     };
 

@@ -62,19 +62,19 @@ function LoginForm() {
         } catch {}
       }
 
-      const isOwner = role === 'OWNER' || role === 'ADMIN';
-
-      if (redirectParam && redirectParam !== '/dashboard') {
-        router.push(redirectParam);
-        return;
-      }
-
-      if (role === 'MECHANIC') {
-        router.push("/mechanic/dashboard");
-      } else if (isOwner) {
-        router.push("/owner/dashboard");
+      // One user only one dashboard: Strictly route to user's assigned role dashboard
+      if (role === 'ADMIN') {
+        const target = redirectParam && redirectParam.startsWith('/admin') ? redirectParam : '/admin/dashboard';
+        router.push(target);
+      } else if (role === 'OWNER') {
+        const target = redirectParam && redirectParam.startsWith('/owner') ? redirectParam : '/owner/dashboard';
+        router.push(target);
+      } else if (role === 'MECHANIC') {
+        const target = redirectParam && redirectParam.startsWith('/mechanic') ? redirectParam : '/mechanic/dashboard';
+        router.push(target);
       } else {
-        router.push("/dashboard");
+        const target = redirectParam && !redirectParam.startsWith('/owner') && !redirectParam.startsWith('/mechanic') && !redirectParam.startsWith('/admin') ? redirectParam : '/dashboard';
+        router.push(target);
       }
     } catch (err: any) {
       console.error("Login failed:", err);

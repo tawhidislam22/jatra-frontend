@@ -18,10 +18,10 @@ import {
   ArrowUpRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 const dummyAdminNotifications = [
@@ -89,7 +89,25 @@ export default function AdminDashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    if (!user) return;
+    if (user.role !== 'ADMIN') {
+      const destination = user.role === 'OWNER' ? '/owner/dashboard' : (user.role === 'MECHANIC' ? '/mechanic/dashboard' : '/dashboard');
+      router.replace(destination);
+    }
+  }, [user, router]);
+
+  // One user only one dashboard: Non-admin should never render admin dashboard
+  if (user && user.role !== 'ADMIN') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0c0d0e]">
+        <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const isActive = (path: string) => {
     if (path === '/admin/dashboard' && pathname !== '/admin/dashboard') return false;
