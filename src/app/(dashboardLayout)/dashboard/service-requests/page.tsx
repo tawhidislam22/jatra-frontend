@@ -12,16 +12,15 @@ import {
   Clock, 
   CheckCircle2, 
   AlertTriangle, 
-  MessageSquare, 
   Star, 
   Eye, 
   X,
   CreditCard,
   User,
   ShieldAlert,
-  ArrowRight
+  Wallet,
+  Receipt
 } from "lucide-react";
-import Link from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 export default function CustomerServiceRequestsPage() {
@@ -38,6 +37,13 @@ export default function CustomerServiceRequestsPage() {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState(false);
   const [reviewError, setReviewError] = useState("");
+
+  // Cancellation Modal
+  const [cancellingRequest, setCancellingRequest] = useState<ServiceRequest | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
+  const [submittingCancel, setSubmittingCancel] = useState(false);
+  const [cancelError, setCancelError] = useState("");
+  const [cancelSuccess, setCancelSuccess] = useState(false);
 
   const fetchRequests = async () => {
     try {
@@ -88,6 +94,72 @@ export default function CustomerServiceRequestsPage() {
       setReviewError(err?.response?.data?.message || err.message || "Failed to submit review.");
     } finally {
       setSubmittingReview(false);
+    }
+  };
+
+  const getCancellationEstimate = (req: ServiceRequest) => {
+    const now = new Date().getTime();
+    const scheduledTime = new Date(req.scheduledDate).getTime();
+    const diffHours = (scheduledTime - now) / (1000 * 60 * 60);
+    const amount = (req as any).payment?.amount || (req as any).totalAmount || 50;
+
+    let feePercent = 0;
+    let tierDescription = "Full 100% Refund (>= 3 days in advance)";
+
+    if (diffHours >= 72) {
+      feePercent = 0;
+      tierDescription = "Full 100% Refund (3+ days before appointment)";
+    } else if (diffHours >= 24) {
+      feePercent = 10;
+      tierDescription = "90% Refund • 10% Cancellation Fee (1 to 3 days before appointment)";
+    } else {
+      feePercent = 30;
+      tierDescription = "70% Refund • 30% Cancellation Fee (Less than 24 hours before appointment)";
+    }
+
+    const cancellationFee = Number(((amount * feePercent) / 100).toFixed(2));
+    const refundAmount = Number((amount - cancellationFee).toFixed(2));
+
+    return {
+      diffHours: Math.max(0, Math.round(diffHours)),
+      feePercent,
+      tierDescription,
+      amount,
+      cancellationFee,
+      refundAmount,
+    };
+  };
+
+  const handleOpenCancelModal = (req: ServiceRequest) => {
+    setCancellingRequest(req);
+    setCancelReason("");
+    setCancelError("");
+    setCancelSuccess(false);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!cancellingRequest) return;
+    try {
+      setSubmittingCancel(true);
+      setCancelError("");
+
+      await serviceRequestsService.cancelRequest(cancellingRequest.id, {
+        reason: cancelReason.trim() || "Customer requested cancellation"
+      });
+
+      setCancelSuccess(true);
+      await fetchRequests();
+      if (selectedRequest?.id === cancellingRequest.id) {
+        setSelectedRequest(null);
+      }
+      setTimeout(() => {
+        setCancellingRequest(null);
+      }, 1500);
+    } catch (err: any) {
+      console.error("Service cancellation error:", err);
+      setCancelError(err?.response?.data?.message || err?.message || "Failed to cancel service request.");
+    } finally {
+      setSubmittingCancel(false);
     }
   };
 
@@ -153,6 +225,8 @@ export default function CustomerServiceRequestsPage() {
           {requests.map((req) => {
             const hasReview = Boolean(req.review);
             const isDone = req.status === "DONE" || req.status === "COMPLETED";
+            const canCancel = req.status === "ACCEPTED" || req.status === "PENDING";
+            const isCancelled = req.status === "CANCELLED";
 
             return (
               <div 
@@ -187,6 +261,25 @@ export default function CustomerServiceRequestsPage() {
                       <span>{new Date(req.scheduledDate).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</span>
                     </div>
                   </div>
+
+                  {/* Cancelled badge details */}
+                  {isCancelled && (
+                    <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-xs space-y-1">
+                      <div className="flex items-center justify-between font-bold text-red-600 dark:text-red-400 text-[11px]">
+                        <span>Appointment Cancelled</span>
+                        {req.cancelledAt && (
+                          <span className="font-mono text-[10px] opacity-80">
+                            {new Date(req.cancelledAt).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+                      {req.refundAmount !== undefined && (
+                        <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-600">
+                          <Wallet className="w-3 h-3" /> Refunded to Wallet: ${req.refundAmount.toFixed(2)}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Problem Photo Badge */}
                   {req.problemImages && req.problemImages.length > 0 && (
@@ -223,6 +316,17 @@ export default function CustomerServiceRequestsPage() {
                   >
                     <Eye className="w-3.5 h-3.5 mr-1" /> View Details
                   </Button>
+
+                  {canCancel && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleOpenCancelModal(req)}
+                      className="text-xs font-bold uppercase tracking-wider text-red-600 border-red-200 hover:bg-red-500/10 h-8"
+                    >
+                      Cancel
+                    </Button>
+                  )}
 
                   {isDone && !hasReview && (
                     <Button
@@ -279,83 +383,67 @@ export default function CustomerServiceRequestsPage() {
 
               <div className="p-3 rounded-xl bg-muted/40 space-y-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Workshop Center</span>
-                <p className="font-extrabold text-foreground">{selectedRequest.center?.name}</p>
-                <p className="text-muted-foreground truncate">{selectedRequest.center?.address}</p>
+                <p className="font-extrabold text-foreground">{selectedRequest.center?.name || "Automotive Center"}</p>
+                <p className="text-muted-foreground">{selectedRequest.center?.address || "Location unavailable"}</p>
               </div>
             </div>
 
-            {/* Problem Photos (Before) */}
-            <div className="space-y-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-                <AlertTriangle className="w-4 h-4 text-amber-500" /> Customer Problem Photos (Before Repair)
-              </h3>
-              {selectedRequest.problemImages && selectedRequest.problemImages.length > 0 ? (
-                <div className="grid grid-cols-3 gap-3">
-                  {selectedRequest.problemImages.map((img, i) => (
-                    <a key={i} href={img} target="_blank" rel="noreferrer" className="block rounded-lg overflow-hidden border aspect-video bg-black">
-                      <img src={img} alt="Problem Photo" className="w-full h-full object-cover hover:scale-105 transition-transform" />
-                    </a>
-                  ))}
+            {/* Cancelled Info */}
+            {selectedRequest.status === "CANCELLED" && (
+              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-xs space-y-2">
+                <div className="flex justify-between font-bold text-red-600 dark:text-red-400">
+                  <span>Cancelled Service Appointment</span>
+                  {selectedRequest.cancelledAt && (
+                    <span className="font-mono text-[11px] opacity-80">
+                      {new Date(selectedRequest.cancelledAt).toLocaleString()}
+                    </span>
+                  )}
                 </div>
-              ) : (
-                <p className="text-xs text-muted-foreground">No problem images uploaded.</p>
-              )}
-            </div>
-
-            {/* Mechanic Completion Photos (After) */}
-            <div className="space-y-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Mechanic Completion Photos (After Repair)
-              </h3>
-              {selectedRequest.completionImages && selectedRequest.completionImages.length > 0 ? (
-                <div className="grid grid-cols-3 gap-3">
-                  {selectedRequest.completionImages.map((img, i) => (
-                    <a key={i} href={img} target="_blank" rel="noreferrer" className="block rounded-lg overflow-hidden border aspect-video bg-black">
-                      <img src={img} alt="Completion Photo" className="w-full h-full object-cover hover:scale-105 transition-transform" />
-                    </a>
-                  ))}
+                <div className="flex gap-4 text-muted-foreground">
+                  {selectedRequest.cancellationFee !== undefined && (
+                    <span>Fee Retained: <strong className="text-foreground">${selectedRequest.cancellationFee.toFixed(2)}</strong></span>
+                  )}
+                  {selectedRequest.refundAmount !== undefined && (
+                    <span className="text-emerald-600 font-bold flex items-center gap-1">
+                      <Wallet className="w-3.5 h-3.5" /> Refunded to Wallet: ${selectedRequest.refundAmount.toFixed(2)}
+                    </span>
+                  )}
                 </div>
-              ) : (
-                <div className="p-4 rounded-xl bg-muted/30 border border-dashed text-center text-xs text-muted-foreground">
-                  Repair completion photos will be uploaded by the assigned mechanic upon completion.
-                </div>
-              )}
-            </div>
-
-            {/* Issue Description & Mechanic Notes */}
-            {selectedRequest.issueDescription && (
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Reported Issue Notes</span>
-                <p className="text-xs text-foreground bg-muted/40 p-3 rounded-lg leading-relaxed font-medium">
-                  {selectedRequest.issueDescription}
-                </p>
+                {selectedRequest.cancellationReason && (
+                  <p className="text-[11px] italic text-muted-foreground">
+                    Reason: &ldquo;{selectedRequest.cancellationReason}&rdquo;
+                  </p>
+                )}
               </div>
             )}
 
-            {/* Assigned Mechanic */}
-            {selectedRequest.mechanic && (
-              <div className="p-3 rounded-xl bg-muted/40 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center font-bold text-amber-600">
-                    <User className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Assigned Mechanic</span>
-                    <p className="font-extrabold text-foreground">{selectedRequest.mechanic.fullName || selectedRequest.mechanic.name}</p>
-                  </div>
-                </div>
+            {/* Action Buttons in Modal */}
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div className="flex items-center gap-2">
+                <a
+                  href={`/dashboard/messages?conversationId=${selectedRequest.id}`}
+                  className="inline-flex items-center gap-1.5 px-4 h-9 rounded-xl border text-xs font-bold uppercase tracking-wider hover:bg-muted/50"
+                >
+                  Contact Workshop
+                </a>
+                {(selectedRequest.status === "ACCEPTED" || selectedRequest.status === "PENDING") && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleOpenCancelModal(selectedRequest)}
+                    className="text-xs font-bold uppercase tracking-wider text-red-600 border-red-200 hover:bg-red-500/10 h-9 rounded-xl"
+                  >
+                    Cancel Booking
+                  </Button>
+                )}
               </div>
-            )}
 
-            {/* Modal Actions */}
-            <div className="pt-4 border-t flex items-center justify-between">
-              <a
-                href="/dashboard/messages"
-                className="inline-flex items-center gap-1.5 text-xs font-bold uppercase text-primary hover:underline"
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedRequest(null)}
+                className="text-xs font-bold uppercase tracking-wider h-9 rounded-xl"
               >
-                <MessageSquare className="w-4 h-4" /> Message Workshop Host
-              </a>
-              <Button onClick={() => setSelectedRequest(null)} className="h-9 px-6 font-bold uppercase tracking-wider text-xs">
                 Close
               </Button>
             </div>
@@ -363,10 +451,126 @@ export default function CustomerServiceRequestsPage() {
         </div>
       )}
 
+      {/* Cancellation Modal */}
+      {cancellingRequest && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card border rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl relative">
+            <button
+              onClick={() => setCancellingRequest(null)}
+              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-muted text-muted-foreground"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-red-600 dark:text-red-400">
+                Service Cancellation
+              </span>
+              <h2 className="text-xl font-black uppercase tracking-tight text-foreground">
+                Cancel Workshop Appointment
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {cancellingRequest.serviceName || cancellingRequest.serviceType} • Scheduled on {new Date(cancellingRequest.scheduledDate).toLocaleDateString()}
+              </p>
+            </div>
+
+            {cancelSuccess ? (
+              <div className="p-6 text-center space-y-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
+                <h3 className="text-base font-bold text-foreground">Appointment Cancelled</h3>
+                <p className="text-xs text-muted-foreground">
+                  Your refund has been credited directly to your Jatra Wallet balance. The mechanic slot has been released.
+                </p>
+              </div>
+            ) : (
+              <>
+                {(() => {
+                  const est = getCancellationEstimate(cancellingRequest);
+                  return (
+                    <div className="p-4 rounded-xl bg-muted/40 border space-y-3 text-xs">
+                      <div className="flex items-center justify-between font-bold">
+                        <span className="text-muted-foreground flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-amber-500" />
+                          Time Until Appointment:
+                        </span>
+                        <span className="font-mono text-foreground font-black">
+                          {est.diffHours} Hours
+                        </span>
+                      </div>
+
+                      <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 font-bold text-[11px]">
+                        Policy Tier: {est.tierDescription}
+                      </div>
+
+                      <div className="space-y-1.5 pt-2 border-t">
+                        <div className="flex justify-between text-muted-foreground">
+                          <span>Service Booking Cost:</span>
+                          <span className="font-mono font-bold text-foreground">${est.amount.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-red-600 dark:text-red-400">
+                          <span>Cancellation Fee ({est.feePercent}%):</span>
+                          <span className="font-mono font-bold">-${est.cancellationFee.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold text-sm pt-1 border-t">
+                          <span className="flex items-center gap-1">
+                            <Wallet className="w-4 h-4" /> Wallet Refund Amount:
+                          </span>
+                          <span className="font-mono font-black">+${est.refundAmount.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Reason for Cancellation (Optional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    placeholder="Tell us why you are cancelling..."
+                    className="w-full bg-muted/30 border rounded-xl p-3 text-xs outline-none focus:border-amber-500 resize-none"
+                  />
+                </div>
+
+                {cancelError && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-600 text-xs font-bold rounded-xl flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                    <span>{cancelError}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-end gap-2 pt-3 border-t">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setCancellingRequest(null)}
+                    className="text-xs font-bold uppercase tracking-wider rounded-xl h-10 px-4"
+                  >
+                    Keep Appointment
+                  </Button>
+                  <Button
+                    type="button"
+                    disabled={submittingCancel}
+                    onClick={handleConfirmCancel}
+                    className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase tracking-wider rounded-xl h-10 px-5 gap-1.5"
+                  >
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    <span>{submittingCancel ? "Processing..." : "Confirm Cancellation"}</span>
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Review Modal */}
       {reviewRequest && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card border rounded-2xl max-w-md w-full p-6 space-y-6 shadow-2xl relative">
+          <div className="bg-card border rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
             <button
               onClick={() => setReviewRequest(null)}
               className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-muted text-muted-foreground"
@@ -375,50 +579,49 @@ export default function CustomerServiceRequestsPage() {
             </button>
 
             <div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">Service Feedback</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-amber-500">
+                Verified Customer Feedback
+              </span>
               <h2 className="text-xl font-black uppercase tracking-tight text-foreground">
-                Rate & Review Workshop
+                Rate Workshop Service
               </h2>
-              <p className="text-xs text-muted-foreground font-medium mt-1">
-                {reviewRequest.center?.name} • {reviewRequest.serviceName}
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {reviewRequest.serviceName || reviewRequest.serviceType} at {reviewRequest.center?.name}
               </p>
             </div>
 
             {reviewSuccess ? (
-              <div className="py-8 text-center space-y-3">
-                <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
-                <h3 className="font-black uppercase text-foreground">Thank You For Your Review!</h3>
-                <p className="text-xs text-muted-foreground">Your feedback has been recorded and submitted to the workshop.</p>
+              <div className="p-6 text-center space-y-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
+                <h3 className="text-base font-bold text-foreground">Review Submitted!</h3>
+                <p className="text-xs text-muted-foreground">Thank you for rating our automotive service.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmitReview} className="space-y-4">
-                {/* 5-Star Rating Selector */}
-                <div className="space-y-1.5 text-center py-2">
-                  <span className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">Rating</span>
+                <div className="space-y-1.5 text-center">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Rating Score
+                  </label>
                   <div className="flex items-center justify-center gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
-                        key={star}
                         type="button"
+                        key={star}
                         onClick={() => setRating(star)}
                         className="p-1 hover:scale-110 transition-transform"
                       >
                         <Star
-                          className={`w-8 h-8 ${
+                          className={`w-7 h-7 ${
                             star <= rating
-                              ? "text-amber-500 fill-amber-500"
-                              : "text-muted hover:text-amber-300"
+                              ? "fill-amber-400 text-amber-400"
+                              : "text-muted-foreground/30"
                           }`}
                         />
                       </button>
                     ))}
                   </div>
-                  <span className="block text-xs font-black text-amber-500 uppercase tracking-widest">
-                    {rating === 5 ? "Exceptional" : rating === 4 ? "Very Good" : rating === 3 ? "Average" : rating === 2 ? "Disappointing" : "Unsatisfactory"}
-                  </span>
                 </div>
 
-                {/* Feedback Comment */}
                 <div className="space-y-1.5">
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                     Comments & Experience (Optional)

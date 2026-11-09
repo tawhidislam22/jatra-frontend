@@ -50,5 +50,10 @@ export const serviceRequestsService = {
   updateStatus: async (id: string, data: any) => {
     const response = await api.patch(`/service-requests/${id}/status`, data);
     return response.data;
+  },
+
+  cancelRequest: async (id: string, data?: { reason?: string }) => {
+    const response = await api.post(`/service-requests/${id}/cancel`, data || {});
+    return response.data;
   }
 };

@@ -22,6 +22,9 @@ export default function VehiclesPage() {
   
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+
+  const [pickupDate, setPickupDate] = useState("");
+  const [returnDate, setReturnDate] = useState("");
   
   const [sortBy, setSortBy] = useState("id");
   const [sortOrder, setSortOrder] = useState("desc");
@@ -48,6 +51,11 @@ export default function VehiclesPage() {
       if (debouncedSearch) params.searchTerm = debouncedSearch;
       if (minPrice) params["pricePerDay[gte]"] = minPrice;
       if (maxPrice) params["pricePerDay[lte]"] = maxPrice;
+      if (pickupDate && returnDate) {
+        params.pickupDate = pickupDate;
+        params.returnDate = returnDate;
+      }
+      params.type = "RENTAL_FLEET";
 
       const response = await vehiclesService.getAllVehicles(params);
       
@@ -69,7 +77,7 @@ export default function VehiclesPage() {
 
   useEffect(() => {
     fetchVehicles();
-  }, [page, limit, debouncedSearch, sortBy, sortOrder, minPrice, maxPrice]);
+  }, [page, limit, debouncedSearch, sortBy, sortOrder, minPrice, maxPrice, pickupDate, returnDate]);
 
   // Handle Sort Change
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -170,10 +178,10 @@ export default function VehiclesPage() {
         {/* Filters and Controls */}
         <div className="mb-12 bg-muted/40 p-6 rounded-md border border-border shadow-sm flex flex-col lg:flex-row gap-6 items-end justify-between">
           
-          <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search Bar */}
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Search Vehicles</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Search Fleet</label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <input 
@@ -186,6 +194,40 @@ export default function VehiclesPage() {
               </div>
             </div>
 
+            {/* Availability Date Filter */}
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Rental Dates</label>
+                {(pickupDate || returnDate) && (
+                  <button
+                    onClick={() => { setPickupDate(""); setReturnDate(""); setPage(1); }}
+                    className="text-[10px] text-primary hover:underline font-bold uppercase"
+                  >
+                    Clear Dates
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <input 
+                  type="date" 
+                  className="w-full px-2 py-3 bg-card border border-border rounded-sm outline-none focus:border-primary transition-colors text-xs font-medium text-foreground"
+                  value={pickupDate}
+                  min={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => { setPickupDate(e.target.value); setPage(1); }}
+                  title="Pickup Date"
+                />
+                <span className="text-muted-foreground font-bold text-xs">-</span>
+                <input 
+                  type="date" 
+                  className="w-full px-2 py-3 bg-card border border-border rounded-sm outline-none focus:border-primary transition-colors text-xs font-medium text-foreground"
+                  value={returnDate}
+                  min={pickupDate || new Date().toISOString().split("T")[0]}
+                  onChange={(e) => { setReturnDate(e.target.value); setPage(1); }}
+                  title="Return Date"
+                />
+              </div>
+            </div>
+
             {/* Price Filter */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Price Range ($/Day)</label>
@@ -193,7 +235,7 @@ export default function VehiclesPage() {
                 <input 
                   type="number" 
                   placeholder="Min"
-                  className="w-full px-4 py-3 bg-card border border-border rounded-sm outline-none focus:border-primary transition-colors text-sm font-medium"
+                  className="w-full px-3 py-3 bg-card border border-border rounded-sm outline-none focus:border-primary transition-colors text-sm font-medium"
                   value={minPrice}
                   onChange={(e) => { setMinPrice(e.target.value); setPage(1); }}
                 />
@@ -201,7 +243,7 @@ export default function VehiclesPage() {
                 <input 
                   type="number" 
                   placeholder="Max"
-                  className="w-full px-4 py-3 bg-card border border-border rounded-sm outline-none focus:border-primary transition-colors text-sm font-medium"
+                  className="w-full px-3 py-3 bg-card border border-border rounded-sm outline-none focus:border-primary transition-colors text-sm font-medium"
                   value={maxPrice}
                   onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }}
                 />
@@ -211,19 +253,19 @@ export default function VehiclesPage() {
             {/* Sort & Limit */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Sort & Display</label>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
                 <select 
-                  className="flex-1 px-4 py-3 bg-card border border-border rounded-sm outline-none focus:border-primary transition-colors text-sm font-bold uppercase tracking-widest text-foreground"
+                  className="flex-1 px-3 py-3 bg-card border border-border rounded-sm outline-none focus:border-primary transition-colors text-xs font-bold uppercase tracking-widest text-foreground"
                   onChange={handleSortChange}
                 >
-                  <option value="newest">Newest First</option>
-                  <option value="price_asc">Price: Low to High</option>
-                  <option value="price_desc">Price: High to Low</option>
-                  <option value="most_rated">Most Rated</option>
+                  <option value="newest">Newest</option>
+                  <option value="price_asc">Price &uarr;</option>
+                  <option value="price_desc">Price &darr;</option>
+                  <option value="most_rated">Top Rated</option>
                 </select>
                 
                 <select 
-                  className="w-24 px-4 py-3 bg-card border border-border rounded-sm outline-none focus:border-primary transition-colors text-sm font-bold text-foreground"
+                  className="w-20 px-2 py-3 bg-card border border-border rounded-sm outline-none focus:border-primary transition-colors text-xs font-bold text-foreground"
                   value={limit}
                   onChange={(e) => { setLimit(Number(e.target.value)); setPage(1); }}
                 >

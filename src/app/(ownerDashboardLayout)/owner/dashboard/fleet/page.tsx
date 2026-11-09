@@ -12,7 +12,11 @@ import {
   Upload, 
   Image as ImageIcon, 
   Trash2, 
-  AlertCircle
+  AlertCircle,
+  Edit2,
+  CheckCircle2,
+  Info,
+  DollarSign
 } from "lucide-react";
 
 export default function FleetPage() {
@@ -20,6 +24,8 @@ export default function FleetPage() {
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [centers, setCenters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Add Vehicle Modal
   const [showAddModal, setShowAddModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -37,6 +43,19 @@ export default function FleetPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Edit Vehicle Modal
+  const [editingVehicle, setEditingVehicle] = useState<any | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    make: "",
+    model: "",
+    year: "",
+    licensePlate: "",
+    pricePerDay: "",
+    features: "",
+  });
+  const [submittingEdit, setSubmittingEdit] = useState(false);
+  const [editError, setEditError] = useState("");
 
   const fetchFleet = async () => {
     try {
@@ -153,6 +172,46 @@ export default function FleetPage() {
     }
   };
 
+  const handleOpenEdit = (v: any) => {
+    setEditingVehicle(v);
+    setEditError("");
+    setEditFormData({
+      make: v.make || "",
+      model: v.model || "",
+      year: v.year?.toString() || "",
+      licensePlate: v.licensePlate || "",
+      pricePerDay: (v.pricePerDay || 0).toString(),
+      features: Array.isArray(v.features) ? v.features.join(", ") : "",
+    });
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingVehicle) return;
+
+    setSubmittingEdit(true);
+    setEditError("");
+
+    try {
+      await vehiclesService.updateVehicle(editingVehicle.id, {
+        make: editFormData.make,
+        model: editFormData.model,
+        year: parseInt(editFormData.year),
+        licensePlate: editFormData.licensePlate,
+        pricePerDay: parseFloat(editFormData.pricePerDay),
+        features: editFormData.features.split(',').map((f: string) => f.trim()).filter(Boolean)
+      });
+
+      setEditingVehicle(null);
+      await fetchFleet();
+    } catch (err: any) {
+      console.error("Error updating vehicle:", err);
+      setEditError(err?.response?.data?.message || err?.message || "Failed to update vehicle.");
+    } finally {
+      setSubmittingEdit(false);
+    }
+  };
+
   const toggleAvailability = async (id: string, isAvailable: boolean) => {
     try {
       await vehiclesService.updateVehicle(id, { 
@@ -168,15 +227,15 @@ export default function FleetPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-black text-foreground uppercase tracking-wider">Fleet Vehicles</h1>
-          <p className="text-xs text-muted-foreground font-medium mt-1">Manage your rental fleet available across your workshop locations</p>
+          <h1 className="text-2xl md:text-3xl font-black text-foreground uppercase tracking-tight">Fleet Vehicles</h1>
+          <p className="text-xs text-muted-foreground font-medium mt-1">Manage rental inventory, live daily rates, and availability independently from workshop mechanics</p>
         </div>
         <Button 
           onClick={() => {
             setErrorMessage("");
             setShowAddModal(true);
           }} 
-          className="bg-[#E60000] hover:bg-red-700 text-white font-bold uppercase tracking-wider text-xs rounded-sm gap-2 h-11 px-5 shadow-sm"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase tracking-wider text-xs rounded-xl gap-2 h-10 px-5 shadow-sm"
         >
           <Plus className="w-4 h-4" /> Add Vehicle
         </Button>
@@ -185,22 +244,22 @@ export default function FleetPage() {
       {loading ? (
         <div className="p-12 text-center text-muted-foreground font-bold uppercase tracking-widest text-sm animate-pulse">Loading fleet...</div>
       ) : vehicles.length === 0 ? (
-        <div className="bg-card border rounded-xl p-16 text-center shadow-sm">
-          <Car className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-xl font-bold uppercase tracking-wider text-foreground mb-2">No Vehicles Found</h3>
-          <p className="text-muted-foreground mb-6">Your rental fleet is empty. Add a vehicle with photos and pricing to get started.</p>
+        <div className="bg-card border rounded-2xl p-16 text-center shadow-sm space-y-3">
+          <Car className="mx-auto h-12 w-12 text-muted-foreground mb-4 opacity-50" />
+          <h3 className="text-xl font-bold uppercase tracking-wider text-foreground">No Vehicles Found</h3>
+          <p className="text-xs text-muted-foreground max-w-sm mx-auto mb-6">Your rental fleet is empty. Add a vehicle with photos and daily pricing to make it bookable online.</p>
           <Button 
             onClick={() => {
               setErrorMessage("");
               setShowAddModal(true);
             }} 
-            className="bg-[#E60000] hover:bg-red-700 text-white font-bold uppercase tracking-wider text-xs rounded-sm h-10 px-6"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase tracking-wider text-xs rounded-xl h-10 px-6"
           >
             Add First Vehicle
           </Button>
         </div>
       ) : (
-        <div className="bg-card border rounded-xl overflow-hidden shadow-sm">
+        <div className="bg-card border rounded-2xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead className="bg-muted/50 border-b">
@@ -225,10 +284,10 @@ export default function FleetPage() {
                             <img 
                               src={vehicleImg} 
                               alt={`${v.make} ${v.model}`} 
-                              className="w-12 h-10 object-cover rounded-md border shrink-0 bg-muted" 
+                              className="w-12 h-10 object-cover rounded-lg border shrink-0 bg-muted" 
                             />
                           ) : (
-                            <div className="w-12 h-10 bg-muted/60 rounded-md border flex items-center justify-center text-muted-foreground shrink-0">
+                            <div className="w-12 h-10 bg-muted/60 rounded-lg border flex items-center justify-center text-muted-foreground shrink-0">
                               <Car className="w-5 h-5 opacity-60" />
                             </div>
                           )}
@@ -242,23 +301,36 @@ export default function FleetPage() {
                       </td>
                       <td className="p-4 text-sm text-muted-foreground font-medium">{v.year}</td>
                       <td className="p-4 font-mono text-xs font-bold uppercase text-foreground">{v.licensePlate}</td>
-                      <td className="p-4 font-bold text-foreground">${v.pricePerDay || 0}/day</td>
+                      <td className="p-4 font-mono font-bold text-foreground">${v.pricePerDay || 0}/day</td>
                       <td className="p-4">
                         <span className={`px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-widest ${
-                          v.isAvailable !== false ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                          v.isAvailable !== false ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                         }`}>
-                          {v.isAvailable !== false ? 'Available' : 'Rented / Busy'}
+                          {v.isAvailable !== false ? 'Available' : 'Deactivated'}
                         </span>
                       </td>
                       <td className="p-4 text-right">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="text-xs font-bold uppercase tracking-wider rounded-sm h-8"
-                          onClick={() => toggleAvailability(v.id, v.isAvailable !== false)}
-                        >
-                          Toggle Status
-                        </Button>
+                        <div className="flex items-center justify-end gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="text-xs font-bold uppercase tracking-wider rounded-xl h-8 gap-1"
+                            onClick={() => handleOpenEdit(v)}
+                          >
+                            <Edit2 className="w-3 h-3" /> Edit
+                          </Button>
+
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className={`text-xs font-bold uppercase tracking-wider rounded-xl h-8 ${
+                              v.isAvailable !== false ? 'hover:bg-red-500/10 text-muted-foreground' : 'text-emerald-600 hover:bg-emerald-500/10'
+                            }`}
+                            onClick={() => toggleAvailability(v.id, v.isAvailable !== false)}
+                          >
+                            {v.isAvailable !== false ? 'Deactivate' : 'Activate'}
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -269,9 +341,139 @@ export default function FleetPage() {
         </div>
       )}
 
+      {/* Edit Vehicle Modal */}
+      {editingVehicle && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border max-h-[92vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-6 border-b">
+              <div>
+                <h2 className="text-xl font-black uppercase tracking-wider text-foreground">Edit Vehicle</h2>
+                <p className="text-xs text-muted-foreground font-medium mt-0.5">
+                  Update daily rate and specifications
+                </p>
+              </div>
+              <button onClick={() => setEditingVehicle(null)} className="text-muted-foreground hover:text-foreground">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Price Snapshot Guarantee Notice */}
+            <div className="mx-6 mt-4 p-3 bg-primary/10 border border-primary/20 rounded-xl text-xs space-y-1">
+              <div className="flex items-center gap-1.5 font-bold text-primary">
+                <Info className="w-4 h-4 shrink-0" />
+                <span>Price Snapshot Integrity</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Updating the daily rental price applies to future bookings only. Previously confirmed or historical bookings preserve their agreed rate snapshots.
+              </p>
+            </div>
+
+            {editError && (
+              <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs font-bold rounded-xl flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{editError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Make</label>
+                  <input 
+                    required 
+                    type="text" 
+                    value={editFormData.make} 
+                    onChange={(e) => setEditFormData({...editFormData, make: e.target.value})} 
+                    className="w-full border rounded-xl p-2.5 outline-none focus:border-primary text-xs font-medium bg-background" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Model</label>
+                  <input 
+                    required 
+                    type="text" 
+                    value={editFormData.model} 
+                    onChange={(e) => setEditFormData({...editFormData, model: e.target.value})} 
+                    className="w-full border rounded-xl p-2.5 outline-none focus:border-primary text-xs font-medium bg-background" 
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Year</label>
+                  <input 
+                    required 
+                    type="number" 
+                    min="1900" 
+                    max="2100" 
+                    value={editFormData.year} 
+                    onChange={(e) => setEditFormData({...editFormData, year: e.target.value})} 
+                    className="w-full border rounded-xl p-2.5 outline-none focus:border-primary text-xs font-medium bg-background" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">License Plate</label>
+                  <input 
+                    required 
+                    type="text" 
+                    value={editFormData.licensePlate} 
+                    onChange={(e) => setEditFormData({...editFormData, licensePlate: e.target.value})} 
+                    className="w-full border rounded-xl p-2.5 outline-none focus:border-primary text-xs font-medium uppercase bg-background" 
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Daily Rental Rate ($)</label>
+                <input 
+                  required 
+                  type="number" 
+                  step="0.01" 
+                  min="0" 
+                  value={editFormData.pricePerDay} 
+                  onChange={(e) => setEditFormData({...editFormData, pricePerDay: e.target.value})} 
+                  className="w-full border rounded-xl p-2.5 outline-none focus:border-primary text-xs font-medium bg-background font-mono font-bold" 
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Features (comma separated)</label>
+                <input 
+                  type="text" 
+                  placeholder="AC, Bluetooth, GPS, Leather Seats" 
+                  value={editFormData.features} 
+                  onChange={(e) => setEditFormData({...editFormData, features: e.target.value})} 
+                  className="w-full border rounded-xl p-2.5 outline-none focus:border-primary text-xs font-medium bg-background" 
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setEditingVehicle(null)} 
+                  className="uppercase font-bold tracking-wider text-xs rounded-xl h-10 px-4"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={submittingEdit} 
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground uppercase font-bold tracking-wider text-xs rounded-xl h-10 px-6"
+                >
+                  {submittingEdit ? "Updating..." : "Save Changes"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Vehicle Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-card rounded-xl shadow-2xl w-full max-w-md overflow-hidden border max-h-[92vh] overflow-y-auto">
+          <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border max-h-[92vh] overflow-y-auto">
             <div className="flex justify-between items-center p-6 border-b">
               <div>
                 <h2 className="text-xl font-black uppercase tracking-wider text-foreground">Add Vehicle</h2>
@@ -283,7 +485,7 @@ export default function FleetPage() {
             </div>
 
             {errorMessage && (
-              <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs font-bold uppercase tracking-wider rounded-sm flex items-center gap-2">
+              <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs font-bold uppercase tracking-wider rounded-xl flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{errorMessage}</span>
               </div>
@@ -296,7 +498,7 @@ export default function FleetPage() {
                 </label>
                 <div className="flex items-center gap-4">
                   {imagePreview ? (
-                    <div className="relative w-28 h-20 rounded-lg overflow-hidden border">
+                    <div className="relative w-28 h-20 rounded-xl overflow-hidden border">
                       <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                       <button
                         type="button"
@@ -309,7 +511,7 @@ export default function FleetPage() {
                   ) : (
                     <div 
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-28 h-20 rounded-lg border-2 border-dashed border-gray-300 hover:border-[#E60000] flex flex-col items-center justify-center text-muted-foreground bg-muted/20 cursor-pointer transition-colors"
+                      className="w-28 h-20 rounded-xl border-2 border-dashed border-muted-foreground/30 hover:border-primary flex flex-col items-center justify-center text-muted-foreground bg-muted/20 cursor-pointer transition-colors"
                     >
                       <ImageIcon className="w-5 h-5 text-muted-foreground mb-1" />
                       <span className="text-[10px] uppercase font-bold text-muted-foreground">Add Photo</span>
@@ -329,7 +531,7 @@ export default function FleetPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => fileInputRef.current?.click()}
-                      className="h-9 text-xs font-bold uppercase tracking-wider rounded-sm"
+                      className="h-9 text-xs font-bold uppercase tracking-wider rounded-xl"
                     >
                       <Upload className="w-3.5 h-3.5 mr-1.5" /> Select Image
                     </Button>
@@ -347,7 +549,7 @@ export default function FleetPage() {
                     <select
                       value={formData.centerId}
                       onChange={(e) => setFormData({ ...formData, centerId: e.target.value })}
-                      className="w-full border rounded-sm p-2.5 outline-none focus:ring-2 focus:ring-[#E60000]/20 font-medium text-xs bg-card uppercase"
+                      className="w-full border rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-primary/20 font-medium text-xs bg-card uppercase"
                     >
                       {centers.map((c) => (
                         <option key={c.id} value={c.id}>
@@ -362,38 +564,38 @@ export default function FleetPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Make</label>
-                  <input required type="text" value={formData.make} onChange={(e) => setFormData({...formData, make: e.target.value})} className="w-full border rounded-sm p-2.5 outline-none focus:ring-2 focus:ring-[#E60000]/20 text-xs font-medium" />
+                  <input required type="text" value={formData.make} onChange={(e) => setFormData({...formData, make: e.target.value})} className="w-full border rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-primary/20 text-xs font-medium" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Model</label>
-                  <input required type="text" value={formData.model} onChange={(e) => setFormData({...formData, model: e.target.value})} className="w-full border rounded-sm p-2.5 outline-none focus:ring-2 focus:ring-[#E60000]/20 text-xs font-medium" />
+                  <input required type="text" value={formData.model} onChange={(e) => setFormData({...formData, model: e.target.value})} className="w-full border rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-primary/20 text-xs font-medium" />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Year</label>
-                  <input required type="number" min="1900" max="2100" value={formData.year} onChange={(e) => setFormData({...formData, year: e.target.value})} className="w-full border rounded-sm p-2.5 outline-none focus:ring-2 focus:ring-[#E60000]/20 text-xs font-medium" />
+                  <input required type="number" min="1900" max="2100" value={formData.year} onChange={(e) => setFormData({...formData, year: e.target.value})} className="w-full border rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-primary/20 text-xs font-medium" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">License Plate</label>
-                  <input required type="text" value={formData.licensePlate} onChange={(e) => setFormData({...formData, licensePlate: e.target.value})} className="w-full border rounded-sm p-2.5 outline-none focus:ring-2 focus:ring-[#E60000]/20 text-xs font-medium uppercase" />
+                  <input required type="text" value={formData.licensePlate} onChange={(e) => setFormData({...formData, licensePlate: e.target.value})} className="w-full border rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-primary/20 text-xs font-medium uppercase" />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Price Per Day ($)</label>
-                <input required type="number" step="0.01" min="0" value={formData.pricePerDay} onChange={(e) => setFormData({...formData, pricePerDay: e.target.value})} className="w-full border rounded-sm p-2.5 outline-none focus:ring-2 focus:ring-[#E60000]/20 text-xs font-medium" />
+                <input required type="number" step="0.01" min="0" value={formData.pricePerDay} onChange={(e) => setFormData({...formData, pricePerDay: e.target.value})} className="w-full border rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-primary/20 text-xs font-medium" />
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Features (comma separated)</label>
-                <input type="text" placeholder="AC, Bluetooth, GPS" value={formData.features} onChange={(e) => setFormData({...formData, features: e.target.value})} className="w-full border rounded-sm p-2.5 outline-none focus:ring-2 focus:ring-[#E60000]/20 text-xs font-medium" />
+                <input type="text" placeholder="AC, Bluetooth, GPS" value={formData.features} onChange={(e) => setFormData({...formData, features: e.target.value})} className="w-full border rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-primary/20 text-xs font-medium" />
               </div>
 
               <div className="flex justify-end gap-2 pt-4 border-t">
-                <Button type="button" variant="outline" onClick={() => setShowAddModal(false)} className="uppercase font-bold tracking-wider text-xs rounded-sm h-10 px-4">Cancel</Button>
-                <Button type="submit" disabled={submitting} className="bg-[#E60000] hover:bg-red-700 text-white uppercase font-bold tracking-wider text-xs rounded-sm h-10 px-6">
+                <Button type="button" variant="outline" onClick={() => setShowAddModal(false)} className="uppercase font-bold tracking-wider text-xs rounded-xl h-10 px-4">Cancel</Button>
+                <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/90 text-primary-foreground uppercase font-bold tracking-wider text-xs rounded-xl h-10 px-6">
                   {submitting ? "Saving..." : "Add Vehicle"}
                 </Button>
               </div>

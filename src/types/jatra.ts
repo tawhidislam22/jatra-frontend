@@ -69,10 +69,64 @@ export interface RentalBooking {
   pickupDate: string;
   returnDate: string;
   totalAmount: number;
+  dailyPriceSnapshot?: number;
+  cancellationFee?: number;
+  refundAmount?: number;
+  cancelledAt?: string;
+  cancellationReason?: string;
   status: 'PENDING' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
   vehicle?: Vehicle;
   customer?: User;
   payment?: Payment;
+  cancellationRecord?: CancellationRecord;
+}
+
+export interface Wallet {
+  id: string;
+  userId: string;
+  balance: number;
+  currency: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WalletTransaction {
+  id: string;
+  walletId: string;
+  amount: number;
+  type: 'CREDIT' | 'DEBIT';
+  reason: 'REFUND' | 'PAYMENT' | 'DEPOSIT';
+  description: string;
+  cancellationFee?: number;
+  refundAmount?: number;
+  referenceId?: string;
+  rentalBookingId?: string;
+  rentalBooking?: {
+    id: string;
+    vehicle?: { make: string; model: string; year: number; licensePlate: string };
+  };
+  serviceRequestId?: string;
+  serviceRequest?: {
+    id: string;
+    serviceName?: string;
+    serviceType?: string;
+    scheduledDate?: string;
+  };
+  createdAt: string;
+}
+
+export interface CancellationRecord {
+  id: string;
+  userId: string;
+  rentalBookingId?: string;
+  serviceRequestId?: string;
+  originalAmount: number;
+  feePercentage: number;
+  cancellationFee: number;
+  refundAmount: number;
+  refundedToWallet: boolean;
+  reason?: string;
+  cancelledAt: string;
 }
 
 export interface ServiceAssignmentHistory {
@@ -104,6 +158,10 @@ export interface ServiceRequest {
   mechanicId?: string;
   customerId?: string;
   status: 'PENDING' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED_PENDING_REVIEW' | 'DONE' | 'COMPLETED' | 'REASSIGNMENT_REQUIRED' | 'CANCELLED';
+  cancellationFee?: number;
+  refundAmount?: number;
+  cancelledAt?: string;
+  cancellationReason?: string;
   vehicle?: Vehicle;
   customer?: User;
   center?: AutomotiveCenter;
