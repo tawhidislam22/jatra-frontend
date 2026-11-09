@@ -3,10 +3,7 @@ import { AutomotiveCenter } from '../types/jatra';
 
 export const centersService = {
   registerCenter: async (data: any) => {
-    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
-    const response = await api.post('/automotive-centers', data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined,
-    });
+    const response = await api.post('/automotive-centers', data);
     return response.data;
   },
   getAllCenters: async (params?: any) => {
@@ -23,10 +20,7 @@ export const centersService = {
     return response.data;
   },
   updateCenter: async (id: string, data: any) => {
-    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
-    const response = await api.patch(`/automotive-centers/${id}`, data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined,
-    });
+    const response = await api.patch(`/automotive-centers/${id}`, data);
     return response.data;
   },
 };

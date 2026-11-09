@@ -7,10 +7,7 @@ export const serviceRequestsService = {
   },
 
   createRequest: async (data: any) => {
-    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
-    const response = await api.post('/service-requests', data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined,
-    });
+    const response = await api.post('/service-requests', data);
     return response.data;
   },
 
@@ -30,10 +27,7 @@ export const serviceRequestsService = {
   },
 
   submitCompletion: async (id: string, data: any) => {
-    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
-    const response = await api.patch(`/service-requests/${id}/complete`, data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined,
-    });
+    const response = await api.patch(`/service-requests/${id}/complete`, data);
     return response.data;
   },
 

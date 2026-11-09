@@ -128,16 +128,32 @@ export function ChatView({ basePath = "/dashboard/messages", portalTitle = "Mess
     // ALWAYS display the customer's actual full name, avatar, and contact details!
     if (shouldShowCustomer) {
       const customer =
+        (conv.serviceRequest?.customer?.name !== conv.center?.name ? conv.serviceRequest?.customer : null) ||
+        (conv.rentalBooking?.customer?.name !== conv.center?.name ? conv.rentalBooking?.customer : null) ||
+        (conv.otherParticipant?.name !== conv.center?.name ? conv.otherParticipant : null) ||
         conv.serviceRequest?.customer ||
         conv.rentalBooking?.customer ||
-        (conv.otherParticipant?.role === "CUSTOMER" ? conv.otherParticipant : null) ||
         conv.otherParticipant;
 
-      const name =
+      let name =
         customer?.fullName?.trim() ||
         customer?.name?.trim() ||
         (customer?.email ? customer.email.split("@")[0] : "") ||
         "Customer";
+
+      // Extra safeguard: under owner/mechanic view, never display the center's own name as the customer title
+      if (conv.center?.name && name.toLowerCase() === conv.center.name.toLowerCase()) {
+        const alt = [
+          conv.serviceRequest?.customer?.fullName,
+          conv.serviceRequest?.customer?.name,
+          conv.rentalBooking?.customer?.fullName,
+          conv.rentalBooking?.customer?.name,
+          conv.otherParticipant?.fullName,
+          conv.otherParticipant?.name
+        ].find((n) => n && n.trim().toLowerCase() !== conv.center!.name.toLowerCase());
+
+        name = alt?.trim() || "Customer";
+      }
 
       const initial = name.charAt(0).toUpperCase();
       const badge = customer?.role || "CUSTOMER";

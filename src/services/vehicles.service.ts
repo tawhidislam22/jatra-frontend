@@ -3,10 +3,7 @@ import { Vehicle } from '../types/jatra';
 
 export const vehiclesService = {
   registerVehicle: async (data: any) => {
-    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
-    const response = await api.post('/vehicles', data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined,
-    });
+    const response = await api.post('/vehicles', data);
     return response.data;
   },
   getAllVehicles: async (params?: any) => {
@@ -23,10 +20,7 @@ export const vehiclesService = {
     return response.data;
   },
   updateVehicle: async (id: string, data: any) => {
-    const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
-    const response = await api.patch(`/vehicles/${id}`, data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined,
-    });
+    const response = await api.patch(`/vehicles/${id}`, data);
     return response.data;
   }
 };
