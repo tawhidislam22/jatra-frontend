@@ -82,9 +82,9 @@ export default function Error({
         {/* Footer Help */}
         <div className="pt-6 border-t text-xs text-muted-foreground flex items-center justify-center gap-2">
           <HelpCircle className="w-3.5 h-3.5 text-primary" />
-          <span>Need immediate roadside assistance?</span>
-          <Link href="/emergency" className="text-primary font-bold hover:underline">
-            Emergency Dispatch &rarr;
+          <span>Need help with a booking or service?</span>
+          <Link href="/contact" className="text-primary font-bold hover:underline">
+            Contact Support &rarr;
           </Link>
         </div>
       </div>

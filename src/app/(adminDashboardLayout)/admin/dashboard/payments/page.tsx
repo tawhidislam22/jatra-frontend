@@ -161,7 +161,7 @@ export default function AdminPaymentsPage() {
                   const serviceType = 
                     p.rentalBooking ? "Car Rental Booking" :
                     p.serviceRequest ? `Workshop Service (${p.serviceRequest.serviceType || 'Inspection'})` :
-                    p.emergencyRequest ? "Roadside Emergency" : "Direct Service Deposit";
+                    "Direct Service Deposit";
 
                   return (
                     <tr key={p.id} className="hover:bg-zinc-900/40 transition-colors">

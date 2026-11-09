@@ -3,17 +3,14 @@
 import { useEffect, useState } from "react";
 import { 
   History, 
-  CheckCircle2, 
   Calendar, 
   Car, 
   User, 
   Search, 
   Wrench, 
-  AlertTriangle,
   ShieldCheck
 } from "lucide-react";
 import { serviceRequestsService } from "@/services/services.service";
-import { emergencyService } from "@/services/emergency.service";
 import { Input } from "@/components/ui/input";
 
 export default function MechanicHistoryPage() {
@@ -25,27 +22,18 @@ export default function MechanicHistoryPage() {
     const loadHistory = async () => {
       setLoading(true);
       try {
-        const [servicesRes, emergenciesRes] = await Promise.all([
-          serviceRequestsService.getRequests(),
-          emergencyService.getEmergencies(),
-        ]);
-
+        const servicesRes = await serviceRequestsService.getRequests();
         const rawServices = servicesRes?.data || (Array.isArray(servicesRes) ? servicesRes : []);
-        const rawEmergencies = emergenciesRes?.data || (Array.isArray(emergenciesRes) ? emergenciesRes : []);
 
         const completedServices = rawServices
           .filter((s: any) => s.status === "COMPLETED")
           .map((s: any) => ({ ...s, jobType: "SERVICE" }));
 
-        const completedEmergencies = rawEmergencies
-          .filter((e: any) => e.status === "RESOLVED")
-          .map((e: any) => ({ ...e, jobType: "EMERGENCY" }));
-
-        const combined = [...completedServices, ...completedEmergencies].sort(
-          (a, b) => new Date(b.updatedAt || b.createdAt || 0).getTime() - new Date(a.updatedAt || a.createdAt || 0).getTime()
+        const sorted = completedServices.sort(
+          (a: any, b: any) => new Date(b.updatedAt || b.createdAt || 0).getTime() - new Date(a.updatedAt || a.createdAt || 0).getTime()
         );
 
-        setHistoryItems(combined);
+        setHistoryItems(sorted);
       } catch (err) {
         console.error("Failed to load repair history:", err);
       } finally {
@@ -70,7 +58,7 @@ export default function MechanicHistoryPage() {
             Repair & Service History
           </h1>
           <p className="text-muted-foreground text-xs md:text-sm font-medium">
-            Log of all completed maintenance jobs and resolved breakdown emergencies
+            Log of all completed workshop maintenance and repair jobs
           </p>
         </div>
 
@@ -105,7 +93,7 @@ export default function MechanicHistoryPage() {
           <p className="text-xs text-muted-foreground max-w-md mx-auto">
             {searchQuery 
               ? "No finished jobs match your search filter."
-              : "Completed service requests and resolved emergencies will be logged here."}
+              : "Completed service requests will be logged here."}
           </p>
         </div>
       ) : (
@@ -114,9 +102,8 @@ export default function MechanicHistoryPage() {
             <div key={item.id || idx} className="bg-card border rounded-xl p-5 shadow-sm space-y-3 hover:border-emerald-400 transition-all">
               <div className="flex items-start justify-between gap-3 border-b pb-3">
                 <div className="flex items-center gap-2">
-                  <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded flex items-center gap-1 ${item.jobType === 'EMERGENCY' ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'}`}>
-                    {item.jobType === 'EMERGENCY' ? <AlertTriangle className="w-3 h-3" /> : <Wrench className="w-3 h-3" />}
-                    {item.jobType === 'EMERGENCY' ? 'Emergency Breakdown' : 'Service Request'}
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded flex items-center gap-1 bg-emerald-100 text-emerald-800">
+                    <Wrench className="w-3 h-3" /> Service Request
                   </span>
                   <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-600 text-white px-2 py-0.5 rounded">
                     COMPLETED
@@ -138,21 +125,14 @@ export default function MechanicHistoryPage() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground pt-2 border-t font-medium">
-                <span className="flex items-center gap-1">
-                  <User className="w-3.5 h-3.5 text-emerald-600" />
-                  Client: <strong className="text-foreground">{item.customer?.fullName || item.customer?.name || "Customer"}</strong>
+              <div className="flex flex-wrap items-center gap-6 pt-2 border-t text-xs text-muted-foreground">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <Car className="w-3.5 h-3.5 text-amber-600" />
+                  {item.vehicle ? `${item.vehicle.brand || item.vehicle.make || ''} ${item.vehicle.model || ''} (${item.vehicle.licensePlate || 'N/A'})` : "Vehicle on file"}
                 </span>
-
-                {item.vehicle && (
-                  <span className="flex items-center gap-1">
-                    <Car className="w-3.5 h-3.5 text-emerald-600" />
-                    Vehicle: <strong className="text-foreground">{item.vehicle.brand} {item.vehicle.model}</strong>
-                  </span>
-                )}
-
-                <span className="text-[10px] text-muted-foreground ml-auto">
-                  Job ID: #{item.id?.slice(0, 8)}
+                <span className="flex items-center gap-1.5 font-medium">
+                  <User className="w-3.5 h-3.5 text-amber-600" />
+                  {item.customer?.fullName || item.customer?.name || "Customer"}
                 </span>
               </div>
             </div>

@@ -94,15 +94,15 @@ export default function AboutPage() {
             </div>
             
             <p className="text-muted-foreground leading-loose font-medium text-[15px]">
-              Jatra is the leading premium platform for vehicle rentals, professional maintenance, and on-demand emergency assistance. We integrate all your automotive needs into a single seamless experience designed for luxury, performance, and ultimate peace of mind.
+              Jatra is the leading premium platform for vehicle rentals and professional maintenance. We integrate your automotive needs into a single seamless experience designed for luxury, performance, and ultimate peace of mind.
             </p>
             <p className="text-muted-foreground leading-loose font-medium text-[15px]">
-              Whether you are looking to rent a luxury sedan for the weekend or need immediate roadside assistance, our extensive network of certified partners and state-of-the-art digital infrastructure guarantees a frictionless experience.
+              Whether you are looking to rent a luxury sedan for the weekend or need certified workshop maintenance, our extensive network of certified partners and state-of-the-art digital infrastructure guarantees a frictionless experience.
             </p>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 py-8 border-t border-b border-border">
               {[
-                "24/7 Roadside Assistance",
+                "Expert Workshop Maintenance",
                 "Wide Range of Vehicles",
                 "Certified Mechanics",
                 "Affordable Pricing",

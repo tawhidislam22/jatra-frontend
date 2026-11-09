@@ -38,7 +38,6 @@ export function Navbar({ initialUser }: NavbarProps) {
     { name: "Home", path: "/" },
     { name: "Vehicles", path: "/vehicles" },
     { name: "Workshops", path: "/centers" },
-    { name: "Emergency", path: "/emergency" },
     { name: "About", path: "/about" },
     { name: "Contact", path: "/contact" },
   ];

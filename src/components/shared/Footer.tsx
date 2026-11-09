@@ -23,7 +23,7 @@ export function Footer() {
               </div>
             </Link>
             <p className="text-muted-foreground leading-loose text-[15px]">
-              We provide the best vehicle rental and emergency assistance services. From premium cars to reliable mechanics, mobility is made simple.
+              We provide premium vehicle rentals and trusted workshop services. From polished cars to reliable mechanics, mobility is made simple.
             </p>
             <div className="flex space-x-3">
               {/* Social placeholders */}
@@ -45,7 +45,6 @@ export function Footer() {
               <li><Link href="/" className="hover:text-primary transition-colors flex items-center gap-2 group"><ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-2 transition-transform" /> Home</Link></li>
               <li><Link href="/vehicles" className="hover:text-primary transition-colors flex items-center gap-2 group"><ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-2 transition-transform" /> Vehicles</Link></li>
               <li><Link href="/centers" className="hover:text-primary transition-colors flex items-center gap-2 group"><ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-2 transition-transform" /> Workshops</Link></li>
-              <li><Link href="/emergency" className="hover:text-primary transition-colors flex items-center gap-2 group"><ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-2 transition-transform" /> Emergency</Link></li>
               <li><Link href="/about" className="hover:text-primary transition-colors flex items-center gap-2 group"><ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-2 transition-transform" /> About Us</Link></li>
               <li><Link href="/login" className="hover:text-primary transition-colors flex items-center gap-2 group"><ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-2 transition-transform" /> Login</Link></li>
             </ul>

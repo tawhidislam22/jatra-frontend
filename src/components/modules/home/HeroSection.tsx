@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, Car, Settings, ShieldAlert } from "lucide-react";
+import { ArrowRight, Car, Settings, ShieldCheck } from "lucide-react";
 
 export function HeroSection() {
   return (
@@ -15,7 +15,7 @@ export function HeroSection() {
           The Smart Way to <span className="text-primary">Drive</span> and <span className="text-primary">Service</span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-          Jatra is your premium platform for vehicle rentals, professional maintenance, and on-demand emergency assistance.
+          Jatra is your premium platform for vehicle rentals and professional maintenance.
         </p>
         
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -48,11 +48,11 @@ export function HeroSection() {
             <p className="text-muted-foreground text-sm">Book appointments with certified automotive centers instantly.</p>
           </div>
           <div className="flex flex-col items-center p-6 rounded-2xl bg-card border shadow-sm hover:shadow-md transition-shadow group">
-            <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <ShieldAlert className="h-8 w-8 text-destructive" />
+            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <ShieldCheck className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-xl font-bold mb-2">24/7 Emergency</h3>
-            <p className="text-muted-foreground text-sm">Immediate on-road assistance whenever you need it most.</p>
+            <h3 className="text-xl font-bold mb-2">Verified Centers</h3>
+            <p className="text-muted-foreground text-sm">Certified automotive centers and verified technicians for top quality.</p>
           </div>
         </div>
       </div>

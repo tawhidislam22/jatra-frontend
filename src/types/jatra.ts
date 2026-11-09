@@ -75,19 +75,6 @@ export interface ServiceRequest {
   payment?: Payment;
 }
 
-export interface Emergency {
-  id: string;
-  latitude: number;
-  longitude: number;
-  issueDescription: string;
-  centerId: string;
-  customerId?: string;
-  mechanicId?: string;
-  status: 'PENDING' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
-  customer?: User;
-  mechanic?: User;
-}
-
 export interface Payment {
   id: string;
   amount: number;
@@ -97,7 +84,6 @@ export interface Payment {
   userId?: string;
   rentalBookingId?: string;
   serviceRequestId?: string;
-  emergencyId?: string;
 }
 
 export interface Review {

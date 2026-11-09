@@ -5,7 +5,6 @@ import Link from "next/link";
 import { 
   Building2, 
   Users, 
-  AlertTriangle, 
   Car, 
   CalendarDays, 
   CreditCard, 
@@ -16,8 +15,8 @@ import {
   ShieldCheck,
   TrendingUp,
   MapPin,
-  Phone,
-  RefreshCw
+  RefreshCw,
+  Wrench
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { adminService } from "@/services/admin.service";
@@ -80,7 +79,7 @@ export default function AdminOverviewPage() {
   const users = s.users || {};
   const centers = s.centers || {};
   const vehicles = s.vehicles || {};
-  const emergencies = s.emergencies || {};
+  const services = s.services || {};
   const financials = s.financials || {};
   const recent = s.recentActivity || {};
 
@@ -101,7 +100,7 @@ export default function AdminOverviewPage() {
               Platform Command Center
             </h1>
             <p className="text-zinc-400 text-sm max-w-xl font-medium">
-              Nationwide oversight of automotive centers, verified workshops, user roles, emergency dispatch, and platform revenue.
+              Nationwide oversight of automotive centers, verified workshops, user roles, service operations, and platform revenue.
             </p>
           </div>
 
@@ -123,7 +122,7 @@ export default function AdminOverviewPage() {
       </div>
 
       {/* Primary KPI Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Gross Platform Volume */}
         <div className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-6 relative overflow-hidden shadow-xl hover:border-zinc-700 transition-colors">
           <div className="flex items-center justify-between">
@@ -184,28 +183,27 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Emergency Assistance Requests */}
         <div className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-6 relative overflow-hidden shadow-xl hover:border-zinc-700 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-black uppercase tracking-[2px] text-zinc-400">Emergencies</span>
-            <div className="p-2.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20">
-              <AlertTriangle className="w-5 h-5" />
+            <span className="text-[11px] font-black uppercase tracking-[2px] text-zinc-400">Workshop Services</span>
+            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <Wrench className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-4">
             <h3 className="text-3xl font-black text-white tracking-tight">
-              {emergencies.total || 0}
+              {services.total || 0}
             </h3>
             <p className="text-xs text-zinc-400 mt-1.5 flex items-center gap-2 font-semibold">
-              <span className="text-red-400 font-bold">{emergencies.pending || 0} Pending</span>
+              <span className="text-amber-400 font-bold">{services.pending || 0} Pending</span>
               <span>•</span>
-              <span className="text-emerald-400 font-bold">{emergencies.completed || 0} Resolved</span>
+              <span className="text-emerald-400 font-bold">{services.completed || 0} Done</span>
             </p>
           </div>
         </div>
       </div>
 
-      {/* Action Sections: Pending Centers & Live Emergencies */}
+      {/* Action Sections: Pending Centers & Recent Bookings */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Pending Verification Queue */}
         <div className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
@@ -268,46 +266,46 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Live Emergency Assistance Feed */}
+        {/* Recent Fleet & Rental Bookings Feed */}
         <div className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-5">
               <div className="flex items-center gap-2.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
                 <h3 className="text-lg font-black uppercase tracking-wider text-white">
-                  Recent Emergency Dispatches
+                  Recent Vehicle Bookings
                 </h3>
               </div>
-              <Link href="/admin/dashboard/emergencies" className="text-xs font-bold text-red-400 hover:text-red-300 transition-colors">
-                Open Dispatch Board
+              <Link href="/admin/dashboard/bookings" className="text-xs font-bold text-red-400 hover:text-red-300 transition-colors">
+                View All Bookings
               </Link>
             </div>
 
-            {recent.emergencies && recent.emergencies.length > 0 ? (
+            {recent.bookings && recent.bookings.length > 0 ? (
               <div className="space-y-4">
-                {recent.emergencies.map((em: any) => (
-                  <div key={em.id} className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 hover:border-zinc-700 transition-colors">
+                {recent.bookings.map((booking: any) => (
+                  <div key={booking.id} className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 hover:border-zinc-700 transition-colors">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-2">
                           <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${
-                            em.status === 'COMPLETED' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                            em.status === 'IN_PROGRESS' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
-                            'bg-red-500/20 text-red-400 border border-red-500/30'
+                            booking.status === 'COMPLETED' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                            booking.status === 'IN_PROGRESS' || booking.status === 'ACCEPTED' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                            'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                           }`}>
-                            {em.status}
+                            {booking.status}
                           </span>
                           <span className="text-xs font-bold text-white">
-                            {em.customer?.fullName || em.customer?.name || "Customer in distress"}
+                            {booking.customer?.fullName || booking.customer?.name || "Customer"}
                           </span>
                         </div>
                         <p className="text-xs text-zinc-400 mt-1.5 font-medium">
-                          {em.issueDescription || "Roadside breakdown assistance request"}
+                          {booking.vehicle ? `${booking.vehicle.make || ''} ${booking.vehicle.model || ''}` : "Rental Fleet Vehicle"}
                         </p>
                         <p className="text-[11px] text-zinc-500 mt-1 flex items-center gap-3">
-                          <span>Dispatch Center: <strong className="text-zinc-300">{em.center?.name || "Nearby Workshop"}</strong></span>
+                          <span>Pickup: <strong className="text-zinc-300">{new Date(booking.pickupDate).toLocaleDateString()}</strong></span>
                           <span>•</span>
-                          <span>GPS: {em.latitude?.toFixed(4)}, {em.longitude?.toFixed(4)}</span>
+                          <span>Total: ${Number(booking.totalAmount || 0).toFixed(2)}</span>
                         </p>
                       </div>
                     </div>
@@ -317,16 +315,16 @@ export default function AdminOverviewPage() {
             ) : (
               <div className="p-12 text-center text-zinc-500">
                 <ShieldCheck className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
-                <p className="font-bold text-sm text-zinc-300 uppercase tracking-wider">No Active Emergencies</p>
-                <p className="text-xs text-zinc-500 mt-1">All roadside emergency assistance calls are clear.</p>
+                <p className="font-bold text-sm text-zinc-300 uppercase tracking-wider">No Recent Bookings</p>
+                <p className="text-xs text-zinc-500 mt-1">Vehicle rental bookings will appear here.</p>
               </div>
             )}
           </div>
 
           <div className="pt-5 border-t border-zinc-800/80 mt-6">
-            <Link href="/admin/dashboard/emergencies">
+            <Link href="/admin/dashboard/bookings">
               <Button variant="ghost" className="w-full text-zinc-400 hover:text-white font-bold text-xs uppercase tracking-wider h-10">
-                Open Emergency Dispatch & Monitoring <ArrowRight className="w-4 h-4 ml-2" />
+                Open Fleet Bookings Management <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
           </div>

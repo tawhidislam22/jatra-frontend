@@ -5,7 +5,6 @@ import {
   Car, 
   LayoutDashboard, 
   Wrench, 
-  AlertTriangle, 
   Building2, 
   CalendarDays, 
   History, 
@@ -24,8 +23,7 @@ import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 const dummyNotifications = [
   { id: 1, title: "New Service Request Assigned #SR-882", time: "2m ago", read: false },
-  { id: 2, title: "Urgent Emergency Breakdown Call", time: "15m ago", read: false },
-  { id: 3, title: "Workshop schedule updated", time: "1d ago", read: true },
+  { id: 2, title: "Workshop schedule updated", time: "1d ago", read: true },
 ];
 
 function MechanicNotificationsPopover() {
@@ -154,11 +152,6 @@ export default function MechanicDashboardLayout({
           <Link href="/mechanic/dashboard/assigned-services">
             <Button variant={isActive("/mechanic/dashboard/assigned-services") ? "secondary" : "ghost"} className={getLinkClasses("/mechanic/dashboard/assigned-services")}>
               <Wrench className="mr-2 h-4 w-4" /> Assigned Services
-            </Button>
-          </Link>
-          <Link href="/mechanic/dashboard/emergencies">
-            <Button variant={isActive("/mechanic/dashboard/emergencies") ? "secondary" : "ghost"} className={getLinkClasses("/mechanic/dashboard/emergencies")}>
-              <AlertTriangle className="mr-2 h-4 w-4" /> Emergency Tasks
             </Button>
           </Link>
           <Link href="/mechanic/dashboard/workshop">

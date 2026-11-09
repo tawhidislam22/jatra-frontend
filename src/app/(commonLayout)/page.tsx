@@ -12,7 +12,7 @@ export default function Home() {
         <title>Jatra - Smart Vehicle Rental & Service Platform</title>
         <meta
           name="description"
-          content="Jatra is your premium platform for vehicle rentals, professional maintenance, and on-demand emergency assistance."
+          content="Jatra is your premium platform for vehicle rentals and professional maintenance."
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />

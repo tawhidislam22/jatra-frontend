@@ -21,12 +21,12 @@ export default function AdminSettingsPage() {
   const [saved, setSaved] = useState(false);
   const [config, setConfig] = useState({
     platformName: "Jatra Automotive Services & Car Rentals",
-    emergencyRadiusKm: 25,
+    serviceRadiusKm: 25,
     baseBookingDeposit: 50,
     platformCommissionPercent: 10,
     autoApproveCenters: false,
     supportEmail: "support@jatra.com",
-    emergencyHotline: "+880 1700-000000"
+    supportHotline: "+880 1700-000000"
   });
 
   const handleSave = (e: React.FormEvent) => {
@@ -48,7 +48,7 @@ export default function AdminSettingsPage() {
           </span>
         </div>
         <p className="text-zinc-400 text-xs font-medium mt-1">
-          Tune global business parameters, emergency dispatch settings, and inspect system service infrastructure.
+          Tune global business parameters, workshop dispatch settings, and inspect system service infrastructure.
         </p>
       </div>
 
@@ -141,14 +141,14 @@ export default function AdminSettingsPage() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-wider text-zinc-300">Emergency Search Radius (KM)</Label>
+            <Label className="text-xs font-bold uppercase tracking-wider text-zinc-300">Workshop Search Radius (KM)</Label>
             <Input
               type="number"
-              value={config.emergencyRadiusKm}
-              onChange={(e) => setConfig({ ...config, emergencyRadiusKm: parseInt(e.target.value) || 10 })}
+              value={config.serviceRadiusKm}
+              onChange={(e) => setConfig({ ...config, serviceRadiusKm: parseInt(e.target.value) || 10 })}
               className="bg-zinc-900 border-zinc-800 text-xs text-white rounded-xl h-11 focus:border-red-500"
             />
-            <p className="text-[10px] text-zinc-500">Maximum distance to match nearest emergency workshop center</p>
+            <p className="text-[10px] text-zinc-500">Maximum distance to match nearest workshop center</p>
           </div>
 
           <div className="space-y-2">
@@ -184,10 +184,10 @@ export default function AdminSettingsPage() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-wider text-zinc-300">24/7 Emergency Dispatch Hotline</Label>
+            <Label className="text-xs font-bold uppercase tracking-wider text-zinc-300">Customer Support Hotline</Label>
             <Input
-              value={config.emergencyHotline}
-              onChange={(e) => setConfig({ ...config, emergencyHotline: e.target.value })}
+              value={config.supportHotline}
+              onChange={(e) => setConfig({ ...config, supportHotline: e.target.value })}
               className="bg-zinc-900 border-zinc-800 text-xs text-white rounded-xl h-11 focus:border-red-500"
             />
           </div>

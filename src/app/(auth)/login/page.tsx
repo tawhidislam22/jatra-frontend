@@ -15,12 +15,26 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const message = searchParams.get("message");
+  const oauthError = searchParams.get("error");
   
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const oauthErrorMessage = (() => {
+    if (!oauthError) return "";
+
+    const messages: Record<string, string> = {
+      oauth_failed: "Google sign-in could not be completed. Please try again.",
+      no_session_found: "Google sign-in started, but the session could not be verified. Please try again.",
+      no_user_found: "Google sign-in succeeded, but no user account was returned.",
+      access_denied: "Google sign-in was cancelled or denied.",
+    };
+
+    return messages[oauthError] || "Google sign-in failed. Please try again.";
+  })();
 
   const handleGoogleLogin = () => {
     const redirectParam = searchParams.get("redirect") || "/dashboard";
@@ -82,9 +96,9 @@ function LoginForm() {
         </div>
       )}
       
-      {error && (
+      {(oauthErrorMessage || error) && (
         <div className="mb-6 p-4 bg-red-50 text-red-600 text-sm font-bold uppercase tracking-wider rounded-sm border border-red-100">
-          {error}
+          {oauthErrorMessage || error}
         </div>
       )}
       

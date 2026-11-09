@@ -53,7 +53,7 @@ export default function PaymentsPage() {
                     {payment.paidAt ? new Date(payment.paidAt).toLocaleDateString() : 'Pending'}
                   </td>
                   <td className="p-4 font-medium text-primary">
-                    {payment.rentalBookingId ? "Vehicle Rental" : payment.serviceRequestId ? "Service Request" : "Emergency Assistance"}
+                    {payment.rentalBookingId ? "Vehicle Rental" : "Service Request"}
                     <div className="text-xs font-normal text-muted-foreground tracking-widest uppercase mt-1">ID: {payment.transactionId?.substring(0, 15) || payment.id.substring(0, 8)}...</div>
                   </td>
                   <td className="p-4 font-black">${payment.amount.toFixed(2)}</td>

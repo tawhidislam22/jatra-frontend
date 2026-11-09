@@ -1,7 +1,7 @@
 import api from './api';
 
 export const paymentService = {
-  createCheckoutSession: async (data: { amount: number; rentalBookingId?: string; serviceRequestId?: string; emergencyId?: string }) => {
+  createCheckoutSession: async (data: { amount: number; rentalBookingId?: string; serviceRequestId?: string }) => {
     const response = await api.post('/payments/create-checkout-session', data);
     return response.data;
   },

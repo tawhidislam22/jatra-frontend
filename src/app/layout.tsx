@@ -8,7 +8,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Jatra - Smart Vehicle Rental & Service",
-  description: "Your premium platform for vehicle rentals, professional maintenance, and on-demand emergency assistance.",
+  description: "Your premium platform for vehicle rentals and professional maintenance.",
 };
 
 export default async function RootLayout({

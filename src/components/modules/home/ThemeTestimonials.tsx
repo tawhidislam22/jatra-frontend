@@ -6,7 +6,7 @@ export function ThemeTestimonials() {
       id: 1,
       name: "Tawhid Islam",
       role: "Customer",
-      content: "The booking process was incredibly smooth. I rented a Camry for the weekend, and it was in pristine condition. The emergency feature also gives great peace of mind.",
+      content: "The booking process was incredibly smooth. I rented a Camry for the weekend, and it was in pristine condition. The support team also gives great peace of mind.",
       rating: 5,
     },
     {

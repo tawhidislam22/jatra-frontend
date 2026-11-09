@@ -164,7 +164,7 @@ export default function MechanicsPage() {
           <Wrench className="w-10 h-10 text-gray-300 mx-auto" />
           <h3 className="text-base font-bold uppercase text-foreground">No mechanics added yet</h3>
           <p className="text-xs text-muted-foreground max-w-md mx-auto font-medium">
-            Add your first mechanic to start assigning service requests and emergency calls at {currentCenter?.name || "your workshop"}.
+            Add your first mechanic to start assigning service requests at {currentCenter?.name || "your workshop"}.
           </p>
         </div>
       ) : (

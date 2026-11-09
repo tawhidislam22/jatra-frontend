@@ -3,22 +3,17 @@
 import { useEffect, useState } from "react";
 import { 
   Wrench, 
-  AlertTriangle, 
   CheckCircle2, 
-  Building2, 
-  Calendar, 
-  ArrowUpRight, 
   Clock, 
   MapPin, 
-  Phone, 
-  Car,
-  User,
-  ShieldAlert,
+  Building2, 
+  Calendar, 
+  Car, 
+  User, 
   ArrowRight
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { serviceRequestsService } from "@/services/services.service";
-import { emergencyService } from "@/services/emergency.service";
 import { authService } from "@/services/auth.service";
 import { centersService } from "@/services/centers.service";
 import { Button } from "@/components/ui/button";
@@ -27,7 +22,6 @@ import Link from "next/link";
 export default function MechanicOverviewPage() {
   const { user } = useAuth();
   const [serviceRequests, setServiceRequests] = useState<any[]>([]);
-  const [emergencies, setEmergencies] = useState<any[]>([]);
   const [workshop, setWorkshop] = useState<any>(user?.employedAtCenter || null);
   const [loading, setLoading] = useState(true);
 
@@ -35,14 +29,12 @@ export default function MechanicOverviewPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [servicesRes, emergenciesRes, meRes] = await Promise.all([
+        const [servicesRes, meRes] = await Promise.all([
           serviceRequestsService.getRequests(),
-          emergencyService.getEmergencies(),
           authService.getMe().catch(() => null),
         ]);
 
         const rawServices = servicesRes?.data || (Array.isArray(servicesRes) ? servicesRes : []);
-        const rawEmergencies = emergenciesRes?.data || (Array.isArray(emergenciesRes) ? emergenciesRes : []);
         const meUser = meRes?.data || user;
 
         let centerData = meUser?.employedAtCenter || user?.employedAtCenter || null;
@@ -68,13 +60,12 @@ export default function MechanicOverviewPage() {
               centerData = found;
             }
           } catch (err) {
-            console.error("Failed to search center by mechanic", err);
+            console.error("Failed to query all centers for mechanic match", err);
           }
         }
 
         setWorkshop(centerData);
         setServiceRequests(rawServices);
-        setEmergencies(rawEmergencies);
       } catch (err) {
         console.error("Failed to load mechanic dashboard data:", err);
       } finally {
@@ -88,13 +79,8 @@ export default function MechanicOverviewPage() {
   const activeServices = serviceRequests.filter(
     (s) => s.status === "ACCEPTED" || s.status === "IN_PROGRESS" || s.status === "PENDING"
   );
-  const activeEmergencies = emergencies.filter(
-    (e) => e.status === "PENDING" || e.status === "ACCEPTED" || e.status === "IN_PROGRESS"
-  );
-  const completedJobs = [
-    ...serviceRequests.filter((s) => s.status === "COMPLETED"),
-    ...emergencies.filter((e) => e.status === "RESOLVED"),
-  ];
+  const inProgressServices = serviceRequests.filter((s) => s.status === "IN_PROGRESS");
+  const completedJobs = serviceRequests.filter((s) => s.status === "COMPLETED");
 
   if (loading) {
     return (
@@ -117,7 +103,7 @@ export default function MechanicOverviewPage() {
               <span className="bg-amber-600 text-white text-[10px] font-black uppercase px-2.5 py-1 rounded">
                 Mechanic Workspace
               </span>
-              <span className="text-stone-400 text-xs font-medium">Ready for dispatch</span>
+              <span className="text-stone-400 text-xs font-medium">Ready for service tasks</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight">
               Welcome back, {user?.fullName || user?.name || "Mechanic"}
@@ -127,7 +113,7 @@ export default function MechanicOverviewPage() {
               <strong className="text-amber-400">
                 {workshop?.name || "Your Assigned Workshop"}
               </strong>
-              {workshop?.address ? ` (${workshop.address})` : ""}. Check your queue below for active repairs and incoming emergency calls.
+              {workshop?.address ? ` (${workshop.address})` : ""}. Check your queue below for active repairs and scheduled maintenance.
             </p>
           </div>
 
@@ -137,9 +123,9 @@ export default function MechanicOverviewPage() {
                 <Wrench className="w-4 h-4 mr-2" /> View Queue
               </Button>
             </Link>
-            <Link href="/mechanic/dashboard/emergencies">
+            <Link href="/mechanic/dashboard/history">
               <Button variant="outline" className="bg-card/10 hover:bg-card/20 text-white border-white/20 font-bold uppercase text-xs tracking-wider h-11 px-5 rounded-sm">
-                <AlertTriangle className="w-4 h-4 mr-2 text-red-400" /> Emergencies ({activeEmergencies.length})
+                <Clock className="w-4 h-4 mr-2 text-amber-400" /> Repair History
               </Button>
             </Link>
           </div>
@@ -150,7 +136,7 @@ export default function MechanicOverviewPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <div className="bg-card border rounded-xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Active Services</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Active Queue</span>
             <div className="p-2 bg-amber-500/10 text-amber-600 rounded-lg">
               <Wrench className="w-5 h-5" />
             </div>
@@ -163,14 +149,14 @@ export default function MechanicOverviewPage() {
 
         <div className="bg-card border rounded-xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Breakdown Calls</span>
-            <div className="p-2 bg-red-500/10 text-red-600 rounded-lg">
-              <AlertTriangle className="w-5 h-5" />
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">In Progress</span>
+            <div className="p-2 bg-blue-500/10 text-blue-600 rounded-lg">
+              <Clock className="w-5 h-5" />
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-black text-red-600">{activeEmergencies.length}</span>
-            <span className="text-[11px] font-bold text-red-500 uppercase tracking-wider">Urgent Action</span>
+            <span className="text-3xl font-black text-blue-600">{inProgressServices.length}</span>
+            <span className="text-[11px] font-bold text-blue-500 uppercase tracking-wider">Active Work</span>
           </div>
         </div>
 
@@ -190,7 +176,7 @@ export default function MechanicOverviewPage() {
         <div className="bg-card border rounded-xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">My Workshop</span>
-            <div className="p-2 bg-blue-500/10 text-blue-600 rounded-lg">
+            <div className="p-2 bg-purple-500/10 text-purple-600 rounded-lg">
               <Building2 className="w-5 h-5" />
             </div>
           </div>
@@ -206,66 +192,8 @@ export default function MechanicOverviewPage() {
         </div>
       </div>
 
-      {/* Two Column Layout: Urgent Emergencies & Next Service Tasks */}
+      {/* Two Column Layout: Active Queue & Recently Completed */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Urgent Emergency Tasks */}
-        <div className="bg-card border rounded-xl p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b pb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-red-500/10 text-red-600 rounded">
-                <ShieldAlert className="w-5 h-5" />
-              </div>
-              <h2 className="text-lg font-bold uppercase tracking-wider text-foreground">Emergency Tasks</h2>
-            </div>
-            <Link href="/mechanic/dashboard/emergencies" className="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1">
-              View All <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {activeEmergencies.length === 0 ? (
-            <div className="text-center py-10 space-y-2">
-              <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
-              <p className="text-sm font-bold text-muted-foreground">No active breakdown calls</p>
-              <p className="text-xs text-muted-foreground">All emergency assistance requests have been resolved.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {activeEmergencies.slice(0, 3).map((item) => (
-                <div key={item.id} className="p-4 rounded-lg bg-red-50/50 border border-red-100 space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <span className="text-[10px] font-black uppercase tracking-wider bg-red-600 text-white px-2 py-0.5 rounded">
-                        {item.status}
-                      </span>
-                      <h3 className="font-bold text-sm text-foreground mt-1.5">{item.issueDescription || "Breakdown Emergency"}</h3>
-                    </div>
-                    <span className="text-[11px] text-muted-foreground font-semibold">
-                      {new Date(item.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground pt-1 border-t border-red-100">
-                    <span className="flex items-center gap-1 font-medium">
-                      <User className="w-3.5 h-3.5 text-red-600" />
-                      {item.customer?.fullName || item.customer?.name || "Customer"}
-                    </span>
-                    <span className="flex items-center gap-1 font-medium">
-                      <MapPin className="w-3.5 h-3.5 text-red-600" />
-                      GPS: {Number(item.latitude || 0).toFixed(4)}, {Number(item.longitude || 0).toFixed(4)}
-                    </span>
-                  </div>
-
-                  <Link href="/mechanic/dashboard/emergencies">
-                    <Button size="sm" className="w-full mt-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider h-8">
-                      Respond to Call &rarr;
-                    </Button>
-                  </Link>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Assigned Service Requests */}
         <div className="bg-card border rounded-xl p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between border-b pb-4">
@@ -273,7 +201,7 @@ export default function MechanicOverviewPage() {
               <div className="p-1.5 bg-amber-500/10 text-amber-600 rounded">
                 <Wrench className="w-5 h-5" />
               </div>
-              <h2 className="text-lg font-bold uppercase tracking-wider text-foreground">Assigned Services</h2>
+              <h2 className="text-lg font-bold uppercase tracking-wider text-foreground">Active Services</h2>
             </div>
             <Link href="/mechanic/dashboard/assigned-services" className="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1">
               View All <ArrowRight className="w-3.5 h-3.5" />
@@ -288,7 +216,7 @@ export default function MechanicOverviewPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {activeServices.slice(0, 3).map((service) => (
+              {activeServices.slice(0, 4).map((service) => (
                 <div key={service.id} className="p-4 rounded-lg bg-card border hover:border-amber-400 transition-colors space-y-3">
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -310,10 +238,66 @@ export default function MechanicOverviewPage() {
                   <div className="flex items-center justify-between pt-2 border-t text-xs text-muted-foreground">
                     <span className="flex items-center gap-1 font-medium">
                       <Car className="w-3.5 h-3.5 text-amber-600" />
-                      {service.vehicle ? `${service.vehicle.brand || ''} ${service.vehicle.model || ''}` : "Vehicle"}
+                      {service.vehicle ? `${service.vehicle.brand || service.vehicle.make || ''} ${service.vehicle.model || ''}` : "Vehicle"}
                     </span>
                     <span className="font-semibold text-foreground">
                       Client: {service.customer?.fullName || service.customer?.name || "Customer"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Recently Completed Repairs */}
+        <div className="bg-card border rounded-xl p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b pb-4">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-emerald-500/10 text-emerald-600 rounded">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <h2 className="text-lg font-bold uppercase tracking-wider text-foreground">Recently Completed</h2>
+            </div>
+            <Link href="/mechanic/dashboard/history" className="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1">
+              View History <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {completedJobs.length === 0 ? (
+            <div className="text-center py-10 space-y-2">
+              <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
+              <p className="text-sm font-bold text-muted-foreground">No completed jobs yet</p>
+              <p className="text-xs text-muted-foreground">Completed maintenance tasks will be archived here.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {completedJobs.slice(0, 4).map((service) => (
+                <div key={service.id} className="p-4 rounded-lg bg-card border hover:border-emerald-400 transition-colors space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">
+                        COMPLETED
+                      </span>
+                      <h3 className="font-bold text-sm text-foreground mt-1.5">{service.serviceType || "Automotive Repair"}</h3>
+                    </div>
+                    <span className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {new Date(service.updatedAt || service.createdAt || Date.now()).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {service.issueDescription || "Service finished successfully."}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-2 border-t text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1 font-medium">
+                      <User className="w-3.5 h-3.5 text-emerald-600" />
+                      {service.customer?.fullName || service.customer?.name || "Customer"}
+                    </span>
+                    <span className="font-semibold text-emerald-600">
+                      Finished
                     </span>
                   </div>
                 </div>

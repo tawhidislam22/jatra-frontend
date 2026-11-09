@@ -52,10 +52,6 @@ export default function NotFound() {
           <Link href="/centers" className="hover:text-primary transition-colors flex items-center gap-1">
             <Wrench className="w-3.5 h-3.5" /> Service Centers
           </Link>
-          <span>&bull;</span>
-          <Link href="/emergency" className="hover:text-primary transition-colors text-red-600 font-bold">
-            Emergency Breakdown
-          </Link>
         </div>
       </div>
     </div>

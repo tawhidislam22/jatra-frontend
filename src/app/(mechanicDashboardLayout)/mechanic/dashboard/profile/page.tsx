@@ -65,7 +65,7 @@ export default function MechanicProfilePage() {
     "Oil & Filter Servicing",
     "Transmission & Clutch",
     "Electrical System & Battery",
-    "Emergency Roadside Recovery",
+    "Preventative Maintenance & Inspection",
     "Suspension & Steering",
     "Tire Mounting & Alignment"
   ];

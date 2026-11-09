@@ -7,7 +7,6 @@ import {
   Building2, 
   Users, 
   Wrench, 
-  AlertTriangle, 
   Car, 
   CalendarDays, 
   CreditCard, 
@@ -27,9 +26,8 @@ import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 const dummyAdminNotifications = [
   { id: 1, title: "New Automotive Center registration pending approval: Apex Motors", time: "2m ago", read: false, type: "center" },
-  { id: 2, title: "High-priority Emergency Assistance dispatched in Dhaka", time: "15m ago", read: false, type: "emergency" },
-  { id: 3, title: "Payment of $350 processed for Rental Booking #1084", time: "1h ago", read: false, type: "payment" },
-  { id: 4, title: "New mechanic account registered by Gulshan Auto Hub", time: "3h ago", read: true, type: "user" },
+  { id: 2, title: "Payment of $350 processed for Rental Booking #1084", time: "1h ago", read: false, type: "payment" },
+  { id: 3, title: "New mechanic account registered by Gulshan Auto Hub", time: "3h ago", read: true, type: "user" },
 ];
 
 function AdminNotificationsPopover() {
@@ -157,12 +155,6 @@ export default function AdminDashboardLayout({
           <Link href="/admin/dashboard/service-requests">
             <Button variant="ghost" className={getLinkClasses("/admin/dashboard/service-requests")}>
               <Wrench className="mr-3 h-4 w-4" /> Service Requests
-            </Button>
-          </Link>
-
-          <Link href="/admin/dashboard/emergencies">
-            <Button variant="ghost" className={getLinkClasses("/admin/dashboard/emergencies")}>
-              <AlertTriangle className="mr-3 h-4 w-4" /> Emergency Dispatch
             </Button>
           </Link>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Car, LayoutDashboard, Building2, CalendarDays, Wrench, Users, AlertTriangle, CreditCard, Star, Settings, LogOut, Bell } from "lucide-react";
+import { Car, LayoutDashboard, Building2, CalendarDays, Wrench, Users, CreditCard, Star, Settings, LogOut, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -119,11 +119,6 @@ export default function OwnerDashboardLayout({
           <Link href="/owner/dashboard/mechanics">
             <Button variant={isActive("/owner/dashboard/mechanics") ? "secondary" : "ghost"} className={getLinkClasses("/owner/dashboard/mechanics")}>
               <Users className="mr-2 h-4 w-4" /> Mechanics
-            </Button>
-          </Link>
-          <Link href="/owner/dashboard/emergencies">
-            <Button variant={isActive("/owner/dashboard/emergencies") ? "secondary" : "ghost"} className={getLinkClasses("/owner/dashboard/emergencies")}>
-              <AlertTriangle className="mr-2 h-4 w-4" /> Emergencies
             </Button>
           </Link>
           <Link href="/owner/dashboard/earnings">

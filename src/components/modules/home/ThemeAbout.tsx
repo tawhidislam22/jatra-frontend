@@ -71,12 +71,12 @@ export function ThemeAbout() {
             </div>
             
             <p className="text-muted-foreground leading-loose font-medium text-[15px]">
-              Jatra is your premium platform for vehicle rentals, professional maintenance, and on-demand emergency assistance. We integrate all automotive needs into a single seamless experience designed for luxury and performance.
+              Jatra is your premium platform for vehicle rentals and professional maintenance. We integrate all automotive needs into a single seamless experience designed for luxury and performance.
             </p>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 py-6 border-t border-b border-border">
               {[
-                "24/7 Roadside Assistance",
+                "Certified Quality Servicing",
                 "Wide Range of Vehicles",
                 "Certified Mechanics",
                 "Affordable Pricing",
