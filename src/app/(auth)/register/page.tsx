@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 export default function RegisterPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState<"CUSTOMER" | "OWNER">("CUSTOMER");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -20,7 +21,8 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleGoogleLogin = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login/google?redirect=${encodeURIComponent("/dashboard")}`;
+    const redirect = role === "OWNER" ? "/onboarding" : "/dashboard";
+    window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login/google?redirect=${encodeURIComponent(redirect)}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,13 +31,15 @@ export default function RegisterPage() {
     setError("");
     
     try {
-      const response = await authService.register({ fullName, email, phone, password });
-      if (response?.data?.accessToken) {
-        localStorage.setItem("token", response.data.accessToken);
+      const response = await authService.register({ fullName, email, phone, password, role });
+      const token = response?.data?.accessToken || response?.data?.token || response?.token;
+      if (token) {
+        localStorage.setItem("token", token);
         window.dispatchEvent(new Event("storage"));
       }
-      // Redirect to OTP verification page instead of dashboard
-      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      // Redirect to OTP verification page
+      const redirectQuery = role === "OWNER" ? "&redirect=onboarding" : "";
+      router.push(`/verify-email?email=${encodeURIComponent(email)}${redirectQuery}`);
     } catch (err: any) {
       console.error("Registration failed:", err);
       setError(err.response?.data?.message || "Failed to register. Please try again.");
@@ -47,7 +51,9 @@ export default function RegisterPage() {
     <div className="bg-card rounded-sm shadow-2xl p-8 md:p-12 border-t-4 border-primary">
       <div className="space-y-2 text-center mb-8">
         <h1 className="text-3xl font-extrabold text-foreground uppercase tracking-tight">Create an Account</h1>
-        <p className="text-muted-foreground font-medium text-sm">Join Jatra to rent vehicles or book services</p>
+        <p className="text-muted-foreground font-medium text-sm">
+          {role === "OWNER" ? "Create an owner account to manage your automotive center" : "Join Jatra to rent vehicles or book services"}
+        </p>
       </div>
       
       {error && (
@@ -57,6 +63,34 @@ export default function RegisterPage() {
       )}
       
       <form onSubmit={handleSubmit} className="space-y-5" autoComplete="off">
+        <div className="space-y-2">
+          <Label className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground">Account Type</Label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setRole("CUSTOMER")}
+              className={`p-3 text-xs font-bold uppercase tracking-wider rounded-sm border transition-all text-center ${
+                role === "CUSTOMER"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-muted/20 text-muted-foreground hover:border-gray-400"
+              }`}
+            >
+              Customer
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole("OWNER")}
+              className={`p-3 text-xs font-bold uppercase tracking-wider rounded-sm border transition-all text-center ${
+                role === "OWNER"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-muted/20 text-muted-foreground hover:border-gray-400"
+              }`}
+            >
+              Business Owner
+            </button>
+          </div>
+        </div>
+
         <div className="space-y-3">
           <Label htmlFor="name" className="text-[11px] font-bold uppercase tracking-[2px] text-muted-foreground">Full Name</Label>
           <Input 
@@ -122,7 +156,7 @@ export default function RegisterPage() {
           className="w-full h-14 bg-primary hover:bg-zinc-800 text-white rounded-sm font-extrabold uppercase tracking-[2px] text-[13px] transition-all duration-300 flex items-center justify-center gap-2 mt-4" 
           disabled={loading}
         >
-          {loading ? "Creating account..." : "Register"} <ArrowRight className="w-4 h-4" />
+          {loading ? "Creating account..." : (role === "OWNER" ? "Register as Owner" : "Register")} <ArrowRight className="w-4 h-4" />
         </Button>
 
         <div className="relative my-6">

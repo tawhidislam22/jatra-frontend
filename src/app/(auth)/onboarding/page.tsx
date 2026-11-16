@@ -92,10 +92,7 @@ export default function OnboardingPage() {
                 localStorage.setItem("token", refreshRes.data.accessToken);
               }
             } catch (e) {
-              console.error("Auto-refresh token failed (likely due to cross-site cookies). Forcing re-login.");
-              localStorage.removeItem("token");
-              router.push("/login?message=Account+upgraded+successfully!+Please+log+in+again+to+apply+your+new+permissions.");
-              return; // Stop execution so we don't render the page
+              console.warn("Auto-refresh token skipped:", e);
             }
           }
         }
@@ -141,20 +138,24 @@ export default function OnboardingPage() {
       if (id) {
         setCenterId(id);
         
-        // Refresh the token so the frontend gets the new ADMIN role
-        try {
-          const refreshRes = await authService.refreshToken();
-          if (refreshRes?.data?.accessToken) {
-            localStorage.setItem("token", refreshRes.data.accessToken);
-            window.dispatchEvent(new Event("storage"));
+        // Update token with newly granted OWNER role from registerCenter response or refresh
+        const newAccessToken = response?.data?.accessToken || response?.accessToken;
+        if (newAccessToken) {
+          localStorage.setItem("token", newAccessToken);
+          window.dispatchEvent(new Event("storage"));
+          setCurrentStep(2);
+        } else {
+          try {
+            const refreshRes = await authService.refreshToken();
+            if (refreshRes?.data?.accessToken) {
+              localStorage.setItem("token", refreshRes.data.accessToken);
+              window.dispatchEvent(new Event("storage"));
+            }
+            setCurrentStep(2);
+          } catch (refreshErr) {
+            console.error("Failed to refresh token after center creation:", refreshErr);
             setCurrentStep(2);
           }
-        } catch (refreshErr) {
-          console.error("Failed to refresh token after center creation:", refreshErr);
-          // If cookies fail (cross-origin), we MUST log them out and force a re-login 
-          // so they get a fresh token with the ADMIN role, otherwise Step 2 will throw 403.
-          localStorage.removeItem("token");
-          router.push("/login?message=Account+upgraded+successfully!+Please+log+in+again+to+continue+setup.");
         }
       } else {
         throw new Error("Failed to retrieve center ID from response.");

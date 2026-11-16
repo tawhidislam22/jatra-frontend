@@ -46,9 +46,32 @@ function VerifyEmailForm() {
     try {
       await authService.verifyEmail({ email, otp });
       setSuccess(`Email verified successfully! Redirecting...`);
+
+      let destination = redirectParam 
+        ? (redirectParam.startsWith('/') ? redirectParam : `/${redirectParam}`)
+        : null;
+
+      if (!destination) {
+        try {
+          const meRes = await authService.getMe();
+          const userRole = meRes?.data?.role;
+          if (userRole === "OWNER") {
+            destination = "/onboarding";
+          } else if (userRole === "ADMIN") {
+            destination = "/admin/dashboard";
+          } else if (userRole === "MECHANIC") {
+            destination = "/mechanic/dashboard";
+          } else {
+            destination = "/dashboard";
+          }
+        } catch {
+          destination = "/dashboard";
+        }
+      }
+
       setTimeout(() => {
-        router.push(redirectParam ? `/${redirectParam}` : "/dashboard");
-      }, 2000);
+        router.push(destination || "/dashboard");
+      }, 1500);
     } catch (err: any) {
       console.error("Verification failed:", err);
       setError(err.response?.data?.message || "Failed to verify email. Please check your OTP.");
